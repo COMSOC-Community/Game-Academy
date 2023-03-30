@@ -1,0 +1,90 @@
+{% load static %}
+{% load core_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Session {{ session.name }} | Home</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+</head>
+
+<body>
+
+{% if request.user.is_authenticated %}
+
+    {% if admin_user or player_user %}
+
+        <h1>Home of Session {{ session.long_name|title }}</h1>
+
+        <div class="navigation">
+            <span class="navigation-button">
+                <a href="{% url 'core:index_session' session.slug_name %}">&#8610;&nbsp;To session index</a>
+            </span>
+        </div>
+
+        <p>
+            Welcome <em>{% if admin_user %}{{ user.username }}{% endif %}{% if player_user %}{{ player_user.name }}{% endif %}</em>
+            to session {{ session.long_name }}. If you need to log out, you can click the button below. You will then be
+            redirected to the index page of this session.
+        </p>
+
+        <p class="center-align">
+            <span class="green-button"><a href="{% url 'core:logout' %}?next={% url 'core:index_session' session.slug_name %}">Logout</a></span>
+        </p>
+
+        {% if admin_user %}
+            <div class="warning-box">
+                <p>
+                    Since you are logged in as an admin, you can also access the
+                    <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>.
+                </p>
+            </div>
+        {% endif %}
+
+	    <p>
+            The games that are available can be accessed below. For each game, you will find a way to submit your
+            answer as well as the results of the game. Once a game will have been played, you will be able to see the
+            (anonymized) answers that were given by the other players.
+        </p>
+
+        {% if games %}
+            {% for game in games %}
+                <h2>{{ game.game_setting.long_name }} - {{ game.name }}</h2>
+
+                {% if game.description %}
+                    <p>{{ game.description }}</p>
+                {% endif %}
+
+                {% with game.game_setting.package_url_namespace|addstr:':index' as index_url_shortcut %}
+                    <p class="center-align">
+                        <span class="green-button">
+                            <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>
+                        </span>
+                    </p>
+                {% endwith %}
+            {% endfor %}
+        {% else %}
+            <p>No games are currently available.</p>
+        {% endif %}
+    {% else %}
+        <p>
+            You are logged in to an account that does not have access to this session.
+            Go back to the <a href="{% url 'core:index_session' session.slug_name %}">session index</a> to login to a
+            different account.
+        </p>
+    {% endif %}
+
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'core:index_session' session.slug_name %}">&#8610;&nbsp;To session index</a>
+        </span>
+    </div>
+{% else %}
+    <p>
+        Only logged-in users with adequate permissions can view this page. You can log in on the
+        <a href="{% url 'core:index_session' session.slug_name %}">session index page</a>.
+    </p>
+{% endif %}
+</body>
+</html>

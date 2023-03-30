@@ -1,0 +1,254 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Session {{ session.name }}</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+</head>
+
+<body>
+
+<h1>Session {{ session.long_name|title }}</h1>
+
+{% if session.visible or admin_user %}
+
+    {% if not session.visible %}
+        <div class="warning-box">
+            <p>This session is not visible, you are only seeing this page because you are an admin!</p>
+        </div>
+    {% endif %}
+
+    <p>
+        Welcome on the index page for session {{ session.long_name }}. This is the entry door to the session.
+    </p>
+
+    {% if admin_user or player_user %}
+        <p>
+            You are currently logged in as <em>{% if admin_user %}{{ user.username }}{% endif %}{% if player_user %}{{ player_user.name }}{% endif %}</em>.
+            You can thus directly go to <a href="{% url 'core:session_home' session.slug_name %}">home page of the session</a>.
+        </p>
+    {% endif %}
+
+    {% if session.can_register %}
+
+        <hr class="hr-separator">
+
+        {% if player_created %}
+            <div class="form-success-message">
+                <p>The player {{ new_player.name }} has been created. You can now use the form below to log in.</p>
+            </div>
+        {% else %}
+
+            {% if session.need_registration %}
+                <p>
+                    This session requires users to be logged in to play. You can use the form below to register as a player.
+                    You will then be able to log in.
+                </p>
+            {% else %}
+                <p>
+                    The registration is open for this session. Use the form below if you want to register. You can also
+                    choose to continue as a guest.
+                </p>
+            {% endif %}
+
+            <p class="form-error">{{ player_creation_error }}</p>
+
+            <form action="{% url 'core:index_session' session.slug_name %}" method="post">
+                {% csrf_token %}
+                {% if registration_form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in registration_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% for hidden_field in registration_form.hidden_fields %}
+                    {% if hidden_field.errors %}
+                        <ul class="errorlist">
+                        {% for error in hidden_field.errors %}
+                            <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {{ hidden_field }}
+                {% endfor %}
+
+                <table class="center-margin form-table">
+                    {% for field in registration_form.visible_fields %}
+                        <tr>
+                            <td class="form-field-label">
+                                {{ field.label_tag }}
+                                {% if field.help_text %}
+                                    <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <br><span class="form-error">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <input type='hidden' name='form_type' value='registration_form'>
+                <p class="center-align">
+                    <input type="submit" value="Register as a Player">
+                </p>
+            </form>
+        {% endif %}
+    {% endif %}
+
+    <hr class="hr-separator">
+
+    {% if session.need_registration %}
+        <p>
+            To access this session, you need to be logged in. You can do so by using the form below.
+            {% if session.registration_open %}
+                If you have not yet registered as a player, please do so above, and then log in.
+            {% else %}
+                The registration form is now close, please contact the session admin if you still need to register.
+            {% endif %}
+        </p>
+    {% else %}
+        <p>
+            You can choose to log in to continue, or to register as a guest. Logging in will allow you to save your
+            action in your player profile, something you cannot do as a guest.
+        </p>
+    {% endif %}
+
+    {% if not session.need_registration %}
+        <div class="session-login-wrapper">
+    {%endif %}
+        <div class="session-player-login">
+            <p class="form-error">{{ general_login_error }}</p>
+
+            <form action="{% url 'core:index_session' session.slug_name %}" method="post">
+                {% csrf_token %}
+                {% if login_form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in login_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% for hidden_field in login_form.hidden_fields %}
+                    {% if hidden_field.errors %}
+                        <ul class="errorlist">
+                        {% for error in hidden_field.errors %}
+                            <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {{ hidden_field }}
+                {% endfor %}
+
+                <table class="center-margin form-table">
+                    {% for field in login_form.visible_fields %}
+                        <tr>
+                            <td class="form-field-label">
+                                {{ field.label_tag }}
+                                {% if field.help_text %}
+                                    <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <br><span class="form-error">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <input type='hidden' name='form_type' value='login_form'>
+                <p class="center-align">
+                    <input type="submit" value="Log in">
+                </p>
+            </form>
+        </div>
+
+        {% if not session.need_registration %}
+            <div class="session-guest-login">
+                <p>{{ guest_creation_error }}</p>
+
+                <form action="{% url 'core:index_session' session.slug_name %}" method="post">
+                    {% csrf_token %}
+
+                {% if guest_form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in guest_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% for hidden_field in guest_form.hidden_fields %}
+                    {% if hidden_field.errors %}
+                        <ul class="errorlist">
+                        {% for error in hidden_field.errors %}
+                            <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {{ hidden_field }}
+                {% endfor %}
+
+                <table class="center-margin form-table">
+                    {% for field in guest_form.visible_fields %}
+                        <tr>
+                            <td class="form-field-label">
+                                {{ field.label_tag }}
+                                {% if field.help_text %}
+                                    <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <br><span class="form-error">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <input type='hidden' name='form_type' value='guest_form'>
+                <p class="center-align">
+                    <input type="submit" value="Continue as guest">
+                </p>
+                </form>
+            </div>
+        {% endif %}
+    {% if not session.need_registration %}
+        </div>
+    {% endif %}
+
+    {% if admin_user %}
+        <div class="warning-box">
+            <p>
+                Since you are logged in as an admin, you can also access the
+                <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>.
+            </p>
+        </div>
+    {% endif %}
+{% else %}
+    <p>
+        This session exists but is not visible. Contact the session admin if you believe that this is a problem.
+    </p>
+{% endif %}
+
+</body>
+</html>

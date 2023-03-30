@@ -1,0 +1,105 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Session</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+</head>
+<body>
+
+<h1>Create a Session</h1>
+
+{% if request.user.is_authenticated %}
+
+    {% if request.user.is_staff %}
+
+        {% if session_created %}
+            <div class="form-success-message">
+                <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
+
+                <p>You can access the main page of the session
+                    <a href="{% url 'core:index_session' session_obj.slug_name %}">here</a>.
+                </p>
+            </div>
+        {% endif %}
+
+         <p>Welcome <em>{{ request.user.username }}</em>! On this page, you will be able to create sessions.</p>
+
+        <p>
+            Sessions are the main components of this website. Once created, you will be able to add games and
+            players to a session. If you are using this website for a course, a session will typically create one
+            session per yearly occurrence of your course.
+        </p>
+
+        <p>
+            Use the form below to create a session.
+        </p>
+
+        {% if session_creation_error %}
+
+            <p>There was a general problem here: {{ session_creation_error }}. Please report that to the admin.</p>
+
+        {% endif %}
+
+        <form action="{% url 'core:create_session' %}" method="post">
+            {% csrf_token %}
+
+            {% if create_session_form.non_field_errors %}
+                <ul class="errorlist">
+                    {% for error in create_session_form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% for hidden_field in create_session_form.hidden_fields %}
+                {% if hidden_field.errors %}
+                    <ul class="errorlist">
+                    {% for error in hidden_field.errors %}
+                        <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+                {{ hidden_field }}
+            {% endfor %}
+
+            <table class="center-margin form-table">
+                {% for field in create_session_form.visible_fields %}
+                    <tr>
+                        <td class="form-field-label">
+                            {{ field.label_tag }}
+                            {% if field.help_text %}
+                                <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ field }}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <br><span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p class="center-align">
+                <input type="submit" value="Create Session">
+            </p>
+        </form>
+
+    {%  else %}
+
+        <p>You need more permissions to see this.</p>
+
+    {% endif %}
+{% else %}
+
+    <p>Only logged-in users can see this page.</p>
+
+{% endif %}
+
+</body>
+</html>
