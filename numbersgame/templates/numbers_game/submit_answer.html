@@ -10,35 +10,42 @@
 
 <body>
 
-<h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+{% if request.user.is_authenticated %}
+    {% if player or admin_user %}
+        <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
 
-{% if answer_submitted %}
-	<p>Your answer has been submitted, thanks !</p>
+        {% if answer_submitted %}
+            <p>Your answer has been submitted, thanks !</p>
 
-	<p>
-        You will be redirected soon to the {{ game.game_setting.long_name }} page.
-        If not, <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">click here</a>!
-    </p>
+            <p>
+                You will be redirected soon to the {{ game.game_setting.long_name }} page.
+                If not, <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">click here</a>!
+            </p>
 
-	<script>
-		function redirect () {
-			window.location.href = "{% url 'numbers_game:index' session.slug_name game.url_tag %}" ;
-		}
-		setTimeout(redirect, 3000);
-	</script>
+            <script>
+                function redirect () {
+                    window.location.href = "{% url 'numbers_game:index' session.slug_name game.url_tag %}" ;
+                }
+                setTimeout(redirect, 3000);
+            </script>
+        {% else %}
+            <p>
+                Fill out the form below to submit your answer to the {{ game.gameType.longName }}. The "answer" field should
+                a rational number with a dot separator. Please also write one or two sentences to explain the reasoning you
+                have used to come up with your answer.
+            </p>
+
+            <form action="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input id="submit_button" type="submit" value="Submit your answer">
+            </form>
+        {% endif %}
+    {% else %}
+        <p>You are not authenticated for this session.</p>
+    {% endif %}
 {% else %}
-	<p>
-        Fill out the form below to submit your answer to the {{ game.gameType.longName }}. The "answer" field should
-        a rational number with a dot separator. Please also write one or two sentences to explain the reasoning you
-        have used to come up with your answer.
-    </p>
-
-    <form action="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}" method="post">
-		{% csrf_token %}
-		{{ form.as_p }}
-		<input id="submit_button" type="submit" value="Submit your answer">
-	</form>
+    <p>Only authenticated users can see this page.</p>
 {% endif %}
-
 </body>
 </html>
