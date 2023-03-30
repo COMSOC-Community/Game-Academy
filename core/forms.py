@@ -14,12 +14,12 @@ class SessionFinderForm(forms.Form):
     def clean_session_name(self):
         session_name = self.cleaned_data['session_name']
         session = Session.objects.filter(name=session_name)
-        if not session.exists():
-            raise forms.ValidationError("There is no session named {}.".format(session_name))
-        else:
+        if session.exists():
             session = session.first()
             self.cleaned_data["session_slug_name"] = session.slug_name
             return session_name
+        else:
+            raise forms.ValidationError("There is no session named {}.".format(session_name))
 
 
 class CreateSessionForm(forms.Form):
@@ -266,8 +266,9 @@ class CreateGameForm(forms.Form):
                               label_suffix="",
                               max_length=Game._meta.get_field("url_tag").max_length,
                               help_text="The URL tag is the part of the URL path dedicated to the game. It will "
-                                        "look like /session/SESSION_URL_TAG/game/GAME_URL_TAG. It has to be a 'slug',"
-                                        " i.e., it can only contains letters, numbers, underscores or hyphens.",
+                                        "look like /session/SESSION_URL_TAG/GAME_TYPE_URL_TAG/GAME_URL_TAG. It has to "
+                                        "be a 'slug', i.e., it can only contains letters, numbers, underscores or "
+                                        "hyphens.",
                               )
     visible = forms.BooleanField(label="Is visible",
                                  label_suffix="",

@@ -9,9 +9,9 @@
 </head>
 <body>
 
-<h1>Create a Session</h1>
-
 {% if request.user.is_authenticated %}
+
+    <h1>Create a Session</h1>
 
     {% if request.user.is_staff %}
 
@@ -89,16 +89,11 @@
                 <input type="submit" value="Create Session">
             </p>
         </form>
-
     {%  else %}
-
         <p>You need more permissions to see this.</p>
-
     {% endif %}
 {% else %}
-
     <p>Only logged-in users can see this page.</p>
-
 {% endif %}
 
 </body>

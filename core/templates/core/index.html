@@ -17,7 +17,6 @@
 
 <form action="{% url 'core:index' %}" method="post">
     {% csrf_token %}
-
     {% if session_finder_form.non_field_errors %}
         <ul class="errorlist">
             {% for error in session_finder_form.non_field_errors %}
@@ -37,24 +36,24 @@
         {{ hidden_field }}
     {% endfor %}
 
-    <input type='hidden' name='form_type' value='session_finder'>
-
-    <table class="center-margin">
-        <tr>
-            <td class="session-finder-main-field">
-                {{ session_finder_form.session_name }}
-            </td>
-            <td>
-                <input type="submit" value="Search">
-            </td>
-        </tr>
-        <tr>
-            <td class="help-text-forms">
-                {{ session_finder_form.session_name.help_text }}
-            </td>
-            <td></td>
-        </tr>
+    <table class="center-margin form-table">
+        {% for field in session_finder_form.visible_fields %}
+            <tr>
+                <td>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <br><span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </td>
+                <td>
+                    <input type="submit" value="To the session">
+                </td>
+            </tr>
+        {% endfor %}
     </table>
+    <input type='hidden' name='form_type' value='session_finder'>
 </form>
 
 </body>
