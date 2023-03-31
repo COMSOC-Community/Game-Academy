@@ -6,6 +6,12 @@ from .models import *
 from .constants import *
 
 
+class MyForm(forms.Form):
+
+    def as_table(self):
+        return """"""
+
+
 class SessionFinderForm(forms.Form):
     session_name = forms.CharField(label="Name of the session",
                                    max_length=Session._meta.get_field("name").max_length,

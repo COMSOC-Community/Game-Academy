@@ -28,6 +28,11 @@
         <p>
             You are currently logged in as <em>{% if player_user %}{{ player_user.name }}{% else %}{% if admin_user %}{{ request.user.username }}{% endif %}{% endif %}</em>.
             You can thus directly go to <a href="{% url 'core:session_home' session.slug_name %}">home page of the session</a>.
+            You can also log out if you want.
+        </p>
+
+        <p class="center-align">
+            <span class="green-button"><a href="{% url 'core:logout' %}?next={% url 'core:index_session' session.slug_name %}">Logout</a></span>
         </p>
     {% endif %}
 
@@ -185,50 +190,50 @@
                 <form action="{% url 'core:index_session' session.slug_name %}" method="post">
                     {% csrf_token %}
 
-                {% if guest_form.non_field_errors %}
-                    <ul class="errorlist">
-                        {% for error in guest_form.non_field_errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-
-                {% for hidden_field in guest_form.hidden_fields %}
-                    {% if hidden_field.errors %}
+                    {% if guest_form.non_field_errors %}
                         <ul class="errorlist">
-                        {% for error in hidden_field.errors %}
-                            <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
-                        {% endfor %}
+                            {% for error in guest_form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
                         </ul>
                     {% endif %}
-                    {{ hidden_field }}
-                {% endfor %}
 
-                <table class="center-margin form-table">
-                    {% for field in guest_form.visible_fields %}
-                        <tr>
-                            <td class="form-field-label">
-                                {{ field.label_tag }}
-                                {% if field.help_text %}
-                                    <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ field }}
-                                {% if field.errors %}
-                                    {% for error in field.errors %}
-                                        <br><span class="form-error">{{ error }}</span>
-                                    {% endfor %}
-                                {% endif %}
-                            </td>
-                        </tr>
+                    {% for hidden_field in guest_form.hidden_fields %}
+                        {% if hidden_field.errors %}
+                            <ul class="errorlist">
+                            {% for error in hidden_field.errors %}
+                                <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {{ hidden_field }}
                     {% endfor %}
-                </table>
 
-                <input type='hidden' name='form_type' value='guest_form'>
-                <p class="center-align">
-                    <input type="submit" value="Continue as guest">
-                </p>
+                    <table class="center-margin form-table">
+                        {% for field in guest_form.visible_fields %}
+                            <tr>
+                                <td class="form-field-label">
+                                    {{ field.label_tag }}
+                                    {% if field.help_text %}
+                                        <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <br><span class="form-error">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    <input type='hidden' name='form_type' value='guest_form'>
+                    <p class="center-align">
+                        <input type="submit" value="Continue as guest">
+                    </p>
                 </form>
             </div>
         {% endif %}
