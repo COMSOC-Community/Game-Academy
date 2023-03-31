@@ -26,6 +26,19 @@
             <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>. You will be able to manage the
             game from there.
         </p>
+        {% if not game.playable %}
+            <p>
+                The game cannot be played at the moment. You can access the answer page
+                <a href="{% url "numbers_game:submit_answer" session.slug_name game.url_tag %}">here</a>.
+            </p>
+        {% endif %}
+        {% if not game.results_visible %}
+            <p>
+                The results are currently not visible to the players. You can access them
+                <a href="{% url "numbers_game:results" session.slug_name game.url_tag %}">here</a>. Note that admin
+                shortcuts are present there.
+            </p>
+        {% endif %}
     </div>
 {% endif %}
 

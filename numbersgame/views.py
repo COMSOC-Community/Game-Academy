@@ -56,6 +56,19 @@ def results(request, session_slug_name, game_url_tag):
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
     admin_user = is_session_admin(session, request.user)
 
+    if admin_user:
+        if request.method == "POST":
+            if "form_type" in request.POST:
+                print(request.POST["form_type"])
+                if request.POST["form_type"] == "game_playable":
+                    game.playable = not game.playable
+                    game.save()
+                elif request.POST["form_type"] == "results_visible":
+                    game.results_visible = not game.results_visible
+                    game.save()
+                elif request.POST["form_type"] == "run_management":
+                    management.call_command("ng_updateresults", session=session.slug_name, game=game.url_tag)
+
     answers = Answer.objects.filter(game=game, answer__isnull=False).order_by('answer')
     if answers:
         shuffled_answers = list(answers)

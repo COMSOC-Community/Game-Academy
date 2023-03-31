@@ -12,183 +12,238 @@
 
 <body>
 
-<h1>Results {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+{% if game.results_visible or admin_user %}
 
-<div class="adminDiv">
+    <h1>Results {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
 
-	{% if admin_user %}
-		{% if game.playable %}
-			<p>Players can currently submit their answers. Use the following button to change that.</p>
-			<form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
-				{% csrf_token %}
-				<input type="hidden" name="notplayable" value="notplayable" />
-				<input id="submit_button" type="submit" value="Close the game"/>
-			</form>
-		{% else %}
-			<p>The game is closed, player can no longer submit their answers.</p>
-		{% endif %}
-		{% if game.resultsVisible %}
-			<p>The results are visible by every players.</p>
-		{% else %}
-			<p>Players cannot currently see the results. Use the following button to change that.</p>
-			<form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
-				{% csrf_token %}
-				<input type="hidden" name="resultsVisible" value="resultsVisible" />
-				<input id="submit_button" type="submit" value="Make the results visible"/>
-			</form>
-		{% endif %}
-		<p>To create the histograms, please use the following button.</p>
-		<form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
-			{% csrf_token %}
-			<input type="hidden" name="runadmin" value="runadmin" />
-			<input id="submit_button" type="submit" value="Create histograms"/>
-		</form>
-	{% endif %}
-</div>
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+        </span>
+        <br>
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
+    </div>
 
-<h2 class="collapsible">Sample answers</h2>
+    <div class="adminDiv">
 
-<div class="collapse_content" style="display: none;">
-	<table class="lined-table center-margin">
-		<tr>
-			<th>Answer</th>
-			<th>Justification</th>
-		</tr>
-		{% for answer in shuffled_answers %}
-			<tr class="show-one-by-one" style="display: none">
-				<td>{{ answer.answer }}</td>
-				<td>{{ answer.motivation }}</td>
-			</tr>
-		{% endfor %}
-	</table>
+        {% if admin_user %}
+            <div class="warning-box">
+                <p>Here are so admin shortcuts if you want to use them.</p>
 
-	<p class="center-align">
-		<button type="button" onclick="appearOneByOne();" class="green-button">
-			Display another answer
-		</button>
-	</p>
-</div>
+                {% if game.playable %}
+                    <p>Players can currently submit their answers.</p>
+                    <form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Close the Game"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>The game is closed, player can no longer submit their answers.</p>
+                    <form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Open the Game"/>
+                        </p>
+                    </form>
+                {% endif %}
 
-<p><br></p>
+                {% if game.results_visible %}
+                    <p>The results are visible by all players.</p>
+                    <form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Hide the Results"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>Players cannot currently see the results.</p>
+                    <form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Show the Results"/>
+                        </p>
+                    </form>
+                {% endif %}
+                <p>
+                    To manually run the management commands, click the following button. This is normally unnecessary,
+                    unless you changed the entries of the database directly, or performed some other manual actions.
+                </p>
+                <form method="post" action="{% url 'numbers_game:results' session.slug_name game.url_tag %}">
+                    {% csrf_token %}
+                        <input type="hidden" name="form_type" value="run_management"/>
+                    <p class="center-align">
+                        <input class="green-button" type="submit" value="Run Management Commands"/>
+                    </p>
+                </form>
+            </div>
+        {% endif %}
+    </div>
 
-<h2 class="collapsible">Distribution of the answers</h2>
+    <h2 class="collapsible">Sample answers</h2>
 
-<div class="collapse_content" style="display: none;">
-    <div id="histogram" class="graph_wrap">
+    <div class="collapse_content" style="display: none;">
+        <table class="lined-table center-margin">
+            <tr>
+                <th>Answer</th>
+                <th>Justification</th>
+            </tr>
+            {% for answer in shuffled_answers %}
+                <tr class="show-one-by-one" style="display: none">
+                    <td>{{ answer.answer }}</td>
+                    <td>{{ answer.motivation }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <p class="center-align">
+            <button type="button" onclick="appearOneByOne();" class="green-button">
+                Display another answer
+            </button>
+        </p>
+    </div>
+
+    <p><br></p>
+
+    <h2 class="collapsible">Distribution of the answers</h2>
+
+    <div class="collapse_content" style="display: none;">
+        <div id="histogram" class="graph_wrap">
+        </div>
+        <script>
+            var histoData = [
+                    {{ game.result.histo_js_data|safe }}
+                ];
+            var histoChart = anychart.column();
+            histoChart.title('Distribution of the answers received');
+            histoChart.yAxis().title('Answer');
+            histoChart.xAxis().title('Answer range');
+            var histoSerie = histoChart.column(histoData);
+            histoSerie.name('Number of answers')
+            histoSerie.stroke({color:'#ffffff'})
+            histoSerie.fill('#FF8000')
+            histoChart.container('histogram');
+            histoChart.draw();
+        </script>
+    </div>
+
+    <p><br></p>
+
+    <h2 class="collapsible">Details</h2>
+
+    <div class="collapse_content" style="display: none;">
+
+        <table class="lined-table center-margin">
+            <tr>
+                <th>Average answer</th>
+                <td>{{ game.result.average }}</td>
+            </tr>
+            <tr>
+                <th>2/3 of the average</th>
+                <td>{{ game.result.corrected_average }}</td>
+            </tr>
+            <tr>
+                <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
+                <td>{{ winning_answers_formatted }}</td>
+            </tr>
+            <tr>
+                <th>Winner{{ winners|length|pluralize:',s' }}</th>
+                <td>{{ winners_formatted }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <p><br></p>
+
+    <h2 class="collapsible">All answers anonymised</h2>
+
+    <div class="collapse_content" style="display: none;">
+        <table class="lined-table center-margin">
+            <tr>
+                <th>Answer</th>
+                <th>Gap</th>
+                <th>Justification</th>
+            </tr>
+            {% for answer in answers %}
+                <tr>
+                    <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
+                    <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
+                    <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <p><br></p>
+
+    {% if admin_user %}
+        <h2 class="collapsible">All answers with names</h2>
+
+        <div class="collapse_content" style="display: none;">
+            <table class="lined-table center-margin">
+                <tr>
+                    <th>Player</th>
+                    <th>Answer</th>
+                    <th>Gap</th>
+                    <th>Justification</th>
+                </tr>
+                {% for answer in answers %}
+                    <tr>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+        </span>
+        <br>
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
     </div>
     <script>
-        var histoData = [
-                {{ game.result.histo_js_data|safe }}
-            ];
-        var histoChart = anychart.column();
-        histoChart.title('Distribution of the answers received');
-        histoChart.yAxis().title('Answer');
-        histoChart.xAxis().title('Answer range');
-        var histoSerie = histoChart.column(histoData);
-        histoSerie.name('Number of answers')
-        histoSerie.stroke({color:'#ffffff'})
-        histoSerie.fill('#FF8000')
-        histoChart.container('histogram');
-        histoChart.draw();
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                var content = this.nextElementSibling;
+                if (content.style.display === "none"){
+                    content.style.display = "block";
+                } else {
+                    content.style.display = "none";
+                }
+            });
+        }
     </script>
-</div>
 
-<p><br></p>
-
-<h2 class="collapsible">Details</h2>
-
-<div class="collapse_content" style="display: none;">
-
-    <table class="lined-table center-margin">
-        <tr>
-            <th>Average answer</th>
-            <td>{{ game.result.average }}</td>
-        </tr>
-        <tr>
-            <th>2/3 of the average</th>
-            <td>{{ game.result.corrected_average }}</td>
-        </tr>
-        <tr>
-            <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
-            <td>{{ winning_answers_formatted }}</td>
-        </tr>
-        <tr>
-            <th>Winner{{ winners|length|pluralize:',s' }}</th>
-            <td>{{ winners_formatted }}</td>
-        </tr>
-    </table>
-</div>
-
-<p><br></p>
-
-<h2 class="collapsible">All answers anonymised</h2>
-
-<div class="collapse_content" style="display: none;">
-	<table class="lined-table center-margin">
-		<tr>
-			<th>Answer</th>
-            <th>Gap</th>
-			<th>Justification</th>
-		</tr>
-		{% for answer in answers %}
-			<tr>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-			</tr>
-		{% endfor %}
-	</table>
-</div>
-
-<p><br></p>
-
-<h2 class="collapsible">All answers with names</h2>
-
-<div class="collapse_content" style="display: none;">
-	<table class="lined-table center-margin">
-		<tr>
-			<th>Player</th>
-			<th>Answer</th>
-            <th>Gap</th>
-			<th>Justification</th>
-		</tr>
-		{% for answer in answers %}
-			<tr>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
-                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-			</tr>
-		{% endfor %}
-	</table>
-</div>
-
-<p><br></p>
-
-<script>
-	var coll = document.getElementsByClassName("collapsible");
-	var i;
-	for (i = 0; i < coll.length; i++) {
-		coll[i].addEventListener("click", function() {
-			var content = this.nextElementSibling;
-			if (content.style.display === "none"){
-				content.style.display = "block";
-			} else {
-				content.style.display = "none";
-			}
-		});
-	}
-</script>
-
-<script>
-	var count = 0;
-	function appearOneByOne() {
-		items = document.getElementsByClassName("show-one-by-one");
-		if(count < items.length) {
-			items[count++].style.display = "table-row";
-		}
-	}
-</script>
-
+    <script>
+        var count = 0;
+        function appearOneByOne() {
+            items = document.getElementsByClassName("show-one-by-one");
+            if(count < items.length) {
+                items[count++].style.display = "table-row";
+            }
+        }
+    </script>
+{% else %}
+    <p>
+        The results for this game are not visible.
+        Get back to the <a href="{% url "numbers_game:index" session.slug_name game.url_tag %}">home page</a> of the
+        game.
+    </p>
+{% endif %}
 </body>
 </html>
