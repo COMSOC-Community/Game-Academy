@@ -87,6 +87,12 @@
                 {% endfor %}
             </div>
         {% endif %}
+
+        <div class="navigation">
+            <span class="navigation-button">
+                <a href="{% url 'core:index_session' session.slug_name %}">&#8610;&nbsp;To session index</a>
+            </span>
+        </div>
     {% else %}
         <p>
             You are logged in to an account that does not have access to this session.
@@ -94,12 +100,6 @@
             different account.
         </p>
     {% endif %}
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'core:index_session' session.slug_name %}">&#8610;&nbsp;To session index</a>
-        </span>
-    </div>
 {% else %}
     <p>
         Only logged-in users with adequate permissions can view this page. You can log in on the

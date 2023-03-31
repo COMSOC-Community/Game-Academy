@@ -367,3 +367,48 @@ def session_admin(request, session_slug_name):
             modify_game_forms.append(modify_game_form)
 
     return render(request, os.path.join('core', 'session_admin.html'), locals())
+
+
+def team(request, session_slug_name, game_url_tag):
+    session = get_object_or_404(Session, slug_name=session_slug_name)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, need_teams=True)
+    admin_user = is_session_admin(session, request.user)
+
+    if request.user.is_authenticated:
+        try:
+            player_user = Player.objects.get(session=session, user=request.user)
+        except Player.DoesNotExist:
+            player_user = None
+
+        teams = Team.objects.filter(game=game)
+        if player_user:
+            try:
+                current_team = Team.objects.get(game=game, player=player_user)
+            except Team.DoesNotExist:
+                current_team = None
+
+            if current_team is None:
+                if request.method == "POST":
+                    form_type = request.POST["form_type"]
+                    if form_type == "create_team_form":
+                        create_team_form = CreateTeamForm(request.POST, game=game)
+                        if create_team_form.is_valid():
+                            new_team = Team.objects.create(
+                                name=create_team_form.cleaned_data["name"],
+                                game=game,
+                                creator=player_user)
+                            new_team.player.add(player_user)
+                            new_team.save()
+                            team_created = True
+                    elif form_type == "join_team_form":
+                        print("Heeere")
+                        joined_team = Team.objects.get(pk=request.POST['join_team_input'])
+                        joined_team.player.add(player_user)
+                        joined_team.save()
+                        team_joined = True
+            else:
+                create_team_form = CreateTeamForm(game=game)
+        else:
+            create_team_form = CreateTeamForm(game=game)
+
+    return render(request, os.path.join('core', 'team.html'), locals())

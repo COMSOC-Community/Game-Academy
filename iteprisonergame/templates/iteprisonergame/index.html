@@ -1,0 +1,100 @@
+{% load static %}
+{% load core_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Iterated Prisoner's Dilemma</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
+</head>
+
+<body>
+
+<h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+
+{% if admin_user %}
+    <div class="warning-box">
+        <p>
+            Since you are logged in as an admin, you can also access the
+            <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>. You will be able to manage the
+            game from there.
+        </p>
+        {% if not game.playable %}
+            <p>
+                The game cannot be played at the moment. You can access the team page
+                <a href="{% url "itepris_game:submit_answer" session.slug_name game.url_tag %}">here</a> or the answer
+                page <a href="{% url "itepris_game:submit_answer" session.slug_name game.url_tag %}">here</a>.
+            </p>
+        {% endif %}
+        {% if not game.results_visible %}
+            <p>
+                The results are currently not visible to the players. You can access them
+                <a href="{% url "itepris_game:results" session.slug_name game.url_tag %}">here</a>. Note that admin
+                shortcuts are present there.
+            </p>
+        {% endif %}
+    </div>
+{% endif %}
+
+<p>
+    This is the main page for the {{ game.game_setting.long_name }}. In this game, you will play several times the
+    Prisoner's Dilemma and you are asked to submit your strategy for the game.
+</p>
+
+<p>
+    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
+    team before being able to submit your answer.
+</p>
+
+<table class="center-margin">
+    <tbody>
+        <tr>
+            <td style="padding-right: 20px;">
+                {% if game.playable %}
+                    <span class="orange-button">
+                        {% with 'core:team_'|addstr:game.game_setting.package_url_namespace as url_name %}
+                            <a href="{% url url_name session.slug_name game.url_tag %}">Create or Join a Team</a>
+                        {% endwith %}
+                    </span>
+                {% else %}
+                    <span class="gray-button">
+                        <a>Create or Join a Team</a>
+                    </span>
+                {% endif %}
+            </td>
+            <td style="padding-left: 20px; padding-right: 20px;">
+                {% if game.playable %}
+                    <span class="orange-button">
+                        <a href="{% url 'itepris_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>
+                    </span>
+                {% else %}
+                    <span class="gray-button">
+                        <a>Submit your answer</a>
+                    </span>
+                {% endif %}
+            </td>
+            <td style="padding-left: 20px;">
+                {% if game.results_visible %}
+                    <span class="orange-button">
+                        <a href="{% url 'itepris_game:results' session.slug_name game.url_tag %}">See the results</a>
+                    </span>
+                {% else %}
+                    <span class="gray-button">
+                        <a>See the results</a>
+                    </span>
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="navigation">
+    <span class="navigation-button">
+        <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+    </span>
+</div>
+
+</body>
+</html>

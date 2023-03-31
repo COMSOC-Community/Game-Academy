@@ -1,0 +1,35 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Iterated Prisoner's Dilemma</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
+</head>
+
+<body>
+
+<h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+
+<p>
+    Fill out the form below to submit your answer to the {{ game.game_setting.long_name }}. The "number of states"
+    field should be an integer greater than 0. The "answer" field should describe the Moore machine defining your
+    strategy as explained in the instructions. Please also write one or two sentences to explain the reasoning you
+    have used to come up with your strategy.
+</p>
+
+<p>
+    Please note that <em>you will submit the answer for the entire team</em> and that after submission, no
+    player from the team will be able to submit anymore.
+</p>
+
+<form action="{% url 'itepris_game:submit_answer' session.slug_name game.url_tag %}" method="post">
+    {% csrf_token %}
+    {{ form.as_table }}
+    <input class="green-button" type="submit" value="Submit answer">
+</form>
+
+</body>
+</html>

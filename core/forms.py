@@ -6,12 +6,6 @@ from .models import *
 from .constants import *
 
 
-class MyForm(forms.Form):
-
-    def as_table(self):
-        return """"""
-
-
 class SessionFinderForm(forms.Form):
     session_name = forms.CharField(label="Name of the session",
                                    max_length=Session._meta.get_field("name").max_length,
@@ -379,3 +373,19 @@ class ModifyGameForm(forms.Form):
             raise forms.ValidationError("A game with this URL tag already exists for this session.")
         else:
             return url_tag
+
+
+class CreateTeamForm(forms.Form):
+    name = forms.CharField(max_length=Team._meta.get_field("name").max_length)
+
+    def __init__(self, *args, **kwargs):
+        self.game = kwargs.pop('game', None)
+        super(CreateTeamForm, self).__init__(*args, **kwargs)
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if Team.objects.filter(game=self.game, name=name).exists():
+            raise forms.ValidationError("A team with this name has already been registered for this game.")
+        else:
+            return name
+
