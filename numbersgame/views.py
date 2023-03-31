@@ -14,7 +14,7 @@ from .models import Answer
 
 def index(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, url_tag=game_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
     admin_user = is_session_admin(session, request.user)
 
     return render(request, os.path.join('numbers_game', 'index.html'), locals())
@@ -22,7 +22,7 @@ def index(request, session_slug_name, game_url_tag):
 
 def submit_answer(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, url_tag=game_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
     admin_user = is_session_admin(session, request.user)
 
     if request.user.is_authenticated:
@@ -53,7 +53,7 @@ def submit_answer(request, session_slug_name, game_url_tag):
 
 def results(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, url_tag=game_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
     admin_user = is_session_admin(session, request.user)
 
     answers = Answer.objects.filter(game=game, answer__isnull=False).order_by('answer')
