@@ -195,8 +195,11 @@ def session_index(request, session_slug_name):
 
 def session_home(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    games = Game.objects.filter(session=session)
+    games = Game.objects.filter(session=session, visible=True)
     admin_user = is_session_admin(session, request.user)
+
+    if admin_user:
+        invisible_games = Game.objects.filter(session=session, visible=False)
 
     if request.user.is_authenticated:
         try:

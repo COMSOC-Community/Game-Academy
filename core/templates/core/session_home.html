@@ -67,6 +67,26 @@
         {% else %}
             <p>No games are currently available.</p>
         {% endif %}
+
+        {% if admin_user and invisible_games %}
+            <div class="warning-box">
+                {% for game in invisible_games %}
+                    <h2>{{ game.game_setting.long_name }} - {{ game.name }}</h2>
+
+                    {% if game.description %}
+                        <p>{{ game.description }}</p>
+                    {% endif %}
+
+                    {% with game.game_setting.package_url_namespace|addstr:':index' as index_url_shortcut %}
+                        <p class="center-align">
+                            <span class="green-button">
+                                <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>
+                            </span>
+                        </p>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        {% endif %}
     {% else %}
         <p>
             You are logged in to an account that does not have access to this session.
