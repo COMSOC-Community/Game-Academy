@@ -3,17 +3,24 @@ from django.apps import AppConfig
 from gameserver.games import *
 
 
+IP_NAME = "ItePrisDilGame"
+IP_LONG_NAME = "Iterative Prisoners' Dilemma Game"
+IP_PACKAGE_NAME = "iteprisonergame"
+IP_URL_TAG = "itepris"
+IP_PACKAGE_URL_NAMESPACE = "itepris_game"
+
+
 class IteprisonergameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'iteprisonergame'
 
     is_game = True
     game_setting = GameSetting(
-            name="ItePrisDilGame",
-            long_name="Iterative Prisoners' Dilemma Game",
-            package_name="iteprisonergame",
-            url_tag="itepris",
-            package_url_namespace="itepris_game",
+            name=IP_NAME,
+            long_name=IP_LONG_NAME,
+            package_name=IP_PACKAGE_NAME,
+            url_tag=IP_URL_TAG,
+            package_url_namespace=IP_PACKAGE_URL_NAMESPACE,
     )
 
     def ready(self):

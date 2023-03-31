@@ -5,10 +5,11 @@ from core.models import Player, Game
 
 class Answer(models.Model):
     game = models.ForeignKey(Game,
-                             on_delete=models.CASCADE)
-    player = models.ForeignKey(Player,
-                               on_delete=models.CASCADE,
-                               related_name='player_numberGame')
+                             on_delete=models.CASCADE,
+                             related_name='numbers_answers')
+    player = models.OneToOneField(Player,
+                                  on_delete=models.CASCADE,
+                                  related_name='numbers_answer')
     answer = models.FloatField()
     motivation = models.TextField()
     gap = models.FloatField(null=True)
@@ -21,7 +22,7 @@ class Answer(models.Model):
         return self.answer
 
     class Meta:
-        ordering = ['winner', 'player']
+        ordering = ['game', 'winner', 'player']
         unique_together = ('game', 'player')
 
     def __str__(self):

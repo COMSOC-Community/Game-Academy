@@ -3,17 +3,24 @@ from django.apps import AppConfig
 from gameserver.games import *
 
 
+NG_NAME = "NumbersGame"
+NG_LONG_NAME = "Numbers Game"
+NG_PACKAGE_NAME = "numbersgame"
+NG_URL_TAG = "numbers"
+NG_PACKAGE_URL_NAMESPACE = "numbers_game"
+
+
 class NumbersgameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'numbersgame'
 
     is_game = True
     game_setting = GameSetting(
-        name="NumbersGame",
-        long_name="Numbers Game",
-        package_name="numbersgame",
-        url_tag="numbers",
-        package_url_namespace="numbers_game",
+        name=NG_NAME,
+        long_name=NG_LONG_NAME,
+        package_name=NG_PACKAGE_NAME,
+        url_tag=NG_URL_TAG,
+        package_url_namespace=NG_PACKAGE_URL_NAMESPACE,
     )
 
     def ready(self):

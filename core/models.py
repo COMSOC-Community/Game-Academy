@@ -55,3 +55,16 @@ class Game(models.Model):
 
     def __str__(self):
         return "[{}] {}".format(self.session, self.name)
+
+
+class Team(models.Model):
+    name = models.CharField(max_length=100)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
+    player = models.ManyToManyField(Player, related_name='teams')
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ('name', 'game')
+
+    def __str__(self):
+        return "[{}] {} - {}".format(self.game.session, self.game.name, self.name)
