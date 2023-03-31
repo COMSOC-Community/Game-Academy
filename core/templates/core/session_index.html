@@ -110,10 +110,10 @@
     {% if session.need_registration %}
         <p>
             To access this session, you need to be logged in. You can do so by using the form below.
-            {% if session.registration_open %}
+            {% if session.can_register %}
                 If you have not yet registered as a player, please do so above, and then log in.
             {% else %}
-                The registration form is now close, please contact the session admin if you still need to register.
+                The registration form is now closed, please contact the session admin if you still need to register.
             {% endif %}
         </p>
     {% else %}

@@ -24,7 +24,7 @@
         </div>
 
         <p>
-            Welcome <em>{% if admin_user %}{{ user.username }}{% endif %}{% if player_user %}{{ player_user.name }}{% endif %}</em>
+            Welcome <em>{% if player_user %}{{ player_user.name }}{% else %}{% if admin_user %}{{ request.user.username }}{% endif %}{% endif %}</em>
             to session {{ session.long_name }}. If you need to log out, you can click the button below. You will then be
             redirected to the index page of this session.
         </p>

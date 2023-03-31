@@ -200,12 +200,10 @@ def session_home(request, session_slug_name):
     admin_user = is_session_admin(session, request.user)
 
     if request.user.is_authenticated:
-        if not admin_user:
-            player_user = Player.objects.filter(session=session, user=request.user)
-            if player_user.exists():
-                player_user = player_user.first()
-            else:
-                player_user = None
+        try:
+            player_user = Player.objects.get(session=session, user=request.user)
+        except Player.DoesNotExist:
+            player_user = None
 
     return render(request, os.path.join('core', 'session_home.html'), locals())
 
@@ -216,7 +214,7 @@ def session_admin(request, session_slug_name):
 
     if admin_user:
         try:
-            player_user = Player.objects.get(user=request.user)
+            player_user = Player.objects.get(session=session, user=request.user)
         except Player.DoesNotExist:
             player_user = None
 
