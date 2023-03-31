@@ -26,7 +26,7 @@
 
     {% if admin_user or player_user %}
         <p>
-            You are currently logged in as <em>{% if admin_user %}{{ user.username }}{% endif %}{% if player_user %}{{ player_user.name }}{% endif %}</em>.
+            You are currently logged in as <em>{% if player_user %}{{ player_user.name }}{% else %}{% if admin_user %}{{ request.user.username }}{% endif %}{% endif %}</em>.
             You can thus directly go to <a href="{% url 'core:session_home' session.slug_name %}">home page of the session</a>.
         </p>
     {% endif %}

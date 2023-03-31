@@ -105,10 +105,9 @@ def session_index(request, session_slug_name):
     if session.visible or admin_user:
 
         if request.user.is_authenticated:
-            player_user = Player.objects.filter(session=session, user=request.user)
-            if player_user.exists():
-                player_user = player_user.first()
-            else:
+            try:
+                player_user = Player.objects.get(session=session, user=request.user)
+            except Player.DoesNotExist:
                 player_user = None
 
         # Registration form
