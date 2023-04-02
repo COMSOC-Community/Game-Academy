@@ -49,67 +49,75 @@
                     setTimeout(redirect, 3000);
                 </script>
             {% else %}
-                <p>
-                    Fill out the form below to submit your answer to the {{ game.game_setting.long_name }}. The "answer"
-                    field should be a rational number with a dot separator (with the <a href="https://docs.python.org/3/tutorial/floatingpoint.html" target="_blank">
-                    limitations</a> of a Python float). Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
-                </p>
+                {% if not current_answer %}
+                    <p>
+                        Fill out the form below to submit your answer to the {{ game.game_setting.long_name }}. The "answer"
+                        field should be a rational number with a dot separator (with the <a href="https://docs.python.org/3/tutorial/floatingpoint.html" target="_blank">
+                        limitations</a> of a Python float). Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
+                    </p>
 
-                {% if submission_error %}
-                    <div class="form-error-message">
-                        <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
+                    {% if submission_error %}
+                        <div class="form-error-message">
+                            <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
 
-                        <p>{{ submission_error }}</p>
-                    </div>
-                {% endif %}
-
-                <form action="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}" method="post">
-                    {% csrf_token %}
-
-                    {% if submit_answer_form.non_field_errors %}
-                        <ul class="errorlist">
-                            {% for error in submit_answer_form.non_field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
+                            <p>{{ submission_error }}</p>
+                        </div>
                     {% endif %}
 
-                    {% for hidden_field in submit_answer_form.hidden_fields %}
-                        {% if hidden_field.errors %}
+                    <form action="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}" method="post">
+                        {% csrf_token %}
+
+                        {% if submit_answer_form.non_field_errors %}
                             <ul class="errorlist">
-                            {% for error in hidden_field.errors %}
-                                <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
-                            {% endfor %}
+                                {% for error in submit_answer_form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
                             </ul>
                         {% endif %}
-                        {{ hidden_field }}
-                    {% endfor %}
 
-                    <table class="center-margin form-table">
-                        {% for field in submit_answer_form.visible_fields %}
-                            <tr>
-                                <td class="form-field-label">
-                                    {{ field.label_tag }}
-                                    {% if field.help_text %}
-                                        <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {{ field }}
-                                    {% if field.errors %}
-                                        {% for error in field.errors %}
-                                            <br><span class="form-error">{{ error }}</span>
-                                        {% endfor %}
-                                    {% endif %}
-                                </td>
-                            </tr>
+                        {% for hidden_field in submit_answer_form.hidden_fields %}
+                            {% if hidden_field.errors %}
+                                <ul class="errorlist">
+                                {% for error in hidden_field.errors %}
+                                    <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                            {{ hidden_field }}
                         {% endfor %}
-                    </table>
 
-                    <p class="center-align">
-                        <input class="green-button" type="submit" value="Submit your Answer">
+                        <table class="center-margin form-table">
+                            {% for field in submit_answer_form.visible_fields %}
+                                <tr>
+                                    <td class="form-field-label">
+                                        {{ field.label_tag }}
+                                        {% if field.help_text %}
+                                            <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                            {% for error in field.errors %}
+                                                <br><span class="form-error">{{ error }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Submit your Answer">
+                        </p>
+                    </form>
+                {% else %}
+                    <p>
+                        You have already submitted the answer {{ current_answer.formatted_answer }}. You cannot submit more than
+                        one answer for this game.
                     </p>
-                </form>
+                {% endif %}
+
             {% endif %}
 
         <div class="navigation">

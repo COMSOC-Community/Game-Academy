@@ -152,10 +152,12 @@
                 <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
                 <td>{{ winning_answers_formatted }}</td>
             </tr>
-            <tr>
-                <th>Winner{{ winners|length|pluralize:',s' }}</th>
-                <td>{{ winners_formatted }}</td>
-            </tr>
+            {% if admin_user %}
+                <tr>
+                    <th>Winner{{ winners|length|pluralize:',s' }}</th>
+                    <td>{{ winners_formatted }}</td>
+                </tr>
+            {% endif %}
         </table>
     </div>
 

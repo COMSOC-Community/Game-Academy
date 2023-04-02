@@ -20,6 +20,17 @@ def index(request, session_slug_name, game_url_tag):
     if not game.visible and not admin_user:
         raise Http404
 
+    if request.user.is_authenticated:
+        try:
+            player = Player.objects.get(session=session, user=request.user)
+        except Player.DoesNotExist:
+            player = None
+        if player is not None:
+            try:
+                answer = Answer.objects.get(game=game, player=request.user.player)
+            except Answer.DoesNotExist:
+                answer = None
+
     return render(request, os.path.join('numbers_game', 'index.html'), locals())
 
 
@@ -35,23 +46,28 @@ def submit_answer(request, session_slug_name, game_url_tag):
         player = Player.objects.filter(session=session, user=request.user)
         if player.exists():
             player = player.first()
-            if request.method == "POST":
-                submit_answer_form = SubmitAnswerForm(request.POST, game=game, player=request.user.player)
-                if submit_answer_form.is_valid():
-                    new_answer = Answer.objects.create(
-                        game=game,
-                        player=request.user.player,
-                        answer=submit_answer_form.cleaned_data['answer'],
-                        motivation=submit_answer_form.cleaned_data['motivation']
-                    )
-                    try:
-                        management.call_command("ng_updateresults", session=session.slug_name, game=game.url_tag)
-                        answer_submitted = True
-                    except Exception as e:
-                        submission_error = repr(e)
-                        new_answer.delete()
-            else:
-                submit_answer_form = SubmitAnswerForm(game=game, player=request.user.player)
+            try:
+                current_answer = Answer.objects.get(game=game, player=request.user.player)
+            except Answer.DoesNotExist:
+                current_answer = None
+            if current_answer is None:
+                if request.method == "POST":
+                    submit_answer_form = SubmitAnswerForm(request.POST, game=game, player=request.user.player)
+                    if submit_answer_form.is_valid():
+                        new_answer = Answer.objects.create(
+                            game=game,
+                            player=request.user.player,
+                            answer=submit_answer_form.cleaned_data['answer'],
+                            motivation=submit_answer_form.cleaned_data['motivation']
+                        )
+                        try:
+                            management.call_command("ng_updateresults", session=session.slug_name, game=game.url_tag)
+                            answer_submitted = True
+                        except Exception as e:
+                            submission_error = repr(e)
+                            new_answer.delete()
+                else:
+                    submit_answer_form = SubmitAnswerForm(game=game, player=request.user.player)
         else:
             player = None
     return render(request, os.path.join('numbers_game', 'submit_answer.html'), locals())

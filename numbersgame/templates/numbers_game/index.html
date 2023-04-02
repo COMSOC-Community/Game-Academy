@@ -11,76 +11,84 @@
 
 <body>
 
-<h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+{% if request.user.is_authenticated %}
 
-<div class="navigation">
-    <span class="navigation-button">
-        <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
-    </span>
-</div>
+    <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
 
-{% if admin_user %}
-    <div class="warning-box">
-        <p>
-            Since you are logged in as an admin, you can also access the
-            <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>. You will be able to manage the
-            game from there.
-        </p>
-        {% if not game.playable %}
-            <p>
-                The game cannot be played at the moment. You can access the answer page
-                <a href="{% url "numbers_game:submit_answer" session.slug_name game.url_tag %}">here</a>.
-            </p>
-        {% endif %}
-        {% if not game.results_visible %}
-            <p>
-                The results are currently not visible to the players. You can access them
-                <a href="{% url "numbers_game:results" session.slug_name game.url_tag %}">here</a>. Note that admin
-                shortcuts are present there.
-            </p>
-        {% endif %}
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
     </div>
-{% endif %}
 
-<p>
-    This is the main page for the {{ game.game_setting.long_name }}. Remember the rules of the game: every player
-    submits a real number between 0 and 100 and the player closest to 2/3 of the average of the answers wins the game.
-</p>
+    {% if admin_user %}
+        <div class="warning-box">
+            <p>
+                Since you are logged in as an admin, you can also access the
+                <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>. You will be able to manage the
+                game from there.
+            </p>
+            {% if not game.playable %}
+                <p>
+                    The game cannot be played at the moment. You can access the answer page
+                    <a href="{% url "numbers_game:submit_answer" session.slug_name game.url_tag %}">here</a>.
+                </p>
+            {% endif %}
+            {% if not game.results_visible %}
+                <p>
+                    The results are currently not visible to the players. You can access them
+                    <a href="{% url "numbers_game:results" session.slug_name game.url_tag %}">here</a>. Note that admin
+                    shortcuts are present there.
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
 
-<table class="center-margin">
-    <tbody>
-        <tr>
-            <td style="padding-right: 20px;">
-                {% if game.playable %}
-                    <span class="orange-button">
-                        <a href="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>
-                    </span>
-                {% else %}
-                    <span class="gray-button">
-                        <a>Submit your answer</a>
-                    </span>
-                {% endif %}
-            </td>
-            <td style="padding-left: 20px;">
+    <p>
+        This is the main page for the {{ game.game_setting.long_name }}. Remember the rules of the game: every player
+        submits a real number between 0 and 100 and the player closest to 2/3 of the average of the answers wins the game.
+    </p>
+
+    {% if answer %}
+        <p>
+            You have already submitted an answer, you cannot submit another one. Your answer is
+            <em>{{ answer.formatted_answer }}</em>.
+        </p>
+    {% endif %}
+
+    <table class="center-margin">
+        <tbody>
+            <tr>
+                <td style="padding-right: 20px;">
+                    {% if game.playable and not answer%}
+                        <span class="orange-button">
+                            <a href="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>
+                        </span>
+                    {% else %}
+                        <span class="gray-button">
+                            <a>Submit your answer</a>
+                        </span>
+                    {% endif %}
+                </td>
                 {% if game.results_visible %}
-                    <span class="orange-button">
-                        <a href="{% url 'numbers_game:results' session.slug_name game.url_tag %}">See the results</a>
-                    </span>
-                {% else %}
-                    <span class="gray-button">
-                        <a>See the results</a>
-                    </span>
+                    <td style="padding-left: 20px;">
+                        <span class="orange-button">
+                            <a href="{% url 'numbers_game:results' session.slug_name game.url_tag %}">See the results</a>
+                        </span>
+                    </td>
                 {% endif %}
-            </td>
-        </tr>
-    </tbody>
-</table>
+            </tr>
+        </tbody>
+    </table>
 
-<div class="navigation">
-    <span class="navigation-button">
-        <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
-    </span>
-</div>
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
+    </div>
+{% else %}
+    <p>Only authenticated users can see this page.</p>
+{% endif %}
 
 </body>
 </html>
