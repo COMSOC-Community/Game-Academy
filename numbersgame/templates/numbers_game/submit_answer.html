@@ -11,8 +11,8 @@
 
 <body>
 
-{% if game.playable or admin_user %}
-    {% if request.user.is_authenticated %}
+{% if request.user.is_authenticated %}
+    {% if game.playable or admin_user %}
         {% if player or admin_user %}
             <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
 
@@ -137,14 +137,14 @@
             </p>
         {% endif %}
     {% else %}
-        <p>Only authenticated users can see this page.</p>
+        <p>
+            It is not possible to play this game.
+            Get back to the <a href="{% url "numbers_game:index" session.slug_name game.url_tag %}">home page</a> of the
+            game.
+        </p>
     {% endif %}
 {% else %}
-    <p>
-        It is not possible to play this game.
-        Get back to the <a href="{% url "numbers_game:index" session.slug_name game.url_tag %}">home page</a> of the
-        game.
-    </p>
+    <p>Only authenticated users can see this page.</p>
 {% endif %}
 </body>
 </html>

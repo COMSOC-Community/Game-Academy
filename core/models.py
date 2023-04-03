@@ -60,7 +60,7 @@ class Game(models.Model):
 class Team(models.Model):
     name = models.CharField(max_length=100)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    player = models.ManyToManyField(Player, related_name='teams')
+    players = models.ManyToManyField(Player, related_name='teams')
     creator = models.ForeignKey(Player, on_delete=models.CASCADE)
 
     class Meta:

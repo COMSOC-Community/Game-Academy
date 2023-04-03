@@ -383,7 +383,7 @@ def team(request, session_slug_name, game_url_tag):
         teams = Team.objects.filter(game=game)
         if player_user:
             try:
-                current_team = Team.objects.get(game=game, player=player_user)
+                current_team = player_user.teams.get(game=game)
             except Team.DoesNotExist:
                 current_team = None
 
@@ -397,17 +397,16 @@ def team(request, session_slug_name, game_url_tag):
                                 name=create_team_form.cleaned_data["name"],
                                 game=game,
                                 creator=player_user)
-                            new_team.player.add(player_user)
+                            new_team.players.add(player_user)
                             new_team.save()
                             team_created = True
                     elif form_type == "join_team_form":
-                        print("Heeere")
                         joined_team = Team.objects.get(pk=request.POST['join_team_input'])
-                        joined_team.player.add(player_user)
+                        joined_team.players.add(player_user)
                         joined_team.save()
                         team_joined = True
-            else:
-                create_team_form = CreateTeamForm(game=game)
+                else:
+                    create_team_form = CreateTeamForm(game=game)
         else:
             create_team_form = CreateTeamForm(game=game)
 
