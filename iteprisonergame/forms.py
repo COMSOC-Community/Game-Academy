@@ -22,7 +22,7 @@ class SubmitAnswerForm(forms.Form):
         print(self.game)
         print(Answer.objects.filter(team=self.team, game=self.game))
         if Answer.objects.filter(team=self.team, game=self.game).exists():
-            raise forms.ValidationError("This team already submitted an answer for this game !")
+            raise forms.ValidationError("This team already submitted an answer for this game!")
         pattern = re.compile("^ *[CD], *([0-9]+), *([0-9]+)$")
         lines = cleaned_data['answer'].strip().split('\n')
         if len(lines) != cleaned_data["number_states"]:

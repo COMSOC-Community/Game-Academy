@@ -26,5 +26,5 @@ class SubmitAnswerForm(forms.Form):
     def clean(self):
         cleaned_data = super(SubmitAnswerForm, self).clean()
         if Answer.objects.filter(player=self.player, game=self.game).exists():
-            raise forms.ValidationError("You have already submitted an answer for this game !")
+            raise forms.ValidationError("You have already submitted an answer for this game!")
         return cleaned_data
