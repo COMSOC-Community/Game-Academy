@@ -3,11 +3,14 @@ from django.apps import AppConfig
 from gameserver.games import *
 
 
-IP_NAME = "ItePrisDilGame"
-IP_LONG_NAME = "Iterative Prisoners' Dilemma Game"
-IP_PACKAGE_NAME = "iteprisonergame"
-IP_URL_TAG = "itepris"
-IP_PACKAGE_URL_NAMESPACE = "itepris_game"
+IPD_NAME = "ItePrisDilGame"
+IPD_LONG_NAME = "Iterative Prisoners' Dilemma Game"
+IPD_PACKAGE_NAME = "iteprisonergame"
+IPD_URL_TAG = "itepris"
+IPD_PACKAGE_URL_NAMESPACE = "itepris_game"
+
+IPD_ROUNDS = [168, 359, 306, 622, 319]
+IPD_PAYOFFS = {("C", "C"): (-10, -10), ("C", "D"): (-25, 0), ("D", "C"): (0, -25), ("D", "D"): (-20, -20)}
 
 
 class IteprisonergameConfig(AppConfig):
@@ -16,11 +19,11 @@ class IteprisonergameConfig(AppConfig):
 
     is_game = True
     game_setting = GameSetting(
-            name=IP_NAME,
-            long_name=IP_LONG_NAME,
-            package_name=IP_PACKAGE_NAME,
-            url_tag=IP_URL_TAG,
-            package_url_namespace=IP_PACKAGE_URL_NAMESPACE,
+            name=IPD_NAME,
+            long_name=IPD_LONG_NAME,
+            package_name=IPD_PACKAGE_NAME,
+            url_tag=IPD_URL_TAG,
+            package_url_namespace=IPD_PACKAGE_URL_NAMESPACE,
     )
 
     def ready(self):

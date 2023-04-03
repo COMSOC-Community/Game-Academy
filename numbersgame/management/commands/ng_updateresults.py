@@ -3,6 +3,8 @@ from django.core.management.base import BaseCommand
 from django.db.models import Avg
 
 from core.models import Session, Game
+
+from numbersgame.apps import NG_NAME
 from numbersgame.models import Answer, Result
 
 
@@ -26,7 +28,7 @@ class Command(BaseCommand):
         if not options['game']:
             print('ERROR: you need to give the URL tag of a game with the --game argument')
             return
-        game = Game.objects.filter(session=session, url_tag=options['game'])
+        game = Game.objects.filter(session=session, url_tag=options['game'], game_type=NG_NAME)
         if not game.exists():
             print('ERROR: no game with URL tag {} has been found'.format(options['game']))
             return

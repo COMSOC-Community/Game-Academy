@@ -7,13 +7,13 @@ from core.models import Session, Game, Player, Team
 from core.views import is_session_admin
 
 from .forms import SubmitAnswerForm
-from .apps import IP_NAME
+from .apps import IPD_NAME
 from .models import Answer
 
 
 def index(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IP_NAME)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -40,7 +40,7 @@ def index(request, session_slug_name, game_url_tag):
 
 def submit_answer(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IP_NAME)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -65,11 +65,10 @@ def submit_answer(request, session_slug_name, game_url_tag):
                             new_answer = Answer.objects.create(
                                 game=game,
                                 team=team,
+                                initial_state=submit_answer_form.cleaned_data['initial_state'],
                                 automata=submit_answer_form.cleaned_data['automata'],
                                 motivation=submit_answer_form.cleaned_data['motivation'],
                                 name=submit_answer_form.cleaned_data['name'],
-                                score=0,
-                                winner=False
                             )
                             answer_submitted = True
                     else:
@@ -83,7 +82,7 @@ def submit_answer(request, session_slug_name, game_url_tag):
 
 def results(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IP_NAME)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:

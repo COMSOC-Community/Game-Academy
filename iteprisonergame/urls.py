@@ -1,9 +1,9 @@
 from django.urls import re_path
 
 from . import views
-from .apps import IP_PACKAGE_URL_NAMESPACE
+from .apps import IPD_PACKAGE_URL_NAMESPACE
 
-app_name = IP_PACKAGE_URL_NAMESPACE
+app_name = IPD_PACKAGE_URL_NAMESPACE
 urlpatterns = [
     re_path(r'^$', views.index, name='index'),
     re_path(r'^answer[/]$', views.submit_answer, name='submit_answer'),
