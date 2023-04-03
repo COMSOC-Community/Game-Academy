@@ -20,6 +20,8 @@ def index(request, session_slug_name, game_url_tag):
 
     if not game.visible and not admin_user:
         raise Http404
+    if not request.user.is_authenticated:
+        raise Http404
 
     if request.user.is_authenticated:
         try:
@@ -41,6 +43,8 @@ def submit_answer(request, session_slug_name, game_url_tag):
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
+        raise Http404
+    if not request.user.is_authenticated:
         raise Http404
 
     if request.user.is_authenticated:
@@ -81,11 +85,12 @@ def results(request, session_slug_name, game_url_tag):
 
     if not game.visible and not admin_user:
         raise Http404
+    if not request.user.is_authenticated:
+        raise Http404
 
     if admin_user:
         if request.method == "POST":
             if "form_type" in request.POST:
-                print(request.POST["form_type"])
                 if request.POST["form_type"] == "game_playable":
                     game.playable = not game.playable
                     game.save()

@@ -12,6 +12,7 @@ class Answer(models.Model):
     name = models.CharField(max_length=100, unique=True)
     total_score = models.FloatField(default=0.0, blank=True, null=True)
     winner = models.BooleanField(blank=True, null=True)
+    graph_json_data = models.TextField(blank=True, null=True)
 
     class Meta:
         ordering = ['game', 'winner', 'team']

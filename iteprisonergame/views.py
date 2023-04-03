@@ -1,7 +1,8 @@
 import os
 
-from django.http import Http404
 from django.shortcuts import render, get_object_or_404
+from django.core import management
+from django.http import Http404
 
 from core.models import Session, Game, Player, Team
 from core.views import is_session_admin
@@ -17,6 +18,8 @@ def index(request, session_slug_name, game_url_tag):
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
+        raise Http404
+    if not request.user.is_authenticated:
         raise Http404
 
     if request.user.is_authenticated:
@@ -44,6 +47,8 @@ def submit_answer(request, session_slug_name, game_url_tag):
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
+        raise Http404
+    if not request.user.is_authenticated:
         raise Http404
 
     if request.user.is_authenticated:
@@ -87,4 +92,20 @@ def results(request, session_slug_name, game_url_tag):
 
     if not game.visible and not admin_user:
         raise Http404
+    if not request.user.is_authenticated:
+        raise Http404
+
+    if admin_user:
+        if request.method == "POST":
+            if "form_type" in request.POST:
+                if request.POST["form_type"] == "game_playable":
+                    game.playable = not game.playable
+                    game.save()
+                elif request.POST["form_type"] == "results_visible":
+                    game.results_visible = not game.results_visible
+                    game.save()
+                elif request.POST["form_type"] == "run_management":
+                    management.call_command("ipd_computeresults", session=session.slug_name, game=game.url_tag)
+
+    answers = Answer.objects.filter(game=game).order_by('total_score')
     return render(request, os.path.join('iteprisonergame', 'results.html'), locals())

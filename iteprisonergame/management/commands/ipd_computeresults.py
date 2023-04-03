@@ -1,6 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
-from django.db.models import Avg
 
 from core.models import Session, Game
 from iteprisonergame.apps import IPD_ROUNDS, IPD_PAYOFFS, IPD_NAME
