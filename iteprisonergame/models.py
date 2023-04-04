@@ -9,7 +9,7 @@ class Answer(models.Model):
     automata = models.TextField()
     initial_state = models.CharField(max_length=50)
     motivation = models.TextField()
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     total_score = models.FloatField(default=0.0, blank=True, null=True)
     winner = models.BooleanField(blank=True, null=True)
     graph_json_data = models.TextField(blank=True, null=True)
