@@ -14,6 +14,11 @@ class Answer(models.Model):
     winner = models.BooleanField(blank=True, null=True)
     graph_json_data = models.TextField(blank=True, null=True)
 
+    def formatted_total_score(self):
+        if int(self.total_score) == self.total_score:
+            return int(self.total_score)
+        return self.total_score
+
     class Meta:
         ordering = ['game', 'winner', 'team']
         unique_together = ('game', 'team')

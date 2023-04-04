@@ -1,0 +1,57 @@
+.automata-display {
+}
+
+.automata-display svg {
+    display: block;
+    margin: auto;
+    border: var(--color-gray-dark) 1px solid;
+	border-radius: 10px;
+}
+
+.nodelabel {
+    font-size: 15px;
+}
+
+.edge_C  {
+    stroke: var(--color-blue);
+}
+
+.edgelabel_C {
+    fill: var(--color-blue);
+    font-size: 15px;
+}
+
+.node_shape_C {
+    fill: var(--color-blue);
+}
+
+.edge_D {
+    stroke: var(--color-pink);
+}
+
+.edgelabel_D {
+    fill: var(--color-pink);
+    font-size: 15px;
+}
+
+.node_shape_D {
+    fill: var(--color-pink);
+}
+
+.edge_CD {
+    stroke: var(--color-yellow-dark);
+}
+
+.edgelabel_CD {
+    fill: var(--color-yellow-dark);
+    font-size: 15px;
+}
+
+.node_shape_CD {
+    fill: var(--color-yellow-dark);
+}
+
+.edgehead{
+    fill: var(--color-gray-dark);
+    stroke: var(--color-gray-dark);
+}

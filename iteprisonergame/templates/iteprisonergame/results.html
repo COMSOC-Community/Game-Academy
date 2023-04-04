@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Iterated Prisoner's Dilemma | Results</title>
 	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/ipdstyle.css' %}"/>
 	<script src="https://d3js.org/d3.v3.min.js"></script>
 </head>
 
@@ -26,33 +27,116 @@
         </span>
     </div>
 
+    {% if admin_user %}
+        <div class="adminDiv">
+            <div class="warning-box">
+                <p>Here are so admin shortcuts if you want to use them.</p>
+
+                {% if game.playable %}
+                    <p>Players can currently submit their answers.</p>
+                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Close the Game"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>The game is closed, player can no longer submit their answers.</p>
+                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Open the Game"/>
+                        </p>
+                    </form>
+                {% endif %}
+
+                {% if game.results_visible %}
+                    <p>The results are visible by all players.</p>
+                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Hide the Results"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>Players cannot currently see the results.</p>
+                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Show the Results"/>
+                        </p>
+                    </form>
+                {% endif %}
+                <p>
+                    To manually run the management commands, click the following button. This is normally unnecessary,
+                    unless you changed the entries of the database directly, or performed some other manual actions.
+                </p>
+                <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                    {% csrf_token %}
+                        <input type="hidden" name="form_type" value="run_management"/>
+                    <p class="center-align">
+                        <input class="green-button" type="submit" value="Run Management Commands"/>
+                    </p>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+
     {% if answers %}
         {% for answer in answers %}
-            <h2>Team {{ answer.team.name }}: {{ answer.name }}</h2>
 
-            <p>
-                Score: {{ answer.total_score }}
-            </p>
+            <hr class="hr-separator">
 
-            <div id="display_automata_{{ answer.id }}"></div>
+            <h2>Team {{ answer.team.name }}: {{ answer.name }} {% if answer.winner %} (winner) {% endif %}</h2>
+
+            {% if admin_user %}
+                <p>
+                    <a class="collapsible">Display the members of the team:</a>
+
+                    <span class="collapsible-content" style="display: none">
+                        {% for p in answer.team.players.all %}
+                            {% if forloop.last %}
+                                {{ p.name }}.
+                            {% else %}
+                                {{ p.name }},
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                </p>
+            {% endif %}
+
+            <div id="display_automata_{{ answer.id }}" class="automata-display">
+            </div>
             <script>
-                var w = 800;
-                var h = 400;
+                var w = 400;
+                var h = 250;
                 //distance between nodes
-                var linkDistance = 200;
+                var linkDistance = 100;
 
                 var colors = d3.scale.category10();
 
-                var dataset = JSON.parse('{{ answer.graph_json_data|safe }}');
+                var dataset_{{ answer.id }} = {{ answer.graph_json_data|safe }};
 
-                var svg = d3.select("display_automata_{{ answer.id }}").append("svg").attr({
-                  "width": w,
-                  "height": h
-                });
+                var svg_{{ answer.id }} = d3
+                    .select("#display_automata_{{ answer.id }}")
+                    .append("svg")
+                    .attr({
+                        "width": w,
+                        "height": h
+                    })
+                    .call(d3.behavior.zoom().on("zoom", function () {
+                        svg_{{ answer.id }}.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+                    }))
+                    .append("g");
 
-                var force = d3.layout.force()
-                  .nodes(dataset.nodes)
-                  .links(dataset.edges)
+
+                var force_{{ answer.id }} = d3.layout.force()
+                  .nodes(dataset_{{ answer.id }}.nodes)
+                  .links(dataset_{{ answer.id }}.edges)
                   .size([w, h])
                   .linkDistance([linkDistance])
                   .charge([-500])
@@ -60,81 +144,94 @@
                   .gravity(0.05)
                   .start();
 
-                var edges = svg.selectAll("path")
-                  .data(dataset.edges)
+                var edges_{{ answer.id }} = svg_{{ answer.id }}.selectAll("path")
+                  .data(dataset_{{ answer.id }}.edges)
                   .enter()
                   .append("path")
                   .style("fill","none")
                   .attr("id", function(d, i) {
-                    return 'edge' + i
+                    return 'edge_{{ answer.id }}_' + d.id
+                  })
+                  .attr("class", function(d, i) {
+                    return 'edge_' + d.label
                   })
                   .attr('marker-end', function(d) {
                     return d.source == d.target ? '' : 'url(#arrowhead)'
                   })
-                  .style("stroke", "#ccc")
                   .style("pointer-events", "none");
 
-                var nodes = svg.selectAll("circle")
-                  .data(dataset.nodes)
-                  .enter()
-                  .append("circle")
-                  .attr({
-                    "r": 15
-                  })
-                  .style("fill", function(d, i) {
-                    return colors(4);
-                  })
-                  .call(force.drag)
+                var nodes_{{ answer.id }} = svg_{{ answer.id }}.selectAll("node_{{ answer.id }}")
+                    .data(dataset_{{ answer.id }}.nodes)
+                    .enter()
+                    .append("g")
+                    .attr("id", function(d, i) {return 'node_{{ answer.id }}_' + d.id})
+                    .attr("class", function(d, i) {
+                        return 'node_shape_' + d.name + (d.init == "True" ? ' square_node' : ' circle_node')
+                    })
 
+                svg_{{ answer.id }}.selectAll('.circle_node')
+                    .append("rect")
+                    .attr("xlink:href", function(d, i) {
+                        return '#node_{{ answer.id }}_' + d.id;
+                    })
+                    .attr("rx", 9)
+                    .attr("ry", 9)
+                    .attr("width", 18)
+                    .attr("height", 18)
+                    .attr("class", function(d, i) {return 'circle_{{ answer.id }} node_shape_' + d.name})
+                    .call(force_{{ answer.id }}.drag)
 
-                var nodelabels = svg.selectAll(".nodelabel")
-                  .data(dataset.nodes)
-                  .enter()
-                  .append("text")
-                  .attr({
+                svg_{{ answer.id }}.selectAll('.square_node')
+                    .append("rect")
+                    .attr("xlink:href", function(d, i) {
+                        return '#node_{{ answer.id }}_' + d.id;
+                    })
+                    .attr("width", 18)
+                    .attr("height", 18)
+                    .attr("class", function(d, i) {return 'square_{{ answer.id }} node_shape_' + d.name})
+                    .call(force_{{ answer.id }}.drag)
+
+                var nodelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".nodelabel_{{ answer.id }}")
+                    .data(dataset_{{ answer.id }}.nodes)
+                    .enter()
+                    .append("text")
+                    .attr({
                     "x": function(d) {
-                      return d.x;
+                        return d.x;
                     },
                     "y": function(d) {
-                      return d.y;
+                        return d.y;
                     },
-                    "class": "nodelabel",
+                    "class": "nodelabel_{{ answer.id }} nodelabel",
                     "stroke": "black"
-                  })
-                  .text(function(d) {
-                    return d.name;
-                  });
+                    })
+                    .text(function(d) {
+                        return d.name;
+                    });
 
-                var edgelabels = svg.selectAll(".edgelabel")
-                  .data(dataset.edges)
-                  .enter()
-                  .append('text')
-                  .style("pointer-events", "none")
-                  .attr({
-                    'class': 'edgelabel',
-                    'id': function(d, i) {
-                      return 'edgelabel' + i
-                    },
-                    'font-size': 20,
-                    'fill': '#aaa'
-                  })
+                var edgelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".edgelabel_{{ answer.id }}")
+                    .data(dataset_{{ answer.id }}.edges)
+                    .enter()
+                    .append('text')
+                    .style("pointer-events", "none")
+                    .attr("id", function(d, i) {return 'edgelabel_{{ answer.id }}_' + d.id})
+                    .attr("class", function(d, i) {return 'edgelabel_{{ answer.id }} edgelabel_' + d.label})
 
-
-                edgelabels.append("textPath")
+                edgelabels_{{ answer.id }}.append("textPath")
                   .attr("xlink:href", function(d, i) {
-                    return '#edge' + i;
+                    return '#edge_{{ answer.id }}_' + d.id;
                   })
                   .style("pointer-events", "none")
                   .text(function(d, i) {
-                    return dataset.methlbl[i].name
+                    return dataset_{{ answer.id }}.edges[i].label
                   });
 
 
-                svg.append('defs').append('marker')
+                svg_{{ answer.id }}.append('defs').append('marker')
                   .attr({
                     'id': 'arrowhead',
                     'viewBox': '-0 -5 10 10',
-                    'refX': 25,
+                    'refX': 20,
                     'refY': 0,
                     'orient': 'auto',
                     'markerWidth': 10,
@@ -143,83 +240,141 @@
                   })
                   .append('svg:path')
                   .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-                  .attr('fill', '#ccc')
-                  .attr('stroke', '#ccc');
+                  .attr("class", 'edgehead')
 
 
-                force.on("tick", function() {
+                force_{{ answer.id }}.on("tick", function() {
 
+                    edges_{{ answer.id }}.attr("d", function(d) {
+                        var x1 = d.source.x,
+                            y1 = d.source.y,
+                            x2 = d.target.x,
+                            y2 = d.target.y,
+                            dx = x2 - x1,
+                            dy = y2 - y1,
+                            dr = Math.sqrt(dx * dx + dy * dy),
 
-                  edges.attr("d", function(d) {
-                    var x1 = d.source.x,
-                      y1 = d.source.y,
-                      x2 = d.target.x,
-                      y2 = d.target.y,
-                      dx = x2 - x1,
-                      dy = y2 - y1,
-                      dr = Math.sqrt(dx * dx + dy * dy),
+                            // Defaults for normal edge.
+                            drx = dr,
+                            dry = dr,
+                            xRotation = 0, // degrees
+                            largeArc = 0, // 1 or 0
+                            sweep = 1; // 1 or 0
 
-                      // Defaults for normal edge.
-                      drx = dr,
-                      dry = dr,
-                      xRotation = 0, // degrees
-                      largeArc = 0, // 1 or 0
-                      sweep = 1; // 1 or 0
+                        // Self edge.
+                        if (x1 === x2 && y1 === y2) {
+                            // Fiddle with this angle to get loop oriented.
+                            xRotation = -45;
 
-                    // Self edge.
-                    if (x1 === x2 && y1 === y2) {
-                      // Fiddle with this angle to get loop oriented.
-                      xRotation = -45;
+                            // Needs to be 1.
+                            largeArc = 1;
 
-                      // Needs to be 1.
-                      largeArc = 1;
+                            // Change sweep to change orientation of loop.
+                            //sweep = 0;
 
-                      // Change sweep to change orientation of loop.
-                      //sweep = 0;
+                            // Make drx and dry different to get an ellipse
+                            // instead of a circle.
+                            drx = 30;
+                            dry = 20;
 
-                      // Make drx and dry different to get an ellipse
-                      // instead of a circle.
-                      drx = 30;
-                      dry = 20;
+                            // For whatever reason the arc collapses to a point if the beginning
+                            // and ending points of the arc are the same, so kludge it.
+                            x2 = x2 + 1;
+                            y2 = y2 + 1;
+                        }
 
-                      // For whatever reason the arc collapses to a point if the beginning
-                      // and ending points of the arc are the same, so kludge it.
-                      x2 = x2 + 1;
-                      y2 = y2 + 1;
-                    }
-
-                    return "M" + x1 + "," + y1 + "A" + drx + "," + dry + " " + xRotation + "," + largeArc + "," + sweep + " " + x2 + "," + y2;
-                  });
-
-                  nodes.attr({
-                    "cx": function(d) {
-                      return d.x;
-                    },
-                    "cy": function(d) {
-                      return d.y;
-                    }
-                  });
-
-                  edgelabels.selectAll("textPath")
-                    .attr("xlink:href", function(d, i) {
-                      return '#edge' + i;
-                    })
-                    .attr("startOffset", function(d, i) {
-                      var arcLength = d3.select("#edge" + i).node().getTotalLength();
-                      var textLength = d3.select("#edgelabel" + i).node().getComputedTextLength();
-                      var offset = (arcLength - textLength) / 2;
-                      return offset;
+                        return "M" + x1 + "," + y1 + "A" + drx + "," + dry + " " + xRotation + "," + largeArc + "," + sweep + " " + x2 + "," + y2;
                     });
-                  nodelabels.attr("x", function(d) {
-                      return d.x;
-                    })
-                    .attr("y", function(d) {
-                      return d.y;
+
+                    nodes_{{ answer.id }}.attr({
+                        "x": function(d) {
+                            return d.x;
+                        },
+                        "y": function(d) {
+                            return d.y;
+                        }
+                    });
+
+                    nodes_{{ answer.id }}.selectAll(".square_{{ answer.id }}").attr({
+                        "x": function(d) {
+                            return d.x - 9;
+                        },
+                        "y": function(d) {
+                            return d.y - 9;
+                        }
+                    });
+
+                    nodes_{{ answer.id }}.selectAll(".circle_{{ answer.id }}").attr({
+                        "x": function(d) {
+                            return d.x - 9;
+                        },
+                        "y": function(d) {
+                            return d.y - 9;
+                        }
+                    });
+
+                    edgelabels_{{ answer.id }}.selectAll("textPath")
+                        .attr("xlink:href", function(d, i) {
+                            return '#edge_{{ answer.id }}_' + d.id;
+                        })
+                        .attr("startOffset", function(d, i) {
+                            var arcLength = d3.select("#edge_{{ answer.id }}_" + d.id).node().getTotalLength();
+                            var textLength = d3.select("#edgelabel_{{ answer.id }}_" + d.id).node().getComputedTextLength();
+                            var offset = (arcLength - textLength) / 2;
+                            return offset;
+                      });
+
+                    nodelabels_{{ answer.id }}.attr({
+                        "x": function(d) {
+                            return d.x - this.getComputedTextLength() / 2;
+                        },
+                        "y": function(d) {
+                            return d.y + this.getComputedTextLength() / 2;
+                        }
                     });
                 });
             </script>
+
+            <p class="center-align">
+                Total score of the strategy: <em>{{ answer.formatted_total_score }}</em>
+            </p>
+
+            <p class="collapsible"><a>See the detail of the scores.</a></p>
+
+            <div class="collapse_content" style="display:none;">
+                <table class="lined-table center-margin">
+                    <tr>
+                        <th>Opponent</th>
+                        <th>#Rounds</th>
+                        <th>Total Score</th>
+                    </tr>
+                    {% for score in answer.scores.all %}
+                        <tr>
+                            <td>{{ score.opponent.name }}</td>
+                            <td>{{ score.number_round }}</td>
+                            <td>{{ score.score }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         {% endfor %}
+
+        <script>
+            var coll = document.getElementsByClassName("collapsible");
+            var i;
+            for (i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function() {
+                    var content = this.nextElementSibling;
+                    if (content.style.display === "none"){
+                        content.style.display = "inline";
+                    } else {
+                        content.style.display = "none";
+                    }
+                });
+            }
+        </script>
     {% endif %}
+
 
     <div class="navigation">
         <span class="navigation-button">

@@ -40,16 +40,36 @@ class Command(BaseCommand):
                 state = state.strip()
                 action, next_state_coop, next_state_def = transition.strip().split(',')
                 if state == answer.initial_state.strip():
-                    nodes.append({"id": state, "name": action.strip()})
-                    links.append({"source": state, "target": next_state_coop, "label": "C"})
-                    links.append({"source": state, "target": next_state_def, "label": "D"})
+                    nodes.append({"id": state, "name": action.strip(), "init": "True"})
+                else:
+                    nodes.append({"id": state, "name": action.strip(), "init": "False"})
+                if next_state_coop == next_state_def:
+                    links.append({"id": len(links), "source": state, "target": next_state_coop, "label": "CD"})
+                else:
+                    links.append({"id": len(links), "source": state, "target": next_state_coop, "label": "C"})
+                    links.append({"id": len(links), "source": state, "target": next_state_def, "label": "D"})
             json_data = '{nodes: ['
             for node in nodes:
-                json_data += '{id: ' + str(node["id"].strip()) + ',name: "' + str(node["name"]).strip() + '"},'
-            json_data = json_data[:-1] + '],edges: ['
+                json_data += '{'
+                for key in node:
+                    json_data += '{}: {}, '.format(key, self.format_json(node[key]))
+                json_data = json_data[:-2] + '}, '
+            json_data = json_data[:-2] + '], edges: ['
             for link in links:
-                json_data += '{source: ' + str(link["source"].strip()) + ',target: ' + \
-                             str(link["target"].strip()) + ',label: "' + str(link["label"].strip()) + '"},'
-            json_data = json_data[:-1] + ']}'
+                json_data += '{'
+                for key in link:
+                    json_data += '{}: {}, '.format(key, self.format_json(link[key]))
+                json_data = json_data[:-2] + '}, '
+            json_data = json_data[:-2] + ']}'
             answer.graph_json_data = json_data
             answer.save()
+
+    @staticmethod
+    def format_json(x):
+        try:
+            y = int(x)
+            if y == x:
+                return int(x)
+            return x
+        except ValueError:
+            return '"' + str(x).strip() + '"'
