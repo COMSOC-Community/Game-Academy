@@ -133,10 +133,26 @@
                     }))
                     .append("g");
 
+                var new_edges_{{ answer.id }} = [];
+                dataset_{{ answer.id }}.edges.forEach(function(e) {
+                    var sourceNode = dataset_{{ answer.id }}.nodes.filter(function(n) {
+                        return n.id === e.source;
+                    })[0],
+                    targetNode = dataset_{{ answer.id }}.nodes.filter(function(n) {
+                        return n.id === e.target;
+                    })[0];
+
+                    new_edges_{{ answer.id }}.push({
+                        source: sourceNode,
+                        target: targetNode,
+                        label: e.label,
+                        id: e.id
+                    });
+                });
 
                 var force_{{ answer.id }} = d3.layout.force()
                   .nodes(dataset_{{ answer.id }}.nodes)
-                  .links(dataset_{{ answer.id }}.edges)
+                  .links(new_edges_{{ answer.id }})
                   .size([w, h])
                   .linkDistance([linkDistance])
                   .charge([-500])
@@ -144,8 +160,9 @@
                   .gravity(0.05)
                   .start();
 
+
                 var edges_{{ answer.id }} = svg_{{ answer.id }}.selectAll("path")
-                  .data(dataset_{{ answer.id }}.edges)
+                  .data(new_edges_{{ answer.id }})
                   .enter()
                   .append("path")
                   .style("fill","none")
@@ -210,7 +227,7 @@
                     });
 
                 var edgelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".edgelabel_{{ answer.id }}")
-                    .data(dataset_{{ answer.id }}.edges)
+                    .data(new_edges_{{ answer.id }})
                     .enter()
                     .append('text')
                     .style("pointer-events", "none")
@@ -223,7 +240,7 @@
                   })
                   .style("pointer-events", "none")
                   .text(function(d, i) {
-                    return dataset_{{ answer.id }}.edges[i].label
+                    return new_edges_{{ answer.id }}[i].label
                   });
 
 
@@ -274,8 +291,8 @@
 
                             // Make drx and dry different to get an ellipse
                             // instead of a circle.
-                            drx = 30;
-                            dry = 20;
+                            drx = 15;
+                            dry = 10;
 
                             // For whatever reason the arc collapses to a point if the beginning
                             // and ending points of the arc are the same, so kludge it.
@@ -337,6 +354,10 @@
 
             <p class="center-align">
                 Total score of the strategy: <em>{{ answer.formatted_total_score }}</em>
+            </p>
+
+            <p class="center-align">
+                {{ answer.motivation }}
             </p>
 
             <p class="collapsible"><a>See the detail of the scores.</a></p>
