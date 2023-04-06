@@ -55,3 +55,7 @@
     fill: var(--color-gray-dark);
     stroke: var(--color-gray-dark);
 }
+
+.lined-table .winning {
+	background: var(--color-green-verylight);
+}

@@ -87,6 +87,28 @@
     {% endif %}
 
     {% if answers %}
+
+        <h2>General Results</h2>
+
+        <table class="center-margin lined-table">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Strategy</th>
+                    <th>Avergae Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for answer in answers %}
+                    <tr>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.team.name }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|floatformat:5 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
         {% for answer in answers %}
 
             <hr class="hr-separator">
@@ -364,20 +386,24 @@
 
             <div class="collapse_content" style="display:none;">
                 <table class="lined-table center-margin">
-                    <tr>
-                        <th>Opponent</th>
-                        <th>#Rounds</th>
-                        <th>Average Score</th>
-                        <th>Average Score Opponent</th>
-                    </tr>
-                    {% for score in answer.scores.all %}
+                    <thead>
                         <tr>
-                            <td>{{ score.opponent.name }}</td>
-                            <td>{{ score.number_round }}</td>
-                            <td>{{ score.answer_avg_score|floatformat:5 }}</td>
-                            <td>{{ score.opp_avg_score|floatformat:5 }}</td>
+                            <th>Opponent</th>
+                            <th>#Rounds</th>
+                            <th>Average Score</th>
+                            <th>Average Score Opponent</th>
                         </tr>
-                    {% endfor %}
+                    </thead>
+                    <tbody>
+                        {% for score in answer.scores.all %}
+                            <tr>
+                                <td>{{ score.opponent.name }}</td>
+                                <td>{{ score.number_round }}</td>
+                                <td>{{ score.answer_avg_score|floatformat:5 }}</td>
+                                <td>{{ score.opp_avg_score|floatformat:5 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         {% endfor %}
