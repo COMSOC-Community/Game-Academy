@@ -101,7 +101,9 @@
             <tbody>
                 {% for answer in answers %}
                     <tr>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.team.name }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>
+                            <a href="#{{ answer.team.name }}">{{ answer.team.name }}</a>
+                        </td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|floatformat:5 }}</td>
                     </tr>
@@ -113,7 +115,7 @@
 
             <hr class="hr-separator">
 
-            <h2>Team {{ answer.team.name }}: {{ answer.name }} {% if answer.winner %} (winner) {% endif %}</h2>
+            <h2 id="{{ answer.team.name }}">Team {{ answer.team.name }}: {{ answer.name }} {% if answer.winner %} (winner) {% endif %}</h2>
 
             {% if admin_user %}
                 <p>
