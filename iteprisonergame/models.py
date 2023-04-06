@@ -39,7 +39,7 @@ class Score(models.Model):
     opp_avg_score = models.FloatField()
 
     class Meta:
-        ordering = ['answer', 'opponent']
+        ordering = ['answer', 'opponent', 'number_round']
         unique_together = ('answer', 'opponent', 'number_round')
 
     def __str__(self):
