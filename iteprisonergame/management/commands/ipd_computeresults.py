@@ -65,7 +65,8 @@ class Command(BaseCommand):
                         opponent=opponent,
                         number_round=round_number,
                         defaults={
-                            'avg_score': score1 / round_number
+                            'answer_avg_score': score1 / round_number,
+                            'opp_avg_score': score2 / round_number,
                         }
                     )
                     Score.objects.update_or_create(
@@ -73,7 +74,8 @@ class Command(BaseCommand):
                         opponent=answer,
                         number_round=round_number,
                         defaults={
-                            'avg_score': score2 / round_number
+                            'answer_avg_score': score2 / round_number,
+                            'opp_avg_score': score1 / round_number,
                         }
                     )
         best_answer = None

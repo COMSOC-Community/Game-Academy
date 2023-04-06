@@ -35,7 +35,8 @@ class Score(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='scores')
     opponent = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='scores_as_opp')
     number_round = models.IntegerField()
-    avg_score = models.FloatField()
+    answer_avg_score = models.FloatField()
+    opp_avg_score = models.FloatField()
 
     class Meta:
         ordering = ['answer', 'opponent']
