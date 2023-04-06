@@ -108,5 +108,5 @@ def results(request, session_slug_name, game_url_tag):
                     management.call_command("ipd_computeresults", session=session.slug_name, game=game.url_tag)
                     management.call_command("ipd_generategraphdata", session=session.slug_name, game=game.url_tag)
 
-    answers = Answer.objects.filter(game=game).order_by('-total_score')
+    answers = Answer.objects.filter(game=game).order_by('-avg_score')
     return render(request, os.path.join('iteprisonergame', 'results.html'), locals())

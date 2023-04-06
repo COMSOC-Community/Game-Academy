@@ -353,7 +353,7 @@
             </script>
 
             <p class="center-align">
-                Total score of the strategy: <em>{{ answer.formatted_total_score }}</em>
+                Average score of the strategy: <em>{{ answer.formatted_avg_score|floatformat:5 }}</em>
             </p>
 
             <p class="center-align">
@@ -367,13 +367,21 @@
                     <tr>
                         <th>Opponent</th>
                         <th>#Rounds</th>
-                        <th>Total Score</th>
+                        <th>Average Score</th>
+                        <th>Average Score Opponent</th>
                     </tr>
                     {% for score in answer.scores.all %}
                         <tr>
                             <td>{{ score.opponent.name }}</td>
                             <td>{{ score.number_round }}</td>
-                            <td>{{ score.score }}</td>
+                            <td>{{ score.avg_score|floatformat:5 }}</td>
+                            <td>
+                                {% for score_as_opp in answer.scores_as_opp.all %}
+                                    {% if score_as_opp.answer == score.opponent and score_as_opp.number_round == score.number_round %}
+                                        {{ score_as_opp.avg_score|floatformat:5 }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </table>

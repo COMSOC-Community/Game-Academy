@@ -65,7 +65,7 @@ class Command(BaseCommand):
                         opponent=opponent,
                         number_round=round_number,
                         defaults={
-                            'score': score1
+                            'avg_score': score1 / round_number
                         }
                     )
                     Score.objects.update_or_create(
@@ -73,13 +73,13 @@ class Command(BaseCommand):
                         opponent=answer,
                         number_round=round_number,
                         defaults={
-                            'score': score2
+                            'avg_score': score2 / round_number
                         }
                     )
         best_answer = None
         best_score = None
         for answer, score in total_scores.items():
-            answer.total_score = score
+            answer.avg_score = score / (sum(IPD_ROUNDS) * (len(ans_automatas) - 1))
             answer.winner = False
             answer.save()
             if best_score is None or score > best_score:

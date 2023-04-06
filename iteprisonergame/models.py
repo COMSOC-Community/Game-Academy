@@ -10,14 +10,14 @@ class Answer(models.Model):
     initial_state = models.CharField(max_length=50)
     motivation = models.TextField()
     name = models.CharField(max_length=100)
-    total_score = models.FloatField(default=0.0, blank=True, null=True)
+    avg_score = models.FloatField(default=0.0, blank=True, null=True)
     winner = models.BooleanField(blank=True, null=True)
     graph_json_data = models.TextField(blank=True, null=True)
 
-    def formatted_total_score(self):
-        if int(self.total_score) == self.total_score:
-            return int(self.total_score)
-        return self.total_score
+    def formatted_avg_score(self):
+        if int(self.avg_score) == self.avg_score:
+            return int(self.avg_score)
+        return self.avg_score
 
     class Meta:
         ordering = ['game', 'winner', 'team']
@@ -27,15 +27,15 @@ class Answer(models.Model):
         return "[{}] {} - {} - {} {}".format(self.game.session,
                                              self.game.name,
                                              self.team.name,
-                                             self.total_score,
+                                             self.avg_score,
                                              "(win)" if self.winner else "")
 
 
 class Score(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='scores')
-    opponent = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='against_scores')
+    opponent = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='scores_as_opp')
     number_round = models.IntegerField()
-    score = models.FloatField()
+    avg_score = models.FloatField()
 
     class Meta:
         ordering = ['answer', 'opponent']
@@ -47,4 +47,4 @@ class Score(models.Model):
                                                        self.answer.team.name,
                                                        self.number_round,
                                                        self.opponent.team.name,
-                                                       self.score)
+                                                       self.avg_score)
