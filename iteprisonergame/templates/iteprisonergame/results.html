@@ -377,7 +377,14 @@
             </script>
 
             <p class="center-align">
-                Average score of the strategy: <em>{{ answer.formatted_avg_score|floatformat:5 }}</em>
+                {% if admin_user %}
+                    <a class="collapsible">Display the score:</a>
+                    <span class="collapsible-content" style="display: none">
+                        {{ answer.formatted_avg_score|floatformat:5 }}
+                    </span>
+                {% else %}
+                    Average score of the strategy: <em>{{ answer.formatted_avg_score|floatformat:5 }}</em>
+                {% endif %}
             </p>
 
             <p class="center-align">
