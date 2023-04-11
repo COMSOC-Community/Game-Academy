@@ -33,21 +33,40 @@ class Command(BaseCommand):
         game = game.first()
 
         for answer in Answer.objects.filter(game=game):
+            state_list = []
             nodes = []
             links = []
             for line in answer.automata.strip().split("\n"):
                 state, transition = line.strip().split(":")
                 state = state.strip()
+                if state not in state_list:
+                    state_list.append(state)
                 action, next_state_coop, next_state_def = transition.strip().split(',')
-                if state == answer.initial_state.strip():
-                    nodes.append({"id": state, "name": action.strip(), "init": "True"})
-                else:
-                    nodes.append({"id": state, "name": action.strip(), "init": "False"})
+                action = action.strip()
+                next_state_coop = next_state_coop.strip()
+                next_state_def = next_state_def.strip()
+                if next_state_coop not in state_list:
+                    state_list.append(next_state_coop)
+                if next_state_def not in state_list:
+                    state_list.append(next_state_def)
+
+                nodes.append({"id": state_list.index(state),
+                              "name": action.strip(),
+                              "init": str(state == answer.initial_state.strip())})
                 if next_state_coop == next_state_def:
-                    links.append({"id": len(links), "source": state, "target": next_state_coop, "label": "CD"})
+                    links.append({"id": len(links),
+                                  "source": state_list.index(state),
+                                  "target": state_list.index(next_state_coop),
+                                  "label": "CD"})
                 else:
-                    links.append({"id": len(links), "source": state, "target": next_state_coop, "label": "C"})
-                    links.append({"id": len(links), "source": state, "target": next_state_def, "label": "D"})
+                    links.append({"id": len(links),
+                                  "source": state_list.index(state),
+                                  "target": state_list.index(next_state_coop),
+                                  "label": "C"})
+                    links.append({"id": len(links),
+                                  "source": state_list.index(state),
+                                  "target": state_list.index(next_state_def),
+                                  "label": "D"})
             json_data = '{nodes: ['
             for node in nodes:
                 json_data += '{'

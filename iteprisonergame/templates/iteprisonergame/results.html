@@ -115,7 +115,7 @@
 
             <hr class="hr-separator">
 
-            <h2 id="{{ answer.team.name }}">Team {{ answer.team.name }}: {{ answer.name }} {% if answer.winner %} (winner) {% endif %}</h2>
+            <h2 id="{{ answer.team.name }}">Team {{ answer.team.name }}: {{ answer.name }}</h2>
 
             {% if admin_user %}
                 <p>
@@ -157,26 +157,9 @@
                     }))
                     .append("g");
 
-                var new_edges_{{ answer.id }} = [];
-                dataset_{{ answer.id }}.edges.forEach(function(e) {
-                    var sourceNode = dataset_{{ answer.id }}.nodes.filter(function(n) {
-                        return n.id === e.source;
-                    })[0],
-                    targetNode = dataset_{{ answer.id }}.nodes.filter(function(n) {
-                        return n.id === e.target;
-                    })[0];
-
-                    new_edges_{{ answer.id }}.push({
-                        source: sourceNode,
-                        target: targetNode,
-                        label: e.label,
-                        id: e.id
-                    });
-                });
-
                 var force_{{ answer.id }} = d3.layout.force()
                   .nodes(dataset_{{ answer.id }}.nodes)
-                  .links(new_edges_{{ answer.id }})
+                  .links(dataset_{{ answer.id }}.edges)
                   .size([w, h])
                   .linkDistance([linkDistance])
                   .charge([-500])
@@ -186,7 +169,7 @@
 
 
                 var edges_{{ answer.id }} = svg_{{ answer.id }}.selectAll("path")
-                  .data(new_edges_{{ answer.id }})
+                  .data(dataset_{{ answer.id }}.edges)
                   .enter()
                   .append("path")
                   .style("fill","none")
@@ -251,7 +234,7 @@
                     });
 
                 var edgelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".edgelabel_{{ answer.id }}")
-                    .data(new_edges_{{ answer.id }})
+                    .data(dataset_{{ answer.id }}.edges)
                     .enter()
                     .append('text')
                     .style("pointer-events", "none")
@@ -264,7 +247,7 @@
                   })
                   .style("pointer-events", "none")
                   .text(function(d, i) {
-                    return new_edges_{{ answer.id }}[i].label
+                    return dataset_{{ answer.id }}.edges[i].label
                   });
 
 
