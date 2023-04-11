@@ -19,6 +19,9 @@ class Answer(models.Model):
             return int(self.avg_score)
         return self.avg_score
 
+    def number_states(self):
+        return len(self.automata.split("\n"))
+
     class Meta:
         ordering = ['game', 'winner', 'team']
         unique_together = ('game', 'team')
