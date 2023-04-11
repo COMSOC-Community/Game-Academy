@@ -6,7 +6,7 @@ from numbersgame.models import Answer
 class SubmitAnswerForm(forms.Form):
     answer = forms.FloatField(min_value=0.0,
                               max_value=100.0,
-                              label_suffix="", )
+                              label_suffix="")
     motivation = forms.CharField(label_suffix="",
                                  widget=forms.Textarea())
 

@@ -5,7 +5,7 @@ from core.models import Team, Game
 
 class Answer(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='itepris_answers')
-    team = models.OneToOneField(Team, on_delete=models.CASCADE, related_name='itepris_answer')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='itepris_answer')
     automata = models.TextField()
     initial_state = models.CharField(max_length=50)
     motivation = models.TextField()

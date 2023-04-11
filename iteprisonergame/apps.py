@@ -27,7 +27,7 @@ class IteprisonergameConfig(AppConfig):
     )
 
     def ready(self):
-        INSTALLED_GAME_APPS.append("ItePrisDilGame")
-        INSTALLED_GAMES_SETTING["ItePrisDilGame"] = self.game_setting
+        INSTALLED_GAME_APPS.append(IPD_NAME)
+        INSTALLED_GAMES_SETTING[IPD_NAME] = self.game_setting
         INSTALLED_GAMES_CHOICES.append((self.game_setting.name, self.game_setting.long_name))
 

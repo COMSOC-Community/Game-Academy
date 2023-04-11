@@ -1,0 +1,58 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<title>Centipede Game</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/centistyle.css' %}"/>
+</head>
+
+<body>
+
+<h1>Submit an answer to the {{ game.gameType.longName }} for the session {{ session.longName }}</h1>
+
+{% if submitted %}
+
+	<p class="center">Your answer has been submitted, thanks !</p>
+
+	<p class="center">You will be redirected soon to the {{ game.gameType.longName }} page. If not, <a href="{% url 'games:gameIndex' session.shortName gameName %}">click here</a>!</p>
+
+	<script>
+		function redirect () {
+			window.location.href = "{% url 'games:gameIndex' session.shortName gameName %}" ;
+		}
+		setTimeout(redirect, 3000);
+	</script>
+
+{% else %}
+
+	<p>Fill out the form below to submit your answer to the {{ game.gameType.longName }}. Please fill out the strategy you would play if you were <span style="color: #A30000; font-weight: bold;">player 1</span> (the first player to play) and if you were <span style="color: #008C8C; font-weight: bold;">player 2</span> (the second player to play) as presented in the figure below. Please also write one or two sentences to explain the reasoning you have used to come up with your answer.</p>
+
+	<p class="center">
+		{% with 'games/'|add:game.gameType.name|add:'Structure.png' as imgFile %}
+			<img width="50%" src="{% static imgFile %}">
+		{% endwith %}
+	</p>
+
+	<form action="{% url 'games:gameAnswer' session.shortName gameName %}" method="post" id="form" style="margin-bottom: 1%;">
+
+		{% csrf_token %}
+
+		{{ form.as_p }}
+
+		<input id="submit_button" type="submit" value="Submit answer">
+
+	</form>
+
+{% endif %}
+
+<span class="navButton"><a href="{% url 'games:gameIndex' session.shortName game.name %}">&#171;- to game page</a></span>
+<br>
+<span class="navButton"><a href="{% url 'games:home' session.shortName %}">&#171;- to session page</a></span>
+<br>
+<span class="navButton"><a href="{% url 'games:index' %}">&#171;- to main page</a></span>
+
+</body>
+</html>

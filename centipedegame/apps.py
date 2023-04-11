@@ -2,6 +2,12 @@ from django.apps import AppConfig
 
 from gameserver.games import *
 
+CENTI_NAME = "CentipedeGame"
+CENTI_LONG_NAME = "Centipede Game"
+CENTI_PACKAGE_NAME = "centipedegame"
+CENTI_URL_TAG = "centipede"
+CENTI_PACKAGE_URL_NAMESPACE = "centipede_game"
+
 
 class CentipedegameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -9,11 +15,11 @@ class CentipedegameConfig(AppConfig):
 
     is_game = True
     game_setting = GameSetting(
-            name="CentipedeGame",
-            long_name="Centipede Game",
-            package_name="centipedegame",
-            url_tag="centipede",
-            package_url_namespace="centipede_game",
+            name=CENTI_NAME,
+            long_name=CENTI_LONG_NAME,
+            package_name=CENTI_PACKAGE_NAME,
+            url_tag=CENTI_URL_TAG,
+            package_url_namespace=CENTI_PACKAGE_URL_NAMESPACE,
         )
 
     def ready(self):

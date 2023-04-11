@@ -7,9 +7,9 @@ class Answer(models.Model):
     game = models.ForeignKey(Game,
                              on_delete=models.CASCADE,
                              related_name='numbers_answers')
-    player = models.OneToOneField(Player,
-                                  on_delete=models.CASCADE,
-                                  related_name='numbers_answer')
+    player = models.ForeignKey(Player,
+                               on_delete=models.CASCADE,
+                               related_name='numbers_answer')
     answer = models.FloatField()
     motivation = models.TextField()
     gap = models.FloatField(null=True)
@@ -23,7 +23,10 @@ class Answer(models.Model):
 
     class Meta:
         ordering = ['game', 'winner', 'player']
-        unique_together = ('game', 'player')
+        constraints = [
+            models.UniqueConstraint(fields=['game', 'player'],
+                                    name='ng_game_player_unique')
+        ]
 
     def __str__(self):
         return "[{}] {} - {} - {} {}".format(self.game.session,
