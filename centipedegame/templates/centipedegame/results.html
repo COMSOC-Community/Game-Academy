@@ -11,197 +11,97 @@
 
 <body>
 
-<h1>{{ game.gameType.longName }} - Session {{ session.longName }}</h1>
+<body>
 
-<div class="adminDiv">
+{% if game.results_visible or admin_user %}
 
-	{% if admin %}
-		{% if game.playable %}
-			<p>Players can currently submit their answers. Use the following button to change that.</p>
-			<form method="post" action="{% url 'games:gameResult' session.shortName game.name %}">
-				{% csrf_token %}
-				<input type="hidden" name="notplayable" value="notplayable" />
-				<input id="submit_button" type="submit" value="Close the game"/>
-			</form>
-		{% else %}
-			<p>The game is closed, player can no longer submit their answers.</p>
-		{% endif %}
-		{% if game.resultsVisible %}
-			<p>The results are visible by every players.</p>
-		{% else %}
-			<p>Players cannot currently see the results. Use the following button to change that.</p>
-			<form method="post" action="{% url 'games:gameResult' session.shortName game.name %}">
-				{% csrf_token %}
-				<input type="hidden" name="resultsVisible" value="resultsVisible" />
-				<input id="submit_button" type="submit" value="Make the results visible"/>
-			</form>
-		{% endif %}
-		<p>To create the histograms, please use the following button.</p>
-		<form method="post" action="{% url 'games:gameResult' session.shortName game.name %}">
-			{% csrf_token %}
-			<input type="hidden" name="runadmin" value="runadmin" />
-			<input id="submit_button" type="submit" value="Create histograms"/>
-		</form>
-	{% endif %}
+    <h1>Results {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
 
-</div>
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'centipede_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+        </span>
+        <br>
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
+    </div>
 
-<button type="button" class="collapsible">
-	<h2>Distribution of the strategies</h2>
-</button>
+    <div class="adminDiv">
 
-<div class="collapseContent" style="display: none;">
+        {% if admin_user %}
+            <div class="warning-box">
+                <p>Here are so admin shortcuts if you want to use them.</p>
 
-	{% with 'games/'|add:game.gameType.name|add:'/'|add:session.shortName|add:' - '|add:game.name|add:'/'|add:game.name|add:'_'|add:session.shortName|add:'_histoPlayer1.png' as imgFile %}
-		<p class="center"><img src="{% static imgFile %}"></p>
-	{% endwith %}
+                {% if game.playable %}
+                    <p>Players can currently submit their answers.</p>
+                    <form method="post" action="{% url 'centipede_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Close the Game"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>The game is closed, player can no longer submit their answers.</p>
+                    <form method="post" action="{% url 'centipede_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Open the Game"/>
+                        </p>
+                    </form>
+                {% endif %}
 
-	{% with 'games/'|add:game.gameType.name|add:'/'|add:session.shortName|add:' - '|add:game.name|add:'/'|add:game.name|add:'_'|add:session.shortName|add:'_histoPlayer2.png' as imgFile %}
-		<p class="center"><img src="{% static imgFile %}"></p>
-	{% endwith %}
+                {% if game.results_visible %}
+                    <p>The results are visible by all players.</p>
+                    <form method="post" action="{% url 'centipede_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Hide the Results"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>Players cannot currently see the results.</p>
+                    <form method="post" action="{% url 'centipede_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Show the Results"/>
+                        </p>
+                    </form>
+                {% endif %}
+                <p>
+                    To manually run the management commands, click the following button. This is normally unnecessary,
+                    unless you changed the entries of the database directly, or performed some other manual actions.
+                </p>
+                <form method="post" action="{% url 'centipede_game:results' session.slug_name game.url_tag %}">
+                    {% csrf_token %}
+                        <input type="hidden" name="form_type" value="run_management"/>
+                    <p class="center-align">
+                        <input class="green-button" type="submit" value="Run Management Commands"/>
+                    </p>
+                </form>
+            </div>
+        {% endif %}
+    </div>
 
-</div>
-
-<p><br></p>
-
-<button type="button" class="collapsible">
-	{% if admin %}
-		{% if uniqueWinner %}
-			<h2>Score heat map and winner</h2>
-		{% else %}
-			<h2>Score heat map and winners</h2>
-		{% endif %}
-	{% else %}
-		<h2>Score heat map</h2>
-	{% endif %}
-</button>
-
-<div class="collapseContent" style="display: none;">
-
-	{% with 'games/'|add:game.gameType.name|add:'/'|add:session.shortName|add:' - '|add:game.name|add:'/'|add:game.name|add:'_'|add:session.shortName|add:'_scoreHeatMap.png' as imgFile %}
-		<p class="center"><img src="{% static imgFile %}" width="700"></p>
-	{% endwith %}
-
-	{% if admin %}
-		{% if uniqueWinner %}
-			<p> The unique winner is: {{ winner.player.name }}.</p>
-		{% else %}
-			<p> The winners are:</p>
-			<ul>
-				{% for w in winners %}
-					<li>{{ w.player.name }}</li>
-				{% endfor %}
-			</ul>
-
-			<p> The randomly selected winner is: {{ winner.player.name }}.</p>
-		{% endif %}
-	{% endif %}
-
-</div>
-
-<p><br></p>
-
-<button type="button" class="collapsible">
-	<h2>All answers anonymized</h2>
-</button>
-
-<div class="collapseContent" style="display: none;">
-	<table class="answerTable">
-		<tr>
-			<th>As Player 1</th>
-			<th>As Player 2</th>
-			<th>Score</th>
-			<th>Justification</th>
-		</tr>
-		{% for ans in answers %}
-			<tr>
-				{% if ans.score == maxScore %}
-					<td class="goodAnswer">{{ ans.strategyPlayer1 }}</td>
-					<td class="goodAnswer">{{ ans.strategyPlayer2 }}</td>
-					<td class="goodAnswer">{{ ans.score }}</td>
-					<td class="goodAnswer">{{ ans.motivation }}</td>
-				{% else %}
-					<td>{{ ans.strategyPlayer1 }}</td>
-					<td>{{ ans.strategyPlayer2 }}</td>
-					<td>{{ ans.score }}</td>
-					<td>{{ ans.motivation }}</td>
-				{% endif %}
-			</tr>
-		{% endfor %}
-	</table>
-</div>
-
-<p><br></p>
-
-{% if admin %}
-
-<button type="button" class="collapsible">
-	<h2>All answers</h2>
-</button>
-
-<div class="collapseContent" style="display: none;">
-	<table class="answerTable">
-		<tr>
-			<th>Player</th>
-			<th>As Player 1</th>
-			<th>As Player 2</th>
-			<th>Score</th>
-			<th>Justification</th>
-		</tr>
-		{% for ans in answers %}
-			<tr>
-				{% if ans.score == maxScore %}
-					<td class="goodAnswer">{{ ans.player.name }}</td>
-					<td class="goodAnswer">{{ ans.strategyPlayer1 }}</td>
-					<td class="goodAnswer">{{ ans.strategyPlayer2 }}</td>
-					<td class="goodAnswer">{{ ans.score }}</td>
-					<td class="goodAnswer">{{ ans.motivation }}</td>
-				{% else %}
-					<td>{{ ans.player.name }}</td>
-					<td>{{ ans.strategyPlayer1 }}</td>
-					<td>{{ ans.strategyPlayer2 }}</td>
-					<td>{{ ans.score }}</td>
-					<td>{{ ans.motivation }}</td>
-				{% endif %}
-			</tr>
-		{% endfor %}
-	</table>
-</div>
-
-<p><br></p>
-
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'centipede_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+        </span>
+        <br>
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
+    </div>
+{% else %}
+    <p>
+        The results for this game are not visible.
+        Get back to the <a href="{% url "centipede_game:index" session.slug_name game.url_tag %}">home page</a> of the
+        game.
+    </p>
 {% endif %}
-
-<span class="navButton"><a href="{% url 'games:gameIndex' session.shortName game.name %}">&#171;- to game page</a></span>
-<br>
-<span class="navButton"><a href="{% url 'games:home' session.shortName %}">&#171;- to session page</a></span>
-<br>
-<span class="navButton"><a href="{% url 'games:index' %}">&#171;- to main page</a></span>
-
-<script>
-	var coll = document.getElementsByClassName("collapsible");
-	var i;
-	for (i = 0; i < coll.length; i++) {
-		coll[i].addEventListener("click", function() {
-			var content = this.nextElementSibling;
-			if (content.style.display === "none"){
-				content.style.display = "block";
-			} else {
-				content.style.display = "none";
-			}
-		});
-	}
-</script>
-
-<script>
-	var count = 0;
-	function appearOneByOne() {
-		items = document.getElementsByClassName("appearOneByOne");
-		if(count < items.length) {
-			items[count++].style.display = "table-row";
-		}
-	}
-</script>
-
 </body>
 </html>

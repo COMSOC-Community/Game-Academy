@@ -76,7 +76,7 @@ def submit_answer(request, session_slug_name, game_url_tag):
 
 def results(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=CENTI_NAME)
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -97,5 +97,5 @@ def results(request, session_slug_name, game_url_tag):
                     management.call_command("ipd_computeresults", session=session.slug_name, game=game.url_tag)
                     management.call_command("ipd_generategraphdata", session=session.slug_name, game=game.url_tag)
 
-    answers = Answer.objects.filter(game=game).order_by('-avg_score')
+    answers = Answer.objects.filter(game=game)
     return render(request, os.path.join('centipedegame', 'results.html'), locals())
