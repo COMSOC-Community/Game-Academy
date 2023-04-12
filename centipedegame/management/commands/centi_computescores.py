@@ -47,7 +47,7 @@ class Command(BaseCommand):
         game = game.first()
 
         try:
-            game.result
+            game.result_centi
         except Result.DoesNotExist:
             result = Result.objects.create(
                 game=game,
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                 histo_strat2_js_data="",
                 scores_heatmap_js_data="",
             )
-            game.result = result
+            game.result_centi = result
             game.save()
 
         answers = Answer.objects.filter(game=game)
@@ -97,9 +97,12 @@ class Command(BaseCommand):
             else:
                 score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] = 1
 
-        game.result.histo_strat1_js_data = "\n".join(
+        game.result_centi.histo_strat1_js_data = "\n".join(
             ["['{}', {}],".format(key, value) for key, value in strat1_histo_data.items()])
-        game.result.histo_strat2_js_data = "\n".join(
+        game.result_centi.histo_strat2_js_data = "\n".join(
             ["['{}', {}],".format(key, value) for key, value in strat2_histo_data.items()])
-        game.result.histo_strat1_js_data = "\n".join(
-            ["[x: '{}', y: '{}', heat: {}],".format(key[0], key[1], value) for key, value in score_heatmap_data.items()])
+        game.result_centi.scores_heatmap_js_data = "\n".join(
+            ["{{x: '{}', y: '{}', heat: {}}},".format(key[0], key[1], value)
+             for key, value in score_heatmap_data.items()])
+        game.result_centi.save()
+        game.save()

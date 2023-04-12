@@ -7,7 +7,8 @@
     <title>Numbers Game | Results</title>
 	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
 	<link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
-    <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-base.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-cartesian.min.js"></script>
 </head>
 
 <body>
@@ -118,7 +119,7 @@
         </div>
         <script>
             var histoData = [
-                    {{ game.result.histo_js_data|safe }}
+                    {{ game.result_ng.histo_js_data|safe }}
                 ];
             var histoChart = anychart.column();
             histoChart.title('Distribution of the answers received');

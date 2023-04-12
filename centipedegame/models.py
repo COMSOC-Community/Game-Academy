@@ -28,7 +28,7 @@ class Answer(models.Model):
 
 
 class Result(models.Model):
-    game = models.OneToOneField(Game, on_delete=models.CASCADE, related_name='result')
+    game = models.OneToOneField(Game, on_delete=models.CASCADE, related_name='result_centi')
     histo_strat1_js_data = models.TextField(null=True, blank=True)
     histo_strat2_js_data = models.TextField(null=True, blank=True)
     scores_heatmap_js_data = models.TextField(null=True, blank=True)

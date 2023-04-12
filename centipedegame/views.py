@@ -94,8 +94,7 @@ def results(request, session_slug_name, game_url_tag):
                     game.results_visible = not game.results_visible
                     game.save()
                 elif request.POST["form_type"] == "run_management":
-                    management.call_command("ipd_computeresults", session=session.slug_name, game=game.url_tag)
-                    management.call_command("ipd_generategraphdata", session=session.slug_name, game=game.url_tag)
+                    management.call_command("centi_computescores", session=session.slug_name, game=game.url_tag)
 
     answers = Answer.objects.filter(game=game)
     return render(request, os.path.join('centipedegame', 'results.html'), locals())

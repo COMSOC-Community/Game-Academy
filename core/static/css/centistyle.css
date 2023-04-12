@@ -1,0 +1,10 @@
+
+.graph_wrap {
+	height: 300px;
+}
+
+#histo_strat_container {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 10px;
+}

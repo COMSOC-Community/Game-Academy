@@ -37,7 +37,7 @@ class Answer(models.Model):
 
 
 class Result(models.Model):
-    game = models.OneToOneField(Game, on_delete=models.CASCADE, related_name='result')
+    game = models.OneToOneField(Game, on_delete=models.CASCADE, related_name='result_ng')
     histo_js_data = models.TextField(null=True, blank=True)
     histo_bin_size = models.PositiveIntegerField()
     average = models.FloatField(null=True,

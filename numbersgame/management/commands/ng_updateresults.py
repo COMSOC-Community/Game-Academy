@@ -35,26 +35,26 @@ class Command(BaseCommand):
         game = game.first()
 
         try:
-            game.result
+            game.result_ng
         except ObjectDoesNotExist:
             result = Result.objects.create(
                 game=game,
                 histo_js_data="",
                 histo_bin_size=3,
             )
-            game.result = result
+            game.result_ng = result
             game.save()
 
         answers = Answer.objects.filter(game=game, answer__isnull=False)
 
-        categories = {i: 0 for i in range(0, 101, game.result.histo_bin_size)}
+        categories = {i: 0 for i in range(0, 101, game.result_ng.histo_bin_size)}
 
         average = answers.aggregate(Avg('answer'))['answer__avg']
         corrected_average = 2/3 * average
         best_answers = []
         smallest_gap = 100
         for answer in answers:
-            category = int(int(answer.answer) / game.result.histo_bin_size) * 3
+            category = int(int(answer.answer) / game.result_ng.histo_bin_size) * 3
             categories[category] += 1
 
             gap = abs(answer.answer - corrected_average)
@@ -69,13 +69,13 @@ class Command(BaseCommand):
         for winner in best_answers:
             winner.winner = True
             winner.save()
-        game.result.average = average
-        game.result.corrected_average = corrected_average
+        game.result_ng.average = average
+        game.result_ng.corrected_average = corrected_average
 
-        game.result.histo_js_data = "\n".join(
-            ["['{}-{}', {}],".format(key, min(key + game.result.histo_bin_size - 1, 100), val)
+        game.result_ng.histo_js_data = "\n".join(
+            ["['{}-{}', {}],".format(key, min(key + game.result_ng.histo_bin_size - 1, 100), val)
              for key, val in categories.items()])
-        game.result.save()
+        game.result_ng.save()
         game.save()
 
         print("The results for the Numbers Game {} have been updated.".format(game.name))
