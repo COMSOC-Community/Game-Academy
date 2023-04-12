@@ -61,6 +61,9 @@ class Command(BaseCommand):
         answers = Answer.objects.filter(game=game)
         best_score = 0
         winners = None
+        strat1_histo_data = {}
+        strat2_histo_data = {}
+        score_heatmap_data = {}
         for answer in answers:
             total_score_as_p1 = 0
             total_score_as_p2 = 0
@@ -81,3 +84,22 @@ class Command(BaseCommand):
             elif total_score == best_score:
                 winners.append(answer)
 
+            if answer.strategy_as_p1 in strat1_histo_data:
+                strat1_histo_data[answer.strategy_as_p1] += 1
+            else:
+                strat1_histo_data[answer.strategy_as_p1] = 1
+            if answer.strategy_as_p2 in strat2_histo_data:
+                strat2_histo_data[answer.strategy_as_p2] += 1
+            else:
+                strat2_histo_data[answer.strategy_as_p2] = 1
+            if (answer.strategy_as_p1, answer.strategy_as_p2) in score_heatmap_data:
+                score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] += 1
+            else:
+                score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] = 1
+
+        game.result.histo_strat1_js_data = "\n".join(
+            ["['{}', {}],".format(key, value) for key, value in strat1_histo_data.items()])
+        game.result.histo_strat2_js_data = "\n".join(
+            ["['{}', {}],".format(key, value) for key, value in strat2_histo_data.items()])
+        game.result.histo_strat1_js_data = "\n".join(
+            ["[x: '{}', y: '{}', heat: {}],".format(key[0], key[1], value) for key, value in score_heatmap_data.items()])
