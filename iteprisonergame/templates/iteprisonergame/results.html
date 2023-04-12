@@ -93,7 +93,9 @@
         <table class="center-margin lined-table">
             <thead>
                 <tr>
-                    <th>Team</th>
+                    {% if admin_user %}
+                        <th>Team</th>
+                    {% endif %}
                     <th>Strategy</th>
                     <th>Average Score</th>
                 </tr>
@@ -101,9 +103,11 @@
             <tbody>
                 {% for answer in answers %}
                     <tr>
-                        <td {% if answer.winner %}class="winning"{% endif %}>
-                            <a href="#{{ answer.team.name }}">{{ answer.team.name }}</a>
-                        </td>
+                        {% if admin_user %}
+                            <td {% if answer.winner %}class="winning"{% endif %}>
+                                <a href="#{{ answer.team.name }}">{{ answer.team.name }}</a>
+                            </td>
+                        {% endif %}
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|floatformat:5 }}</td>
                     </tr>
@@ -115,7 +119,7 @@
 
             <hr class="hr-separator">
 
-            <h2 id="{{ answer.team.name }}">Team {{ answer.team.name }}: {{ answer.name }}</h2>
+            <h2 {% if admin_user %}id="{{ answer.team.name }}"{% endif %}>{% if admin_user %}Team {{ answer.team.name }}: {% endif %}{{ answer.name }}</h2>
 
             {% if admin_user %}
                 <p>

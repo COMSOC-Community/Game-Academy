@@ -53,27 +53,24 @@
         <img width="50%" src="{% static 'img/centipede_structure.png' %}" alt="Structure of the Centipede Game.">
     </p>
 
-    {% if answer %}
+    {% if current_answer %}
         <p>
             You have already submitted an answer, you cannot submit another one. Your answer is
-            <em>{{ answer.formatted_answer }}</em>.
+            <em style="color: #A30000;">{{ current_answer.strategy_as_p1 }}</em> as <span style="color: #A30000; font-weight: bold;">player 1</span> and
+            <em style="color: #008C8C;">{{ current_answer.strategy_as_p2 }}</em> as <span style="color: #008C8C; font-weight: bold;">player 2</span>.
         </p>
     {% endif %}
 
     <table class="center-margin">
         <tbody>
             <tr>
-                <td style="padding-right: 20px;">
-                    {% if game.playable and not answer%}
+                {% if game.playable and not current_answer%}
+                    <td style="padding-right: 20px;">
                         <span class="orange-button">
                             <a href="{% url 'centipede_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>
                         </span>
-                    {% else %}
-                        <span class="gray-button">
-                            <a>Submit your answer</a>
-                        </span>
-                    {% endif %}
-                </td>
+                    </td>
+                {% endif %}
                 {% if game.results_visible %}
                     <td style="padding-left: 20px;">
                         <span class="orange-button">

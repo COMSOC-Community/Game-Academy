@@ -59,17 +59,13 @@
     <table class="center-margin">
         <tbody>
             <tr>
-                <td style="padding-right: 20px;">
-                    {% if game.playable and not answer%}
+                {% if game.playable and not answer%}
+                    <td style="padding-right: 20px;">
                         <span class="orange-button">
                             <a href="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>
                         </span>
-                    {% else %}
-                        <span class="gray-button">
-                            <a>Submit your answer</a>
-                        </span>
-                    {% endif %}
-                </td>
+                    </td>
+                {% endif %}
                 {% if game.results_visible %}
                     <td style="padding-left: 20px;">
                         <span class="orange-button">

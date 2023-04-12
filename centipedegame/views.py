@@ -51,30 +51,24 @@ def submit_answer(request, session_slug_name, game_url_tag):
         if player.exists():
             player = player.first()
 
-            team = player.teams.filter(game=game)
-            if team.exists():
-                team = team.first()
-                try:
-                    current_answer = Answer.objects.get(game=game, team=team)
-                except Answer.DoesNotExist:
-                    current_answer = None
-                if current_answer is None:
-                    if request.method == "POST":
-                        submit_answer_form = SubmitAnswerForm(request.POST, game=game, team=team)
-                        if submit_answer_form.is_valid():
-                            new_answer = Answer.objects.create(
-                                game=game,
-                                team=team,
-                                initial_state=submit_answer_form.cleaned_data['initial_state'],
-                                automata=submit_answer_form.cleaned_data['automata'],
-                                motivation=submit_answer_form.cleaned_data['motivation'],
-                                name=submit_answer_form.cleaned_data['name'],
-                            )
-                            answer_submitted = True
-                    else:
-                        submit_answer_form = SubmitAnswerForm(game=game, team=team)
-            else:
-                team = None
+            try:
+                current_answer = Answer.objects.get(game=game, player=player)
+            except Answer.DoesNotExist:
+                current_answer = None
+            if current_answer is None:
+                if request.method == "POST":
+                    submit_answer_form = SubmitAnswerForm(request.POST, game=game, player=player)
+                    if submit_answer_form.is_valid():
+                        new_answer = Answer.objects.create(
+                            game=game,
+                            player=player,
+                            strategy_as_p1=submit_answer_form.cleaned_data['strategy_as_p1'],
+                            strategy_as_p2=submit_answer_form.cleaned_data['strategy_as_p2'],
+                            motivation=submit_answer_form.cleaned_data['motivation'],
+                        )
+                        answer_submitted = True
+                else:
+                    submit_answer_form = SubmitAnswerForm(game=game, player=player)
         else:
             player = None
     return render(request, os.path.join('centipedegame', 'submit_answer.html'), locals())
