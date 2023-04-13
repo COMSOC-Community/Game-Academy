@@ -96,5 +96,18 @@ def results(request, session_slug_name, game_url_tag):
                 elif request.POST["form_type"] == "run_management":
                     management.call_command("centi_computescores", session=session.slug_name, game=game.url_tag)
 
-    answers = Answer.objects.filter(game=game)
+    answers = Answer.objects.filter(game=game).order_by('-avg_score')
+    if answers:
+        winning_answers = answers.filter(winning=True)
+        if winning_answers:
+            winning_answers_formatted = sorted(list(set(answer.avg_score for answer in winning_answers)))
+            if len(winning_answers_formatted) > 1:
+                winning_answers_formatted = "{} and {}".format(winning_answers_formatted[0],
+                                                               winning_answers_formatted[1])
+            else:
+                winning_answers_formatted = "{}".format(winning_answers_formatted[0])
+            winners_formatted = sorted(list(answer.player.name for answer in winning_answers))
+            if len(winners_formatted) > 1:
+                winners_formatted[-1] = "and " + winners_formatted[-1]
+            winners_formatted = ", ".join(winners_formatted)
     return render(request, os.path.join('centipedegame', 'results.html'), locals())

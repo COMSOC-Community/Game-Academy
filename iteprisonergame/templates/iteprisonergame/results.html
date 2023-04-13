@@ -123,7 +123,7 @@
 
             {% if admin_user %}
                 <p>
-                    <a class="collapsible">Display the members of the team:</a>
+                    <a class="collapsible">Display the member{{ answer.team.players.all|length|pluralize:',s' }} of the team:</a>
 
                     <span class="collapsible-content" style="display: none">
                         {% for p in answer.team.players.all %}

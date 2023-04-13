@@ -15,6 +15,7 @@ class Answer(models.Model):
     avg_score_as_p1 = models.FloatField(default=0.0, null=True, blank=True)
     avg_score_as_p2 = models.FloatField(default=0.0, null=True, blank=True)
     avg_score = models.FloatField(default=0.0, null=True, blank=True)
+    winning = models.BooleanField(default=False)
     motivation = models.TextField()
 
     class Meta:

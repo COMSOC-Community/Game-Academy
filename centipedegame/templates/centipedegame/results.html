@@ -88,7 +88,12 @@
         {% endif %}
     </div>
 
-    <div id="histogram_strat" class="graph_wrap"></div>
+    <h2 class="collapsible">Distribution of the Strategies Submitted</h2>
+
+    <div class="collapse_content" style="display: none">
+        <div id="histogram_strat" class="graph_wrap"></div>
+    </div>
+
     <script>
         var histo_strat_chart = anychart.column();
         histo_strat_chart.title('Distribution of strategies submitted as player 1 and 2');
@@ -112,14 +117,97 @@
         histo_strat_chart.draw();
     </script>
 
-    <div id="score_heatmap" class="graph_wrap"></div>
+    <h2 class="collapsible">Distribution of scores per Answer</h2>
+
+    <div class="collapsible_content" style="display:none;">
+        <div id="score_heatmap" class="graph_wrap"></div>
+
+        {% if admin_user %}
+            <p class="center-align" style="margin-top: 20px;">
+                <a class="collapsible">Display the winner{{ winning_answers|length|pluralize:',s' }}:</a>
+                <span class="collapsible-content" style="display: none"> {{ winners_formatted }}</span>
+            </p>
+        {% endif %}
+    </div>
+
     <script>
         var score_heatmap_data = [
                 {{ game.result_centi.scores_heatmap_js_data|safe }}
             ];
         var score_heatmap_chart = anychart.heatMap(score_heatmap_data);
+        score_heatmap_chart.xAxis().title('Strategy');
+        score_heatmap_chart.yAxis().title('');
         score_heatmap_chart.container('score_heatmap');
         score_heatmap_chart.draw();
+    </script>
+
+    <h2 class="collapsible">All answers anonymised</h2>
+
+    <div class="collapse_content" style="display: none;">
+        <table class="lined-table center-margin">
+            <tr>
+                <th>As Player 1</th>
+                <th>As Player 2</th>
+                <th>Average Score</th>
+                <th>Justification</th>
+            </tr>
+            {% for answer in answers %}
+                <tr>
+                    <td {% if answer.winning %}class="winning"{% endif %}>
+                        {{ answer.strategy_as_p1 }}<br>{{ answer.avg_score_as_p1 }}
+                    </td>
+                    <td {% if answer.winning %}class="winning"{% endif %}>
+                        {{ answer.strategy_as_p2 }}<br>{{ answer.avg_score_as_p2 }}
+                    </td>
+                    <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.avg_score|floatformat:5 }}</td>
+                    <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    {% if admin_user %}
+        <h2 class="collapsible">All answers with names</h2>
+
+        <div class="collapse_content" style="display: none;">
+            <table class="lined-table center-margin">
+                <tr>
+                    <th>Player</th>
+                    <th>As Player 1</th>
+                    <th>As Player 2</th>
+                    <th>Average Score</th>
+                    <th>Justification</th>
+                </tr>
+                {% for answer in answers %}
+                    <tr>
+                        <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                        <td {% if answer.winning %}class="winning"{% endif %}>
+                            {{ answer.strategy_as_p1 }}<br>{{ answer.avg_score_as_p1 }}
+                        </td>
+                        <td {% if answer.winning %}class="winning"{% endif %}>
+                            {{ answer.strategy_as_p2 }}<br>{{ answer.avg_score_as_p2 }}
+                        </td>
+                        <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.avg_score|floatformat:5 }}</td>
+                        <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                var content = this.nextElementSibling;
+                if (content.style.display === "none"){
+                    content.style.display = "block";
+                } else {
+                    content.style.display = "none";
+                }
+            });
+        }
     </script>
 
     <div class="navigation">

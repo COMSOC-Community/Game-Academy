@@ -75,7 +75,7 @@ class Command(BaseCommand):
             answer.avg_score_as_p1 = total_score_as_p1 / (len(answers) - 1)
             answer.avg_score_as_p2 = total_score_as_p2 / (len(answers) - 1)
             total_score = total_score_as_p1 + total_score_as_p2
-            answer.avg_score = total_score / (len(answers) - 1)
+            answer.avg_score = total_score / (2 * (len(answers) - 1))  # Dividing by 2 for P1 and P2
             answer.save()
 
             if winners is None or total_score > best_score:
@@ -92,10 +92,11 @@ class Command(BaseCommand):
                 strat2_histo_data[answer.strategy_as_p2] += 1
             else:
                 strat2_histo_data[answer.strategy_as_p2] = 1
-            if (answer.strategy_as_p1, answer.strategy_as_p2) in score_heatmap_data:
-                score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] += 1
-            else:
-                score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] = 1
+            if (answer.strategy_as_p1, answer.strategy_as_p2) not in score_heatmap_data:
+                score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] = answer.avg_score
+        for answer in winners:
+            answer.winning = True
+            answer.save()
 
         game.result_centi.histo_strat1_js_data = "\n".join(
             ["['{}', {}],".format(key, value) for key, value in strat1_histo_data.items()])
