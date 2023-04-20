@@ -6,14 +6,17 @@ from centipedegame.models import Answer
 class SubmitAnswerForm(forms.Form):
     strategy_as_p1 = forms.ChoiceField(
         choices=[
+            ('', '----'),
             ("Down - Down", "Down - Down"),
             ("Down - Right", "Down - Right"),
             ("Right - Down", "Right - Down"),
             ("Right - Right", "Right - Right")],
         label="Strategy as Player 1",
-        label_suffix="")
+        label_suffix="",
+        required=True)
     strategy_as_p2 = forms.ChoiceField(
         choices=[
+            ('', '----'),
             ("Down - Down", "Down - Down"),
             ("Down - Right", "Down - Right"),
             ("Right - Down", "Right - Down"),
