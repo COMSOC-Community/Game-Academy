@@ -94,6 +94,8 @@ class Command(BaseCommand):
                 strat2_histo_data[answer.strategy_as_p2] = 1
             if (answer.strategy_as_p1, answer.strategy_as_p2) not in score_heatmap_data:
                 score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] = answer.avg_score
+
+            answer.winning = False
         for answer in winners:
             answer.winning = True
             answer.save()
