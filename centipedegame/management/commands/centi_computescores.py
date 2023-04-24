@@ -96,6 +96,7 @@ class Command(BaseCommand):
                 score_heatmap_data[(answer.strategy_as_p1, answer.strategy_as_p2)] = answer.avg_score
 
             answer.winning = False
+            answer.save()
         for answer in winners:
             answer.winning = True
             answer.save()
