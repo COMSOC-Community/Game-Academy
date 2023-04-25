@@ -23,9 +23,11 @@ class Answer(models.Model):
         unique_together = ('game', 'player')
 
     def __str__(self):
-        return "[{}] {} - {}".format(self.game.session,
-                                     self.game.name,
-                                     self.player.name)
+        return "[{}] {} - {} - ({}, {})".format(self.game.session,
+                                                self.game.name,
+                                                self.player.name,
+                                                self.strategy_as_p1,
+                                                self.strategy_as_p2)
 
 
 class Result(models.Model):

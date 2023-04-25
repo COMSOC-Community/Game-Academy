@@ -107,7 +107,7 @@
         histo_strat1_serie.stroke({color:'#ffffff'})
         histo_strat1_serie.fill('#A30000')
         var histo_strat2_data = [
-                {{ game.result_centi.histo_strat1_js_data|safe }}
+                {{ game.result_centi.histo_strat2_js_data|safe }}
             ];
         var histo_strat2_serie = histo_strat_chart.column(histo_strat2_data);
         histo_strat2_serie.name('Number of answers for player 2')
