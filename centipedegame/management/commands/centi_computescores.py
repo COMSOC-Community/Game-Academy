@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.db.models import Avg
 
 from centipedegame.models import Answer, Result
 from core.models import Session, Game

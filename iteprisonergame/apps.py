@@ -15,7 +15,7 @@ IPD_PAYOFFS = {("C", "C"): (-10, -10), ("C", "D"): (-25, 0), ("D", "C"): (0, -25
 
 class IteprisonergameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'iteprisonergame'
+    name = IPD_PACKAGE_NAME
 
     is_game = True
     game_setting = GameSetting(

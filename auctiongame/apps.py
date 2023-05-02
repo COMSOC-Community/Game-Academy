@@ -2,18 +2,24 @@ from django.apps import AppConfig
 
 from gameserver.games import *
 
+AUCT_NAME = "AuctionGame"
+AUCT_LONG_NAME = "Auction Game"
+AUCT_PACKAGE_NAME = "auctiongame"
+AUCT_URL_TAG = "auction"
+AUCT_PACKAGE_URL_NAMESPACE = "auction_game"
+
 
 class AuctiongameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'auctiongame'
+    name = AUCT_PACKAGE_NAME
 
     is_game = True
     game_setting = GameSetting(
-            name="AuctionGame",
-            long_name="Auction Game",
-            package_name="auctiongame",
-            url_tag="auction",
-            package_url_namespace="auction_game",
+            name=AUCT_NAME,
+            long_name=AUCT_LONG_NAME,
+            package_name=AUCT_PACKAGE_NAME,
+            url_tag=AUCT_URL_TAG,
+            package_url_namespace=AUCT_PACKAGE_URL_NAMESPACE,
         )
 
     def ready(self):

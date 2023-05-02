@@ -11,7 +11,7 @@ CENTI_PACKAGE_URL_NAMESPACE = "centipede_game"
 
 class CentipedegameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'centipedegame'
+    name = CENTI_PACKAGE_NAME
 
     is_game = True
     game_setting = GameSetting(

@@ -12,7 +12,7 @@ NG_PACKAGE_URL_NAMESPACE = "numbers_game"
 
 class NumbersgameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'numbersgame'
+    name = NG_PACKAGE_NAME
 
     is_game = True
     game_setting = GameSetting(

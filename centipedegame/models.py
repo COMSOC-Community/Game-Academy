@@ -40,4 +40,4 @@ class Result(models.Model):
         ordering = ['game']
 
     def __str__(self):
-        return "{} - Results Data".format(self.game.name)
+        return "[{}] {}".format(self.game.session, self.game.name)
