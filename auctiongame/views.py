@@ -101,18 +101,32 @@ def results(request, session_slug_name, game_url_tag):
                 elif request.POST["form_type"] == "run_management":
                     management.call_command("auct_generategraph", session=session.slug_name, game=game.url_tag)
 
-    answers = Answer.objects.filter(game=game).order_by('-bid')
-    if answers:
-        winning_answers = answers.filter(winning=True)
-        if winning_answers:
-            winning_answers_formatted = sorted(list(set(answer.avg_score for answer in winning_answers)))
-            if len(winning_answers_formatted) > 1:
-                winning_answers_formatted = "{} and {}".format(winning_answers_formatted[0],
-                                                               winning_answers_formatted[1])
-            else:
-                winning_answers_formatted = "{}".format(winning_answers_formatted[0])
-            winners_formatted = sorted(list(answer.player.name for answer in winning_answers))
-            if len(winners_formatted) > 1:
-                winners_formatted[-1] = "and " + winners_formatted[-1]
-            winners_formatted = ", ".join(winners_formatted)
-    return render(request, os.path.join('centipedegame', 'results.html'), locals())
+    try:
+        current_player = Player.objects.get(session=session, user=request.user)
+    except Player.DoesNotExist:
+        current_player = None
+    if current_player is not None:
+        try:
+            current_answer = Answer.objects.get(game=game, player=current_player)
+        except Answer.DoesNotExist:
+            current_answer = None
+
+    answers = Answer.objects.filter(game=game).order_by('auction_id', '-bid')
+    answers_per_auction = {str(auction_id): answers.filter(auction_id=auction_id).order_by('-bid')
+                           for auction_id in range(1, 6)}
+    formatted_winners = {str(auction_id): "" for auction_id in range(1, 6)}
+    for auction_id, auction_answers in answers_per_auction.items():
+        if auction_answers:
+            winning_answers = auction_answers.filter(winning_auction=True)
+            if winning_answers:
+                winners_formatted = sorted(list(answer.player.name for answer in winning_answers))
+                if len(winners_formatted) > 1:
+                    winners_formatted[-1] = "and " + winners_formatted[-1]
+                formatted_winners[auction_id] = ", ".join(winners_formatted)
+    global_winning_answers = answers.filter(winning_global=True)
+    if global_winning_answers:
+        global_winners_formatted = sorted(list(answer.player.name for answer in global_winning_answers))
+        if len(global_winners_formatted) > 1:
+            global_winners_formatted[-1] = "and " + global_winners_formatted[-1]
+        global_winners_formatted = ", ".join(global_winners_formatted)
+    return render(request, os.path.join('auctiongame', 'results.html'), locals())

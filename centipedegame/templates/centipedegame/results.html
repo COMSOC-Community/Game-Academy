@@ -74,8 +74,8 @@
                     </form>
                 {% endif %}
                 <p>
-                    To manually run the management commands, click the following button. This is normally unnecessary,
-                    unless you changed the entries of the database directly, or performed some other manual actions.
+                    To manually run the management commands, click the following button. This is necessary before showing
+                    the results.
                 </p>
                 <form method="post" action="{% url 'centipede_game:results' session.slug_name game.url_tag %}">
                     {% csrf_token %}

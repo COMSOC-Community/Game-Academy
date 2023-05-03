@@ -54,7 +54,7 @@ class Command(BaseCommand):
         best_answers = []
         smallest_gap = 100
         for answer in answers:
-            category = int(int(answer.answer) / game.result_ng.histo_bin_size) * 3
+            category = int(int(answer.answer) / game.result_ng.histo_bin_size) * game.result_ng.histo_bin_size
             categories[category] += 1
 
             gap = abs(answer.answer - corrected_average)

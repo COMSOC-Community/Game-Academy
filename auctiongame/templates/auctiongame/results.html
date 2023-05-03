@@ -1,0 +1,210 @@
+{% load static %}
+{% load core_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<title>Auction Game | Results</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/auctionstyle.css' %}"/>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-cartesian.min.js"></script>
+</head>
+
+<body>
+
+{% if game.results_visible or admin_user %}
+
+    <h1>Results {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'auction_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+        </span>
+        <br>
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
+    </div>
+
+    <div class="adminDiv">
+
+        {% if admin_user %}
+            <div class="warning-box">
+                <p>Here are so admin shortcuts if you want to use them.</p>
+
+                {% if game.playable %}
+                    <p>Players can currently submit their answers.</p>
+                    <form method="post" action="{% url 'auction_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Close the Game"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>The game is closed, player can no longer submit their answers.</p>
+                    <form method="post" action="{% url 'auction_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="game_playable"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Open the Game"/>
+                        </p>
+                    </form>
+                {% endif %}
+
+                {% if game.results_visible %}
+                    <p>The results are visible by all players.</p>
+                    <form method="post" action="{% url 'auction_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Hide the Results"/>
+                        </p>
+                    </form>
+                {% else %}
+                    <p>Players cannot currently see the results.</p>
+                    <form method="post" action="{% url 'auction_game:results' session.slug_name game.url_tag %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="results_visible"/>
+                        <p class="center-align">
+                            <input class="green-button" type="submit" value="Show the Results"/>
+                        </p>
+                    </form>
+                {% endif %}
+                <p>
+                    To manually run the management commands, click the following button. This is necessary before showing
+                    the results.
+                </p>
+                <form method="post" action="{% url 'auction_game:results' session.slug_name game.url_tag %}">
+                    {% csrf_token %}
+                        <input type="hidden" name="form_type" value="run_management"/>
+                    <p class="center-align">
+                        <input class="green-button" type="submit" value="Run Management Commands"/>
+                    </p>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+    {% for auction_id in "12345" %}
+        <h2 class="collapsible">Auction {{ auction_id }} {% if current_answer.auction_id|slugify == auction_id %}(yours){% endif %}</h2>
+        <div class="collapsible-content" style="display: none;">
+            {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
+                {% if auction_answers %}
+                    <div id="histogram_{{ auction_id }}" class="graph_wrap">
+                    </div>
+                    <script>
+                        var histoData_{{ auction_id }} = [
+                                {% with 'histo_auct'|addstr:auction_id|addstr:'_js_data' as histo_attr %}
+                                    {{ game.result_auct|get_attr:histo_attr|safe }}
+                                {% endwith %}
+                            ];
+                        var histoChart_{{ auction_id }} = anychart.column();
+                        histoChart_{{ auction_id }}.title('Distribution of the bids received');
+                        histoChart_{{ auction_id }}.yAxis().title('Bid');
+                        histoChart_{{ auction_id }}.xAxis().title('Bid range');
+                        var histoSerie_{{ auction_id }} = histoChart_{{ auction_id }}.column(histoData_{{ auction_id }});
+                        histoSerie_{{ auction_id }}.name('Number of bids')
+                        histoSerie_{{ auction_id }}.stroke({color:'#ffffff'})
+                        histoSerie_{{ auction_id }}.fill('#FF8000')
+                        histoChart_{{ auction_id }}.container('histogram_{{ auction_id }}');
+                        histoChart_{{ auction_id }}.draw();
+                    </script>
+
+                    <table class="lined-table center-margin">
+                        <tr>
+                            <th>Valuation</th>
+                            <th>Bid</th>
+                            <th>Utility</th>
+                            <th>Justification</th>
+                        </tr>
+                        {% for answer in auction_answers %}
+                            <tr>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|floatformat:5 }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    {% if admin_user %}
+                        <p class="center-align" style="margin-top: 20px;">
+                            <a class="collapsible">Display the winner{{ winning_answers|pluralize }}:</a>
+                            {% with formatted_winners|get_key_dict:auction_id as winners %}
+                                <span class="collapsible-content" style="display: none"> {{ winners }}</span>
+                            {% endwith %}
+                        </p>
+                    {% endif %}
+                {% else %}
+                    <p>No player has been assigned to this auction.</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+    {% endfor %}
+
+    <h2 class="collapsible">Global winner{{ global_winning_answers|pluralize }}</h2>
+    <div class="collapsible-content" style="display: none;">
+        <p class="center-align">{{ global_winners_formatted }}</p>
+    </div>
+
+    <h2 class="collapsible">All answers with names</h2>
+
+    <div class="collapsible-content" style="display: none;">
+        <table class="lined-table center-margin">
+            <tr>
+                <th>Player</th>
+                <th>Auction</th>
+                <th>Valuation</th>
+                <th>Bid</th>
+                <th>Utility</th>
+                <th>Justification</th>
+            </tr>
+            {% for answer in answers %}
+                <tr>
+                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.auction_id }}</td>
+                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
+                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
+                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|floatformat:5 }}</td>
+                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                var content = this.nextElementSibling;
+                if (content.style.display === "none"){
+                    content.style.display = "block";
+                } else {
+                    content.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+    <div class="navigation">
+        <span class="navigation-button">
+            <a href="{% url 'auction_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+        </span>
+        <br>
+        <span class="navigation-button">
+            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+        </span>
+    </div>
+{% else %}
+    <p>
+        The results for this game are not visible.
+        Get back to the <a href="{% url "auction_game:index" session.slug_name game.url_tag %}">home page</a> of the
+        game.
+    </p>
+{% endif %}
+</body>
+</html>
