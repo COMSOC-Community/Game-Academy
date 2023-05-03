@@ -145,35 +145,37 @@
         </div>
     {% endfor %}
 
-    <h2 class="collapsible">Global winner{{ global_winning_answers|pluralize }}</h2>
-    <div class="collapsible-content" style="display: none;">
-        <p class="center-align">{{ global_winners_formatted }}</p>
-    </div>
+    {% if admin_user %}
+        <h2 class="collapsible">Global winner{{ global_winning_answers|pluralize }}</h2>
+        <div class="collapsible-content" style="display: none;">
+            <p class="center-align">{{ global_winners_formatted }}</p>
+        </div>
 
-    <h2 class="collapsible">All answers with names</h2>
+        <h2 class="collapsible">All answers with names</h2>
 
-    <div class="collapsible-content" style="display: none;">
-        <table class="lined-table center-margin">
-            <tr>
-                <th>Player</th>
-                <th>Auction</th>
-                <th>Valuation</th>
-                <th>Bid</th>
-                <th>Utility</th>
-                <th>Justification</th>
-            </tr>
-            {% for answer in answers %}
+        <div class="collapsible-content" style="display: none;">
+            <table class="lined-table center-margin">
                 <tr>
-                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.player.name }}</td>
-                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.auction_id }}</td>
-                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
-                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
-                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|floatformat:5 }}</td>
-                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                    <th>Player</th>
+                    <th>Auction</th>
+                    <th>Valuation</th>
+                    <th>Bid</th>
+                    <th>Utility</th>
+                    <th>Justification</th>
                 </tr>
-            {% endfor %}
-        </table>
-    </div>
+                {% for answer in answers %}
+                    <tr>
+                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.auction_id }}</td>
+                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
+                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
+                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|floatformat:5 }}</td>
+                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
 
     <script>
         var coll = document.getElementsByClassName("collapsible");
