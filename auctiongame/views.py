@@ -112,7 +112,7 @@ def results(request, session_slug_name, game_url_tag):
             current_answer = None
 
     answers = Answer.objects.filter(game=game).order_by('auction_id', '-bid')
-    answers_per_auction = {str(auction_id): answers.filter(auction_id=auction_id).order_by('-bid')
+    answers_per_auction = {str(auction_id): answers.filter(auction_id=auction_id, bid__isnull=False).order_by('-bid')
                            for auction_id in range(1, 6)}
     formatted_winners = {str(auction_id): "" for auction_id in range(1, 6)}
     for auction_id, auction_answers in answers_per_auction.items():

@@ -50,7 +50,7 @@
         drawn at random from a binomial probability distribution.
     </p>
 
-    {% if current_answer %}
+    {% if current_answer.bid %}
         <p>
             You have already submitted an answer, you cannot submit another one. Your answer is
             <em>{{ current_answer.bid }}</em> for auction <em>{{ current_answer.auction_id }}</em>.
@@ -60,7 +60,7 @@
     <table class="center-margin">
         <tbody>
             <tr>
-                {% if game.playable and not current_answer%}
+                {% if game.playable and not current_answer.bid %}
                     <td style="padding-right: 20px;">
                         <span class="orange-button">
                             <a href="{% url 'auction_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>

@@ -52,59 +52,61 @@ class Command(BaseCommand):
         global_highest_utility = None
         global_winner = None
         for auction_id in range(1, 6):
-            answers = Answer.objects.filter(game=game, auction_id=auction_id)
+            answers = Answer.objects.filter(game=game, auction_id=auction_id, bid__isnull=False)
             if answers:
                 bids = [answer.bid for answer in answers]
-                category_labels = linspace(int(min(bids)), int(max(bids)) + 1,
-                                           (int(max(bids)) + 1 - int(min(bids))) * 4 + 1)
-                categories = {i: 0 for i in category_labels}
-                for bid in bids:
-                    previous_label = category_labels[0]
-                    for label in category_labels:
-                        if label > bid:
-                            break
-                        previous_label = label
-                    if previous_label is not None:
-                        categories[previous_label] += 1
-                attr_name = "histo_auct{}_js_data".format(auction_id)
-                setattr(game.result_auct, attr_name, "\n".join(["['{}', {}],".format(key, val)
-                                                                for key, val in categories.items()]))
-                game.result_auct.save()
+                if bids:
+                    category_labels = linspace(int(min(bids)), int(max(bids)) + 1,
+                                               (int(max(bids)) + 1 - int(min(bids))) * 4 + 1)
+                    categories = {i: 0 for i in category_labels}
+                    for bid in bids:
+                        previous_label = category_labels[0]
+                        for label in category_labels:
+                            if label > bid:
+                                break
+                            previous_label = label
+                        if previous_label is not None:
+                            categories[previous_label] += 1
+                    attr_name = "histo_auct{}_js_data".format(auction_id)
+                    setattr(game.result_auct, attr_name, "\n".join(["['{}', {}],".format(key, val)
+                                                                    for key, val in categories.items()]))
+                    game.result_auct.save()
 
-                highest_bid = None
-                local_winners = None
-                for answer in answers:
-                    if highest_bid is None or answer.bid > highest_bid:
-                        highest_bid = answer.bid
-                        local_winners = [answer]
-                    elif answer.bid == highest_bid:
-                        local_winners.append(answer)
-                    answer.winning_auction = False
-                    answer.winning_global = False
-                    answer.save()
-                for answer in answers:
-                    if answer not in local_winners:
-                        answer.utility = 0
+                    highest_bid = None
+                    local_winners = None
+                    for answer in answers:
+                        if highest_bid is None or answer.bid > highest_bid:
+                            highest_bid = answer.bid
+                            local_winners = [answer]
+                        elif answer.bid == highest_bid:
+                            local_winners.append(answer)
+                        answer.winning_auction = False
+                        answer.winning_global = False
                         answer.save()
-                winning_utility = local_winners[0].utility
-                if winning_utility < 0:
-                    new_local_winners = [answer for answer in answers if answer not in local_winners]
-                elif winning_utility == 0:
-                    new_local_winners = list(answers)
-                else:
-                    new_local_winners = local_winners
-                for answer in new_local_winners:
-                    answer.winning_auction = True
-                    answer.save()
-                if new_local_winners:
-                    new_winning_utility = new_local_winners[0].utility
-                    if global_highest_utility is None or new_winning_utility > global_highest_utility:
-                        global_highest_utility = new_winning_utility
-                        global_winner = deepcopy(new_local_winners)
-                    elif new_winning_utility == global_highest_utility:
-                        for answer in new_local_winners:
-                            global_winner.append(answer)
-        for answer in global_winner:
-            answer.winning_global = True
-            answer.save()
+                    for answer in answers:
+                        if answer not in local_winners:
+                            answer.utility = 0
+                            answer.save()
+                    winning_utility = local_winners[0].utility
+                    if winning_utility < 0:
+                        new_local_winners = [answer for answer in answers if answer not in local_winners]
+                    elif winning_utility == 0:
+                        new_local_winners = list(answers)
+                    else:
+                        new_local_winners = local_winners
+                    for answer in new_local_winners:
+                        answer.winning_auction = True
+                        answer.save()
+                    if new_local_winners:
+                        new_winning_utility = new_local_winners[0].utility
+                        if global_highest_utility is None or new_winning_utility > global_highest_utility:
+                            global_highest_utility = new_winning_utility
+                            global_winner = deepcopy(new_local_winners)
+                        elif new_winning_utility == global_highest_utility:
+                            for answer in new_local_winners:
+                                global_winner.append(answer)
+        if global_winner is not None:
+            for answer in global_winner:
+                answer.winning_global = True
+                answer.save()
 

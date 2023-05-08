@@ -91,57 +91,59 @@
     {% for auction_id in "12345" %}
         <h2 class="collapsible">Auction {{ auction_id }} {% if current_answer.auction_id|slugify == auction_id %}(yours){% endif %}</h2>
         <div class="collapsible-content" style="display: none;">
-            {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
-                {% if auction_answers %}
-                    <div id="histogram_{{ auction_id }}" class="graph_wrap">
-                    </div>
-                    <script>
-                        var histoData_{{ auction_id }} = [
-                                {% with 'histo_auct'|addstr:auction_id|addstr:'_js_data' as histo_attr %}
-                                    {{ game.result_auct|get_attr:histo_attr|safe }}
-                                {% endwith %}
-                            ];
-                        var histoChart_{{ auction_id }} = anychart.column();
-                        histoChart_{{ auction_id }}.title('Distribution of the bids received');
-                        histoChart_{{ auction_id }}.yAxis().title('Bid');
-                        histoChart_{{ auction_id }}.xAxis().title('Bid range');
-                        var histoSerie_{{ auction_id }} = histoChart_{{ auction_id }}.column(histoData_{{ auction_id }});
-                        histoSerie_{{ auction_id }}.name('Number of bids')
-                        histoSerie_{{ auction_id }}.stroke({color:'#ffffff'})
-                        histoSerie_{{ auction_id }}.fill('#FF8000')
-                        histoChart_{{ auction_id }}.container('histogram_{{ auction_id }}');
-                        histoChart_{{ auction_id }}.draw();
-                    </script>
+            {% if game.result_auct %}
+                {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
+                    {% if auction_answers %}
+                        <div id="histogram_{{ auction_id }}" class="graph_wrap">
+                        </div>
+                        <script>
+                            var histoData_{{ auction_id }} = [
+                                    {% with 'histo_auct'|addstr:auction_id|addstr:'_js_data' as histo_attr %}
+                                        {{ game.result_auct|get_attr:histo_attr|safe }}
+                                    {% endwith %}
+                                ];
+                            var histoChart_{{ auction_id }} = anychart.column();
+                            histoChart_{{ auction_id }}.title('Distribution of the bids received');
+                            histoChart_{{ auction_id }}.yAxis().title('Bid');
+                            histoChart_{{ auction_id }}.xAxis().title('Bid range');
+                            var histoSerie_{{ auction_id }} = histoChart_{{ auction_id }}.column(histoData_{{ auction_id }});
+                            histoSerie_{{ auction_id }}.name('Number of bids')
+                            histoSerie_{{ auction_id }}.stroke({color:'#ffffff'})
+                            histoSerie_{{ auction_id }}.fill('#FF8000')
+                            histoChart_{{ auction_id }}.container('histogram_{{ auction_id }}');
+                            histoChart_{{ auction_id }}.draw();
+                        </script>
 
-                    <table class="lined-table center-margin">
-                        <tr>
-                            <th>Valuation</th>
-                            <th>Bid</th>
-                            <th>Utility</th>
-                            <th>Justification</th>
-                        </tr>
-                        {% for answer in auction_answers %}
+                        <table class="lined-table center-margin">
                             <tr>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|floatformat:5 }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                                <th>Valuation</th>
+                                <th>Bid</th>
+                                <th>Utility</th>
+                                <th>Justification</th>
                             </tr>
-                        {% endfor %}
-                    </table>
+                            {% for answer in auction_answers %}
+                                <tr>
+                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
+                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
+                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|floatformat:5 }}</td>
+                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
 
-                    {% if admin_user %}
-                        <p class="center-align" style="margin-top: 20px;">
-                            <a class="collapsible">Display the winner{{ winning_answers|pluralize }}:</a>
-                            {% with formatted_winners|get_key_dict:auction_id as winners %}
-                                <span class="collapsible-content" style="display: none"> {{ winners }}</span>
-                            {% endwith %}
-                        </p>
+                        {% if admin_user %}
+                            <p class="center-align" style="margin-top: 20px;">
+                                <a class="collapsible">Display the winner{{ winning_answers|pluralize }}:</a>
+                                {% with formatted_winners|get_key_dict:auction_id as winners %}
+                                    <span class="collapsible-content" style="display: none"> {{ winners }}</span>
+                                {% endwith %}
+                            </p>
+                        {% endif %}
+                    {% else %}
+                        <p>No player has been assigned to this auction.</p>
                     {% endif %}
-                {% else %}
-                    <p>No player has been assigned to this auction.</p>
-                {% endif %}
-            {% endwith %}
+                {% endwith %}
+        {% endif %}
         </div>
     {% endfor %}
 
