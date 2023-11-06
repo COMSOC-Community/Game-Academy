@@ -6,32 +6,44 @@ from django.core.management.base import BaseCommand
 from auctiongame.models import Answer, Result
 from core.models import Session, Game
 
-from auctiongame.apps import AUCT_NAME
+from auctiongame.apps import NAME
 
 
 class Command(BaseCommand):
-    help = 'Updates the values required for the results page, to be run each time a new answer is submitted.'
+    help = "Updates the values required for the results page, to be run each time a new answer is submitted."
 
     def add_arguments(self, parser):
-        parser.add_argument('--session', type=str, required=True)
-        parser.add_argument('--game', type=str, required=True)
+        parser.add_argument("--session", type=str, required=True)
+        parser.add_argument("--game", type=str, required=True)
 
     def handle(self, *args, **options):
-        if not options['session']:
-            print('ERROR: you need to give the URL tag of a session with the --session argument')
+        if not options["session"]:
+            print(
+                "ERROR: you need to give the URL tag of a session with the --session argument"
+            )
             return
-        session = Session.objects.filter(slug_name=options['session'])
+        session = Session.objects.filter(slug_name=options["session"])
         if not session.exists():
-            print('ERROR: no session with URL tag {} has been found'.format(options['session']))
+            print(
+                "ERROR: no session with URL tag {} has been found".format(
+                    options["session"]
+                )
+            )
             return
         session = session.first()
 
-        if not options['game']:
-            print('ERROR: you need to give the URL tag of a game with the --game argument')
+        if not options["game"]:
+            print(
+                "ERROR: you need to give the URL tag of a game with the --game argument"
+            )
             return
-        game = Game.objects.filter(session=session, url_tag=options['game'], game_type=AUCT_NAME)
+        game = Game.objects.filter(
+            session=session, url_tag=options["game"], game_type=NAME
+        )
         if not game.exists():
-            print('ERROR: no game with URL tag {} has been found'.format(options['game']))
+            print(
+                "ERROR: no game with URL tag {} has been found".format(options["game"])
+            )
             return
         game = game.first()
 
@@ -52,12 +64,17 @@ class Command(BaseCommand):
         global_highest_utility = None
         global_winner = None
         for auction_id in range(1, 6):
-            answers = Answer.objects.filter(game=game, auction_id=auction_id, bid__isnull=False)
+            answers = Answer.objects.filter(
+                game=game, auction_id=auction_id, bid__isnull=False
+            )
             if answers:
                 bids = [answer.bid for answer in answers]
                 if bids:
-                    category_labels = linspace(int(min(bids)), int(max(bids)) + 1,
-                                               (int(max(bids)) + 1 - int(min(bids))) * 4 + 1)
+                    category_labels = linspace(
+                        int(min(bids)),
+                        int(max(bids)) + 1,
+                        (int(max(bids)) + 1 - int(min(bids))) * 4 + 1,
+                    )
                     categories = {i: 0 for i in category_labels}
                     for bid in bids:
                         previous_label = category_labels[0]
@@ -68,8 +85,16 @@ class Command(BaseCommand):
                         if previous_label is not None:
                             categories[previous_label] += 1
                     attr_name = "histo_auct{}_js_data".format(auction_id)
-                    setattr(game.result_auct, attr_name, "\n".join(["['{}', {}],".format(key, val)
-                                                                    for key, val in categories.items()]))
+                    setattr(
+                        game.result_auct,
+                        attr_name,
+                        "\n".join(
+                            [
+                                "['{}', {}],".format(key, val)
+                                for key, val in categories.items()
+                            ]
+                        ),
+                    )
                     game.result_auct.save()
 
                     highest_bid = None
@@ -89,7 +114,9 @@ class Command(BaseCommand):
                             answer.save()
                     winning_utility = local_winners[0].utility
                     if winning_utility < 0:
-                        new_local_winners = [answer for answer in answers if answer not in local_winners]
+                        new_local_winners = [
+                            answer for answer in answers if answer not in local_winners
+                        ]
                     elif winning_utility == 0:
                         new_local_winners = list(answers)
                     else:
@@ -99,7 +126,10 @@ class Command(BaseCommand):
                         answer.save()
                     if new_local_winners:
                         new_winning_utility = new_local_winners[0].utility
-                        if global_highest_utility is None or new_winning_utility > global_highest_utility:
+                        if (
+                            global_highest_utility is None
+                            or new_winning_utility > global_highest_utility
+                        ):
                             global_highest_utility = new_winning_utility
                             global_winner = deepcopy(new_local_winners)
                         elif new_winning_utility == global_highest_utility:
@@ -109,4 +139,3 @@ class Command(BaseCommand):
             for answer in global_winner:
                 answer.winning_global = True
                 answer.save()
-

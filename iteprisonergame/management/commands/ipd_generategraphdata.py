@@ -1,34 +1,45 @@
 from django.core.management.base import BaseCommand
 
 from core.models import Session, Game
-from iteprisonergame.apps import IPD_ROUNDS, IPD_PAYOFFS, IPD_NAME
-from iteprisonergame.automata import MooreMachine, fight
-from iteprisonergame.models import Answer, Score
+from iteprisonergame.apps import NAME
+from iteprisonergame.models import Answer
 
 
 class Command(BaseCommand):
-    help = 'Computes the results of the IPD.'
+    help = "Computes the results of the IPD."
 
     def add_arguments(self, parser):
-        parser.add_argument('--session', type=str, required=True)
-        parser.add_argument('--game', type=str, required=True)
+        parser.add_argument("--session", type=str, required=True)
+        parser.add_argument("--game", type=str, required=True)
 
     def handle(self, IP_NAME=None, *args, **options):
-        if not options['session']:
-            print('ERROR: you need to give the URL tag of a session with the --session argument')
+        if not options["session"]:
+            print(
+                "ERROR: you need to give the URL tag of a session with the --session argument"
+            )
             return
-        session = Session.objects.filter(slug_name=options['session'])
+        session = Session.objects.filter(slug_name=options["session"])
         if not session.exists():
-            print('ERROR: no session with URL tag {} has been found'.format(options['session']))
+            print(
+                "ERROR: no session with URL tag {} has been found".format(
+                    options["session"]
+                )
+            )
             return
         session = session.first()
 
-        if not options['game']:
-            print('ERROR: you need to give the URL tag of a game with the --game argument')
+        if not options["game"]:
+            print(
+                "ERROR: you need to give the URL tag of a game with the --game argument"
+            )
             return
-        game = Game.objects.filter(session=session, url_tag=options['game'], game_type=IPD_NAME)
+        game = Game.objects.filter(
+            session=session, url_tag=options["game"], game_type=NAME
+        )
         if not game.exists():
-            print('ERROR: no game with URL tag {} has been found'.format(options['game']))
+            print(
+                "ERROR: no game with URL tag {} has been found".format(options["game"])
+            )
             return
         game = game.first()
 
@@ -42,7 +53,9 @@ class Command(BaseCommand):
                     state = state.strip()
                     if state not in state_list:
                         state_list.append(state)
-                    action, next_state_coop, next_state_def = transition.strip().split(',')
+                    action, next_state_coop, next_state_def = transition.strip().split(
+                        ","
+                    )
                     action = action.strip()
                     next_state_coop = next_state_coop.strip()
                     next_state_def = next_state_def.strip()
@@ -51,36 +64,52 @@ class Command(BaseCommand):
                     if next_state_def not in state_list:
                         state_list.append(next_state_def)
 
-                    nodes.append({"id": state_list.index(state),
-                                  "name": action.strip(),
-                                  "init": str(state == answer.initial_state.strip())})
+                    nodes.append(
+                        {
+                            "id": state_list.index(state),
+                            "name": action.strip(),
+                            "init": str(state == answer.initial_state.strip()),
+                        }
+                    )
                     if next_state_coop == next_state_def:
-                        links.append({"id": len(links),
-                                      "source": state_list.index(state),
-                                      "target": state_list.index(next_state_coop),
-                                      "label": "CD"})
+                        links.append(
+                            {
+                                "id": len(links),
+                                "source": state_list.index(state),
+                                "target": state_list.index(next_state_coop),
+                                "label": "CD",
+                            }
+                        )
                     else:
-                        links.append({"id": len(links),
-                                      "source": state_list.index(state),
-                                      "target": state_list.index(next_state_coop),
-                                      "label": "C"})
-                        links.append({"id": len(links),
-                                      "source": state_list.index(state),
-                                      "target": state_list.index(next_state_def),
-                                      "label": "D"})
-                json_data = '{nodes: ['
+                        links.append(
+                            {
+                                "id": len(links),
+                                "source": state_list.index(state),
+                                "target": state_list.index(next_state_coop),
+                                "label": "C",
+                            }
+                        )
+                        links.append(
+                            {
+                                "id": len(links),
+                                "source": state_list.index(state),
+                                "target": state_list.index(next_state_def),
+                                "label": "D",
+                            }
+                        )
+                json_data = "{nodes: ["
                 for node in nodes:
-                    json_data += '{'
+                    json_data += "{"
                     for key in node:
-                        json_data += '{}: {}, '.format(key, self.format_json(node[key]))
-                    json_data = json_data[:-2] + '}, '
-                json_data = json_data[:-2] + '], edges: ['
+                        json_data += "{}: {}, ".format(key, self.format_json(node[key]))
+                    json_data = json_data[:-2] + "}, "
+                json_data = json_data[:-2] + "], edges: ["
                 for link in links:
-                    json_data += '{'
+                    json_data += "{"
                     for key in link:
-                        json_data += '{}: {}, '.format(key, self.format_json(link[key]))
-                    json_data = json_data[:-2] + '}, '
-                json_data = json_data[:-2] + ']}'
+                        json_data += "{}: {}, ".format(key, self.format_json(link[key]))
+                    json_data = json_data[:-2] + "}, "
+                json_data = json_data[:-2] + "]}"
                 answer.graph_json_data = json_data
                 answer.save()
 

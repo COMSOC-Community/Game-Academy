@@ -14,11 +14,19 @@ handler404 = error_404_view
 handler500 = error_500_view
 
 urlpatterns = [
-    path('', include('core.urls')),
-    re_path(r'^admin/', admin.site.urls),
+    path("", include("core.urls")),
+    re_path(r"^admin/", admin.site.urls),
 ]
 
 for game_setting in INSTALLED_GAMES_SETTING.values():
-    urlpatterns.append(re_path(r'^session/(?P<session_slug_name>[\w-]+)/' + re.escape(str(game_setting.url_tag)) +
-                               r'/(?P<game_url_tag>[\w-]+)/', include(str(game_setting.package_name) + '.urls',
-                                                                      namespace=game_setting.package_url_namespace)))
+    urlpatterns.append(
+        re_path(
+            r"^session/(?P<session_slug_name>[\w-]+)/"
+            + re.escape(str(game_setting.url_tag))
+            + r"/(?P<game_url_tag>[\w-]+)/",
+            include(
+                str(game_setting.package_name) + ".urls",
+                namespace=game_setting.package_url_namespace,
+            ),
+        )
+    )

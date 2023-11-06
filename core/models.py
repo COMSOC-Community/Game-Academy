@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 
-from gameserver.games import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES_SETTING
+from gameserver.games import INSTALLED_GAMES_SETTING
 
 
 class Session(models.Model):
@@ -24,12 +24,14 @@ class Session(models.Model):
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="player")
     name = models.SlugField(max_length=100, blank=False, null=False)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, blank=False, null=False)
+    session = models.ForeignKey(
+        Session, on_delete=models.CASCADE, blank=False, null=False
+    )
     is_guest = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ['session', 'name']
-        unique_together = ('name', 'session')
+        ordering = ["session", "name"]
+        unique_together = ("name", "session")
 
     def __str__(self):
         return "[{}] {}".format(self.session, self.name)
@@ -39,7 +41,9 @@ class Game(models.Model):
     game_type = models.CharField(max_length=100, blank=False, null=False)
     name = models.CharField(max_length=100, blank=False, null=False)
     url_tag = models.SlugField(max_length=10, blank=False, null=False)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, blank=False, null=False)
+    session = models.ForeignKey(
+        Session, on_delete=models.CASCADE, blank=False, null=False
+    )
     playable = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
     results_visible = models.BooleanField(default=False)
@@ -50,8 +54,8 @@ class Game(models.Model):
         return INSTALLED_GAMES_SETTING[self.game_type]
 
     class Meta:
-        ordering = ['session', 'game_type', 'name']
-        unique_together = [('url_tag', 'session'), ('name', 'session')]
+        ordering = ["session", "game_type", "name"]
+        unique_together = [("url_tag", "session"), ("name", "session")]
 
     def __str__(self):
         return "[{}] {}".format(self.session, self.name)
@@ -60,12 +64,12 @@ class Game(models.Model):
 class Team(models.Model):
     name = models.CharField(max_length=100)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
-    players = models.ManyToManyField(Player, related_name='teams')
+    players = models.ManyToManyField(Player, related_name="teams")
     creator = models.ForeignKey(Player, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['name']
-        unique_together = ('name', 'game')
+        ordering = ["name"]
+        unique_together = ("name", "game")
 
     def __str__(self):
         return "[{}] {} - {}".format(self.game.session, self.game.name, self.name)

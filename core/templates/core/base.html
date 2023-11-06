@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Game Server{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    {% if request.user.is_authenticated %}
+        <div class="side-panel">
+            <h3>
+                {{ request.user.username|title }}
+                <span><a class="button" href="{% url 'core:logout' %}">Logout</a></span>
+            </h3>
+            <div class="side-panel-content">
+                <h4>Sessions</h4>
+                <ul>
+                        <li><a href="{% url 'core:create_session' %}">Create Session</a></li>
+        {#                <li><a href="{% url 'my_sessions' %}">My Sessions</a></li>#}
+        {#                <li><a href="{% url 'manage_sessions' %}">Manage Sessions</a></li>#}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <header>
+        {% block header %}{% endblock %}
+    </header>
+
+    {% if request.user.is_authenticated %}
+        <main class="truncated-main">
+    {% else %}
+        <main class="full-main">
+    {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Simon Rey</p>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

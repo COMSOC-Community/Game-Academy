@@ -8,13 +8,15 @@ from core.models import Session, Game, Player, Team
 from core.views import is_session_admin
 
 from .forms import SubmitAnswerForm
-from .apps import IPD_NAME
+from .apps import NAME
 from .models import Answer
 
 
 def index(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=NAME
+    )
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -38,12 +40,14 @@ def index(request, session_slug_name, game_url_tag):
                 except Answer.DoesNotExist:
                     current_answer = None
 
-    return render(request, os.path.join('iteprisonergame', 'index.html'), locals())
+    return render(request, os.path.join("iteprisonergame", "index.html"), locals())
 
 
 def submit_answer(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=NAME
+    )
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -65,15 +69,21 @@ def submit_answer(request, session_slug_name, game_url_tag):
                     current_answer = None
                 if current_answer is None:
                     if request.method == "POST":
-                        submit_answer_form = SubmitAnswerForm(request.POST, game=game, team=team)
+                        submit_answer_form = SubmitAnswerForm(
+                            request.POST, game=game, team=team
+                        )
                         if submit_answer_form.is_valid():
                             new_answer = Answer.objects.create(
                                 game=game,
                                 team=team,
-                                initial_state=submit_answer_form.cleaned_data['initial_state'],
-                                automata=submit_answer_form.cleaned_data['automata'],
-                                motivation=submit_answer_form.cleaned_data['motivation'],
-                                name=submit_answer_form.cleaned_data['name'],
+                                initial_state=submit_answer_form.cleaned_data[
+                                    "initial_state"
+                                ],
+                                automata=submit_answer_form.cleaned_data["automata"],
+                                motivation=submit_answer_form.cleaned_data[
+                                    "motivation"
+                                ],
+                                name=submit_answer_form.cleaned_data["name"],
                             )
                             answer_submitted = True
                     else:
@@ -82,12 +92,16 @@ def submit_answer(request, session_slug_name, game_url_tag):
                 team = None
         else:
             player = None
-    return render(request, os.path.join('iteprisonergame', 'submit_answer.html'), locals())
+    return render(
+        request, os.path.join("iteprisonergame", "submit_answer.html"), locals()
+    )
 
 
 def results(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=IPD_NAME)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=NAME
+    )
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -105,8 +119,16 @@ def results(request, session_slug_name, game_url_tag):
                     game.results_visible = not game.results_visible
                     game.save()
                 elif request.POST["form_type"] == "run_management":
-                    management.call_command("ipd_computeresults", session=session.slug_name, game=game.url_tag)
-                    management.call_command("ipd_generategraphdata", session=session.slug_name, game=game.url_tag)
+                    management.call_command(
+                        "ipd_computeresults",
+                        session=session.slug_name,
+                        game=game.url_tag,
+                    )
+                    management.call_command(
+                        "ipd_generategraphdata",
+                        session=session.slug_name,
+                        game=game.url_tag,
+                    )
 
-    answers = Answer.objects.filter(game=game).order_by('-avg_score')
-    return render(request, os.path.join('iteprisonergame', 'results.html'), locals())
+    answers = Answer.objects.filter(game=game).order_by("-avg_score")
+    return render(request, os.path.join("iteprisonergame", "results.html"), locals())

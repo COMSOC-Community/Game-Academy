@@ -8,13 +8,15 @@ from core.models import Session, Game, Player, Team
 from core.views import is_session_admin
 
 from .forms import SubmitAnswerForm
-from .apps import CENTI_NAME
+from .apps import NAME
 from .models import Answer
 
 
 def index(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=CENTI_NAME)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=NAME
+    )
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -33,12 +35,14 @@ def index(request, session_slug_name, game_url_tag):
             except Answer.DoesNotExist:
                 current_answer = None
 
-    return render(request, os.path.join('centipedegame', 'index.html'), locals())
+    return render(request, os.path.join("centipedegame", "index.html"), locals())
 
 
 def submit_answer(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=CENTI_NAME)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=NAME
+    )
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -57,26 +61,36 @@ def submit_answer(request, session_slug_name, game_url_tag):
                 current_answer = None
             if current_answer is None:
                 if request.method == "POST":
-                    submit_answer_form = SubmitAnswerForm(request.POST, game=game, player=player)
+                    submit_answer_form = SubmitAnswerForm(
+                        request.POST, game=game, player=player
+                    )
                     if submit_answer_form.is_valid():
                         new_answer = Answer.objects.create(
                             game=game,
                             player=player,
-                            strategy_as_p1=submit_answer_form.cleaned_data['strategy_as_p1'],
-                            strategy_as_p2=submit_answer_form.cleaned_data['strategy_as_p2'],
-                            motivation=submit_answer_form.cleaned_data['motivation'],
+                            strategy_as_p1=submit_answer_form.cleaned_data[
+                                "strategy_as_p1"
+                            ],
+                            strategy_as_p2=submit_answer_form.cleaned_data[
+                                "strategy_as_p2"
+                            ],
+                            motivation=submit_answer_form.cleaned_data["motivation"],
                         )
                         answer_submitted = True
                 else:
                     submit_answer_form = SubmitAnswerForm(game=game, player=player)
         else:
             player = None
-    return render(request, os.path.join('centipedegame', 'submit_answer.html'), locals())
+    return render(
+        request, os.path.join("centipedegame", "submit_answer.html"), locals()
+    )
 
 
 def results(request, session_slug_name, game_url_tag):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=CENTI_NAME)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=NAME
+    )
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -94,20 +108,29 @@ def results(request, session_slug_name, game_url_tag):
                     game.results_visible = not game.results_visible
                     game.save()
                 elif request.POST["form_type"] == "run_management":
-                    management.call_command("centi_computescores", session=session.slug_name, game=game.url_tag)
+                    management.call_command(
+                        "centi_computescores",
+                        session=session.slug_name,
+                        game=game.url_tag,
+                    )
 
-    answers = Answer.objects.filter(game=game).order_by('-avg_score')
+    answers = Answer.objects.filter(game=game).order_by("-avg_score")
     if answers:
         winning_answers = answers.filter(winning=True)
         if winning_answers:
-            winning_answers_formatted = sorted(list(set(answer.avg_score for answer in winning_answers)))
+            winning_answers_formatted = sorted(
+                list(set(answer.avg_score for answer in winning_answers))
+            )
             if len(winning_answers_formatted) > 1:
-                winning_answers_formatted = "{} and {}".format(winning_answers_formatted[0],
-                                                               winning_answers_formatted[1])
+                winning_answers_formatted = "{} and {}".format(
+                    winning_answers_formatted[0], winning_answers_formatted[1]
+                )
             else:
                 winning_answers_formatted = "{}".format(winning_answers_formatted[0])
-            winners_formatted = sorted(list(answer.player.name for answer in winning_answers))
+            winners_formatted = sorted(
+                list(answer.player.name for answer in winning_answers)
+            )
             if len(winners_formatted) > 1:
                 winners_formatted[-1] = "and " + winners_formatted[-1]
             winners_formatted = ", ".join(winners_formatted)
-    return render(request, os.path.join('centipedegame', 'results.html'), locals())
+    return render(request, os.path.join("centipedegame", "results.html"), locals())

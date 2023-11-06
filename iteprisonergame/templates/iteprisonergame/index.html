@@ -16,7 +16,7 @@
     <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
 
     {% if admin_user %}
-        <div class="warning-box">
+        <div class="warning-section">
             <p>
                 Since you are logged in as an admin, you can also access the
                 <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>. You will be able to manage the

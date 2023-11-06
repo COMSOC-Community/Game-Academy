@@ -1,60 +1,56 @@
-{% load static %}
+{% extends 'core/base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Game Server</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
-</head>
+{% block title %}Welcome to Game Server{% endblock %}
 
-<body>
+{% block header %}
+    <h1>Welcome to the Game Server</h1>
+    <p>Learn while play, and play while learning!</p>
+{% endblock %}
 
+{% block content %}
 
-<h1>Game Server</h1>
+    <section>
+        <h2>The Game Server</h2>
+        <p>
+            Welcome to the Game Server! This platform allows anyone to organize game sessions in which anyone can play
+            games inspired from game theory to learn while playing, and to play while learning.
+        </p>
+    </section>
 
-<p>Welcome to the game server. To get started, find the session you are looking for below.</p>
-
-<form action="{% url 'core:index' %}" method="post">
-    {% csrf_token %}
-    {% if session_finder_form.non_field_errors %}
-        <ul class="errorlist">
-            {% for error in session_finder_form.non_field_errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    {% for hidden_field in session_finder_form.hidden_fields %}
-        {% if hidden_field.errors %}
-            <ul class="errorlist">
-            {% for error in hidden_field.errors %}
-                <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-        {{ hidden_field }}
-    {% endfor %}
-
-    <table class="center-margin form-table">
-        {% for field in session_finder_form.visible_fields %}
+    <section>
+        <h2>Get Started</h2>
+        <p>Ready to play? Find your session!</p>
+        <form action="{% url 'core:index' %}" method="post">
+            {% include "include/form_top_template.html" with form=session_finder_form form_type='session_finder' submit_button_label='Go to session' %}
+        </form>
+        <table class="center-margin session-finder">
             <tr>
-                <td>
-                    {{ field }}
-                    {% if field.errors %}
-                        {% for error in field.errors %}
-                            <br><span class="form-error">{{ error }}</span>
-                        {% endfor %}
-                    {% endif %}
-                </td>
-                <td>
-                    <input type="submit" value="To the session">
-                </td>
+                <td>{{ session_finder_form.session_name }}</td>
+                <td><input type="submit" name="session_finder" value="Go to session"></td>
             </tr>
-        {% endfor %}
-    </table>
-    <input type='hidden' name='form_type' value='session_finder'>
-</form>
+        </table>
+    </section>
 
-</body>
-</html>
+    <section>
+        <h2>Register or Login</h2>
+
+        <div class="side-by-side-wrapper">
+            <div class="side-by-side-box">
+                <form action="{% url 'core:index' %}" method="post">
+                    {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Login' %}
+                </form>
+            </div>
+
+            <div class="side-by-side-box">
+                {% if user_created %}
+                    <p>User <em>{{ user.username }}</em> has been created. You can now log in.</p>
+                {% else %}
+                    <form action="{% url 'core:index' %}" method="post">
+                        {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register' %}
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+    </section>
+{% endblock %}

@@ -1,28 +1,20 @@
-from django.apps import AppConfig
+from gameserver.games import GameConfig
 
-from gameserver.games import *
-
-CENTI_NAME = "CentipedeGame"
-CENTI_LONG_NAME = "Centipede Game"
-CENTI_PACKAGE_NAME = "centipedegame"
-CENTI_URL_TAG = "centipede"
-CENTI_PACKAGE_URL_NAMESPACE = "centipede_game"
+NAME = "centipedegame"
+LONGNAME = "Centipede Game"
+URL_TAG = "centipede"
+PACKAGE_URL_NAMESPACE = "centipede_game"
 
 
-class CentipedegameConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = CENTI_PACKAGE_NAME
+class CentipedeGameConfig(GameConfig):
+    name = NAME
 
-    is_game = True
-    game_setting = GameSetting(
-            name=CENTI_NAME,
-            long_name=CENTI_LONG_NAME,
-            package_name=CENTI_PACKAGE_NAME,
-            url_tag=CENTI_URL_TAG,
-            package_url_namespace=CENTI_PACKAGE_URL_NAMESPACE,
+    def __init__(self, app_name, app_module):
+        super().__init__(
+            app_name,
+            app_module,
+            LONGNAME,
+            __package__,
+            URL_TAG,
+            PACKAGE_URL_NAMESPACE,
         )
-
-    def ready(self):
-        INSTALLED_GAME_APPS.append("CentipedeGame")
-        INSTALLED_GAMES_SETTING["CentipedeGame"] = self.game_setting
-        INSTALLED_GAMES_CHOICES.append((self.game_setting.name, self.game_setting.long_name))

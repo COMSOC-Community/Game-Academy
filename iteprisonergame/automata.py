@@ -1,5 +1,4 @@
 class MooreMachine:
-
     def __init__(self):
         self.current_state = ""
         self.initial_state = ""
@@ -23,12 +22,17 @@ class MooreMachine:
                 if input_symbol in self.transitions[state]:
                     next_state = self.transitions[state][input_symbol]
                     if next_state not in self.transitions:
-                        errors.append("The state {} reached from ({}, {}) is not a known state.".format(next_state,
-                                                                                                        state,
-                                                                                                        input_symbol))
+                        errors.append(
+                            "The state {} reached from ({}, {}) is not a known state.".format(
+                                next_state, state, input_symbol
+                            )
+                        )
                 else:
-                    errors.append("No transition is specified for state {} and symbol {}.".format(state,
-                                                                                                  input_symbol))
+                    errors.append(
+                        "No transition is specified for state {} and symbol {}.".format(
+                            state, input_symbol
+                        )
+                    )
         return errors
 
     def transition(self, input_symbol):
