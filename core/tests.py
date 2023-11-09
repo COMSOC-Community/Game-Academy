@@ -1,15 +1,15 @@
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 
-from core.models import Session
+from core.models import Session, CustomUser
 
 
 class IndexViewTest(TestCase):
     def setUp(self):
         # Create a test user
         self.user_password = "testpassword"
-        self.user = User.objects.create_user(
+        self.user = CustomUser.objects.create_user(
             username="testuser", password=self.user_password
         )
         self.user.is_active = True
@@ -24,7 +24,7 @@ class IndexViewTest(TestCase):
             visible=True,
             group=group,
         )
-        self.admin_user = User.objects.create_user(
+        self.admin_user = CustomUser.objects.create_user(
             username="admin_user",
             password="admin_password",
         )
@@ -41,7 +41,7 @@ class IndexViewTest(TestCase):
         form_data = {"session_name": self.session.name, "session_finder": ""}
         response = self.client.post(reverse("core:index"), form_data)
         self.assertRedirects(
-            response, reverse("core:index_session", args=(self.session.slug_name,))
+            response, reverse("core:session_portal", args=(self.session.slug_name,))
         )
 
     def test_login_form_submission(self):

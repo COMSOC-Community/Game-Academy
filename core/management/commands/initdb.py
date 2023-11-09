@@ -8,6 +8,4 @@ class Command(BaseCommand):
     help = "Initializes the database, to be run once when the server is set up."
 
     def handle(self, *args, **options):
-        Group.objects.update_or_create(name=SESSION_MANAGER_GROUP)
-        Group.objects.update_or_create(name=PLAYER_GROUP)
-        Group.objects.update_or_create(name=GUEST_PLAYER_GROUP)
+        pass

@@ -1,11 +1,8 @@
-from collections import OrderedDict
-
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 
 from gameserver.games import INSTALLED_GAMES_CHOICES
-from .models import Session, Player, Game, Team
+from .models import Session, Player, Game, Team, CustomUser
 from .constants import player_username, guest_username
 
 
@@ -47,16 +44,14 @@ class LoginForm(forms.Form):
 
         if username and password:
             user = authenticate(username=username, password=password)
-
             if not user:
                 raise forms.ValidationError(
                     "Invalid username or password. Please try again."
                 )
-
         return cleaned_data
 
 
-class RegistrationForm(forms.Form):
+class UserRegistrationForm(forms.Form):
     username = forms.CharField(
         label="Username",
         max_length=100,
@@ -78,7 +73,7 @@ class RegistrationForm(forms.Form):
     def clean_username(self):
         username = self.cleaned_data["username"]
 
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise forms.ValidationError(
                 "A user with this username already exists. Please choose a different one."
             )
@@ -178,7 +173,7 @@ class CreateSessionForm(forms.Form):
         return long_name
 
 
-class SessionLoginForm(forms.Form):
+class PlayerLoginForm(forms.Form):
     player_name = forms.SlugField(
         label="Player name",
         label_suffix="",
@@ -187,39 +182,61 @@ class SessionLoginForm(forms.Form):
     password = forms.CharField(
         label="Password", label_suffix="", widget=forms.PasswordInput()
     )
+    search_user = forms.BooleanField(
+        label="Look for users",
+        label_suffix="",
+        initial=False,
+        required=False,
+        help_text="If selected, the player name provided is considered to be a username (for a user) instead of the "
+        "name of a player for this session.",
+    )
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session", None)
-        super(SessionLoginForm, self).__init__(*args, **kwargs)
-        field_order = ["player_name", "password"]
-        reordered_fields = OrderedDict()
-        for fld in field_order:
-            reordered_fields[fld] = self.fields[fld]
-        for fld, value in self.fields.items():
-            if fld not in reordered_fields:
-                reordered_fields[fld] = value
-        self.fields = reordered_fields
+        super(PlayerLoginForm, self).__init__(*args, **kwargs)
 
-    def clean_player_name(self):
-        player_name = self.cleaned_data["player_name"].title()
-        player = Player.objects.filter(name=player_name, session=self.session)
-        if player.exists():
-            player = player.first()
-            self.cleaned_data["player"] = player
-            return player_name
-        raise forms.ValidationError(
-            "No player with this name is registered for this session."
-        )
+    def clean(self):
+        super().clean()
 
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        player = self.cleaned_data.get("player", None)
-        if player is None or player.user.check_password(password):
-            return password
-        raise forms.ValidationError("The password does not match.")
+        player_name = self.cleaned_data["player_name"]
+        user = None
+        print(self.cleaned_data["search_user"])
+        if self.cleaned_data["search_user"]:
+            user = CustomUser.objects.filter(username=player_name)
+            if user.exists():
+                user = user.first()
+                self.cleaned_data["user"] = user
+                player = Player.objects.filter(user=user, session=self.session)
+                if player.exists():
+                    self.cleaned_data["player"] = player.first()
+            else:
+                raise forms.ValidationError("No match was found.")
+        else:
+            player_name = player_name.title()
+            player = Player.objects.filter(name=player_name, session=self.session)
+            if player.exists():
+                player = player.first()
+                user = player.user
+                self.cleaned_data["player"] = player
+                self.cleaned_data["user"] = user
+            else:
+                self.add_error(
+                    "player_name",
+                    forms.ValidationError(
+                        "No player with this name is registered for this session."
+                    ),
+                )
+
+        if user:
+            password = self.cleaned_data["password"]
+            user = authenticate(username=user.username, password=password)
+            if not user:
+                self.add_error(
+                    "password", forms.ValidationError("The password is incorrect.")
+                )
 
 
-class SessionPlayerRegistration(forms.Form):
+class PlayerRegistrationForm(forms.Form):
     player_name = forms.SlugField(
         label="Player name",
         label_suffix="",
@@ -234,19 +251,33 @@ class SessionPlayerRegistration(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session", None)
-        super(SessionPlayerRegistration, self).__init__(*args, **kwargs)
+        self.passwords_display = kwargs.pop("passwords_display", True)
+        super(PlayerRegistrationForm, self).__init__(*args, **kwargs)
+        if not self.passwords_display:
+            self.fields.pop("password1")
+            self.fields.pop("password2")
+
+    def clean_password1(self):
+        password1 = self.cleaned_data["password1"]
+        if len(password1) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
+        return password1
 
     def clean_password2(self):
-        password1 = self.cleaned_data["password1"]
+        password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data["password2"]
-        if password1 != password2:
-            raise forms.ValidationError("The two passwords do not match.")
+
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match. Please try again.")
+
         return password2
 
     def clean_player_name(self):
         player_name = self.cleaned_data["player_name"].title()
         username = player_username(self.session, player_name)
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(
+            username=username
+        ).exists() or Player.objects.filter(session=self.session, name=player_name):
             raise forms.ValidationError(
                 "This player name is already used by someone in this session. Choose another "
                 "one."
@@ -294,7 +325,7 @@ class SessionGuestRegistration(forms.Form):
         guest_name = self.cleaned_data["guest_name"]
         username = guest_username(self.session, guest_name)
         if (
-            User.objects.filter(username=username).exists()
+            CustomUser.objects.filter(username=username).exists()
             or Player.objects.filter(name=guest_name).exists()
         ):
             raise forms.ValidationError(

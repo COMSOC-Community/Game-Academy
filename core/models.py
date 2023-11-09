@@ -1,7 +1,20 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, AbstractUser
 
 from gameserver.games import INSTALLED_GAMES_SETTING
+
+
+class CustomUser(AbstractUser):
+    is_player = models.BooleanField(blank=True, null=True, default=False)
+    is_guest_player = models.BooleanField(blank=True, null=True, default=False)
+
+    def display_name(self):
+        if self.is_player:
+            return self.players.first().name
+        return self.username
+
+    def __str__(self):
+        return self.username
 
 
 class Session(models.Model):
@@ -11,7 +24,7 @@ class Session(models.Model):
     can_register = models.BooleanField(default=True)
     need_registration = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
-    admins = models.ManyToManyField(User, related_name="administrated_sessions")
+    admins = models.ManyToManyField(CustomUser, related_name="administrated_sessions")
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     class Meta:
@@ -22,7 +35,9 @@ class Session(models.Model):
 
 
 class Player(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="player")
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="players"
+    )
     name = models.SlugField(max_length=100, blank=False, null=False)
     session = models.ForeignKey(
         Session, on_delete=models.CASCADE, blank=False, null=False

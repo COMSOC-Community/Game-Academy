@@ -13,7 +13,7 @@ urlpatterns = [
     re_path(
         r"^session/(?P<session_slug_name>[\w-]+)[/]?$",
         views.session_index,
-        name="index_session",
+        name="session_portal",
     ),
     re_path(
         r"^session/(?P<session_slug_name>[\w-]+)/home[/]?$",

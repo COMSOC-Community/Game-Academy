@@ -17,22 +17,17 @@
 
     <div class="navigation">
         <span class="navigation-button">
-            <a href="{% url 'core:index_session' session.slug_name %}">&#8610;&nbsp;To session index</a>
+            <a href="{% url 'core:session_portal' session.slug_name %}">&#8610;&nbsp;To session index</a>
         </span><br>
         <span class="navigation-button">
             <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
         </span>
     </div>
 
-    {% if player_user %}
-        <p>
-            Logged-in as <em>{{ player_user.name }}</em>.
-        </p>
-    {% else %}
-        <p>
-            Logged-in as <em>{{ request.user.username }}</em> (not a player).
-        </p>
-    {% endif %}
+    <p>
+        Logged-in as <em>{{ request.user.display_name }}</em>.
+    </p>
+
     <p>
         This is the admin page for the session {{ session.long_name }}. You will find here all the tools to manage
         your session. We provide below some links to the different sections of this page.
@@ -438,7 +433,7 @@
 
     <div class="navigation">
         <span class="navigation-button">
-            <a href="{% url 'core:index_session' session.slug_name %}">&#8610;&nbsp;To session index</a>
+            <a href="{% url 'core:session_portal' session.slug_name %}">&#8610;&nbsp;To session index</a>
         </span><br>
         <span class="navigation-button">
             <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
