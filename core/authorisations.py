@@ -1,7 +1,6 @@
-from core.constants import SESSION_MANAGER_GROUP
-
-
 def can_create_sessions(user):
-    if user.is_authenticated:
-        return user.is_staff or user.groups.filter(name=SESSION_MANAGER_GROUP)
-    return False
+    return user.is_authenticated and not user.is_player
+
+
+def is_session_admin(session, user):
+    return user.is_authenticated and (user in session.admins.all() or user.is_staff)

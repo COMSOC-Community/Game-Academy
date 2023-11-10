@@ -9,136 +9,133 @@
 {% block logout_next %}?next={% url 'core:session_portal' session.slug_name %}{% endblock %}
 
 {% block content %}
-    {% if session.visible or admin_user %}
-
-        {% if not session.visible %}
-            <section class="warning-section">
-                <p>This session is not visible, you are only seeing this page because you are an administrator of the session!</p>
-            </section>
-        {% endif %}
-
-        <section>
-            <p>
-                Welcome on the index page for the session {{ session.long_name }}. This is the entry door to the session.
-            </p>
-
-            <p>
-                To participate in a session, a user needs to have a player profile for the session.
-                If you already have a user account, you can log in with your user account and then add a player profile
-                to it.
-                Alternatively, you can create a player profile directly for this session, a user account will then be
-                created automatically for you. Note that if you do this, your account can only be used for this session
-                and you will need to create a new account/player profile to participate in other sessions.
-            </p>
+    {% if not session.visible %}
+        <section class="warning-section">
+            <p>This session is not visible, you are only seeing this page because you are an administrator of the session!</p>
         </section>
+    {% endif %}
 
-        <section>
-            <h2>Player Profile</h2>
-            {% if player_profile %}
-                <p>
-                    You are currently logged in under the user account <em>{{ request.user.display_name }}</em>. We have
-                    found a player profile linked to that account for this session.
-                </p>
+    <section>
+        <p>
+            Welcome on the index page for the session {{ session.long_name }}. This is the entry door to the session.
+        </p>
 
-                <p class="center-align">
-                    <span><a class="button" href="{% url 'core:session_home' session.slug_name %}">Join the session as {{ player_profile.name }}</a></span>
-                </p>
-            {% else %}
-                {% if registration_form %}
-                    {% if login_form or guest_form %}
-                        <div class="side-by-side-wrapper">
-                            <div class="side-by-side-box">
-                    {% endif %}
-                    <h3>Create</h3>
-                        {% if new_player %}
-                            <div class="form-success-message">
-                                <p>The player {{ new_player.name }} has been created. You can now use the login form.</p>
-                            </div>
-                        {% else %}
-                            {% if session.need_registration %}
-                                <p>
-                                    This session requires users to have a player profile to play. You can use the form below
-                                    to register as a player. You will then be able to log in.
-                                </p>
-                            {% else %}
-                                <p>
-                                    The registration is open for this session. Use the form below if you want to register. You can also
-                                    choose to continue as a guest.
-                                </p>
-                            {% endif %}
-                            {% if authenticated_user %}
-                                <p>
-                                    Since you are already logged in on your user account {{ request.user.display_name }},
-                                    you can create a player profile for this session by simply indicating a player name.
-                                    The password for you player will be the same as your user account's password.
-                                </p>
-                            {% endif %}
-                            {% if player_creation_error %}
-                                <p class="form-error">There was a general problem here: {{ player_creation_error }}. Please report that to the admin.</p>
-                            {% endif %}
-                            <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
-                                {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register as a Player' %}
-                            </form>
-                        {% endif %}
-                    {% if login_form or guest_form %}
-                        </div>
-                        <div class="side-by-side-box">
-                            <h3>Log in</h3>
-                    {% endif %}
-                {% else %}
-                {% endif %}
-                {% if session.need_registration %}
-                    <p>
-                        To access this session, you need to be logged into your player profile. You can do so by using
-                        the form below.
-                        {% if session.can_register %}
-                            If you have not yet registered as a player, please do so now, and then log in.
-                        {% else %}
-                            The registration form is now closed, please contact the session admin if you still need to register.
-                        {% endif %}
-                    </p>
-                {% else %}
-                    <p>
-                        You can choose to log in to continue, or to register as a guest. Logging in will allow you to
-                        save your actions in your player profile, something you cannot do as a guest.
-                    </p>
-                {% endif %}
+        <p>
+            To participate in a session, a user needs to have a player profile for the session.
+            If you already have a user account, you can log in with your user account and then add a player profile
+            to it.
+            Alternatively, you can create a player profile directly for this session, a user account will then be
+            created automatically for you. Note that if you do this, your account can only be used for this session
+            and you will need to create a new account/player profile to participate in other sessions.
+        </p>
+    </section>
 
-                {% if not registration_form and login_form and guest_form %}
+    <section>
+        <h2>Player Profile</h2>
+        {% if player_profile %}
+            <p>
+                You are currently logged in under the user account <em>{{ request.user.display_name }}</em>. We have
+                found a player profile linked to that account for this session.
+            </p>
+
+            <p class="center-align">
+                <span><a class="button" href="{% url 'core:session_home' session.slug_name %}">Join the session as {{ player_profile.name }}</a></span>
+            </p>
+        {% else %}
+            {% if registration_form %}
+                {% if login_form or guest_form %}
                     <div class="side-by-side-wrapper">
                         <div class="side-by-side-box">
                 {% endif %}
-
-                {% if login_form %}
-                    <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
-                        {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
-                    </form>
-                    {% if not registration_form and guest_form %}
+                <h3>Create</h3>
+                    {% if new_player %}
+                        <div class="form-success-message">
+                            <p>The player {{ new_player.name }} has been created. You can now use the login form.</p>
                         </div>
-                        <div class="side-by-side-box">
+                    {% else %}
+                        {% if session.need_registration %}
+                            <p>
+                                This session requires users to have a player profile to play. You can use the form below
+                                to register as a player. You will then be able to log in.
+                            </p>
+                        {% else %}
+                            <p>
+                                The registration is open for this session. Use the form below if you want to register. You can also
+                                choose to continue as a guest.
+                            </p>
+                        {% endif %}
+                        {% if authenticated_user %}
+                            <p>
+                                Since you are already logged in on your user account {{ request.user.display_name }},
+                                you can create a player profile for this session by simply indicating a player name.
+                                The password for you player will be the same as your user account's password.
+                            </p>
+                        {% endif %}
+                        {% if player_creation_error %}
+                            <p class="form-error">There was a general problem here: {{ player_creation_error }}. Please report that to the admin.</p>
+                        {% endif %}
+                        <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
+                            {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register as a Player' %}
+                        </form>
                     {% endif %}
+                {% if login_form or guest_form %}
+                    </div>
+                    <div class="side-by-side-box">
+                        <h3>Log in</h3>
                 {% endif %}
+            {% else %}
+            {% endif %}
+            {% if session.need_registration %}
+                <p>
+                    To access this session, you need to be logged into your player profile. You can do so by using
+                    the form below.
+                    {% if session.can_register %}
+                        If you have not yet registered as a player, please do so now, and then log in.
+                    {% else %}
+                        The registration form is now closed, please contact the session admin if you still need to register.
+                    {% endif %}
+                </p>
+            {% else %}
+                <p>
+                    You can choose to log in to continue, or to register as a guest. Logging in will allow you to
+                    save your actions in your player profile, something you cannot do as a guest.
+                </p>
+            {% endif %}
 
-                {% if guest_form %}
-                    {% if login_form and registration_form %}
-                        <div class="hr-separator"></div>
-                    {% endif %}
-                    <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
-                        {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
-                    </form>
-                    {% if not registration_form and login_form %}
-                        </div>
-                        </div>
-                    {% endif %}
-                {% endif %}
+            {% if not registration_form and login_form and guest_form %}
+                <div class="side-by-side-wrapper">
+                    <div class="side-by-side-box">
+            {% endif %}
 
-                {% if registration_form %}
-                    {% if login_form or guest_form %}
-                        </div>
-                        </div>
-                    {% endif %}
+            {% if login_form %}
+                <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
+                    {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
+                </form>
+                {% if not registration_form and guest_form %}
+                    </div>
+                    <div class="side-by-side-box">
                 {% endif %}
             {% endif %}
-        </section>
-    {% endif %}
+
+            {% if guest_form %}
+                {% if login_form and registration_form %}
+                    <div class="hr-separator"></div>
+                {% endif %}
+                <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
+                    {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
+                </form>
+                {% if not registration_form and login_form %}
+                    </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {% if registration_form %}
+                {% if login_form or guest_form %}
+                    </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </section>
 {% endblock %}

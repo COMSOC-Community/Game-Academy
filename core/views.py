@@ -1,13 +1,14 @@
 import logging
-import os.path
 
 from django.contrib.auth import login, logout, authenticate
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import Group
+from django.urls import reverse
 
-from .authorisations import can_create_sessions
+from .authorisations import can_create_sessions, is_session_admin
 from .constants import guest_password, SESSION_GROUP_PREFIX
+from .decorators import session_visible_or_admin_decorator, session_admin_decorator
 from .forms import (
     LoginForm,
     PlayerLoginForm,
@@ -17,7 +18,6 @@ from .forms import (
     SessionGuestRegistration,
     SessionFinderForm,
     CreateSessionForm,
-    ModifySessionForm,
     CreateGameForm,
     ModifyGameForm,
     CreateTeamForm,
@@ -52,10 +52,26 @@ def error_500_view(request):
     return error_render(request, "500.html", 500)
 
 
+def force_player_logout(request, session_slug_name):
+    session = get_object_or_404(Session, slug_name=session_slug_name)
+    if request.method == 'POST':
+        if 'logout_and_continue' in request.POST:
+            logout(request)
+            if "next" in request.GET:
+                return redirect(request.GET["next"])
+            return redirect("core:index")
+        else:
+            raise Http404("POST request but unknown form type")
+    if "prev" in request.GET:
+        url_back = request.GET["prev"]
+    else:
+        url_back = reverse('core:session_home', args=(session.slug_name,))
+    return render(request, "core/force_player_logout.html", {"session": session, "url_back": url_back})
+
+
 # ====================
 #    GENERAL INDEX
 # ====================
-
 
 def index(request):
     user_created = False
@@ -172,140 +188,133 @@ def create_session(request):
     return render(request, "core/create_session.html", context)
 
 
-def is_session_admin(session, user):
-    return user.is_authenticated and (user in session.admins.all() or user.is_staff)
-
-
-def session_index(request, session_slug_name):
+@session_visible_or_admin_decorator
+def session_portal(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
     is_user_admin = is_session_admin(session, request.user)
 
-    if session.visible or is_user_admin:
-        authenticated_user = request.user.is_authenticated
-        context = {
-            "session": session,
-            "is_user_admin": is_user_admin,
-        }
-        if request.method == "POST":
-            print(request.POST)
-            if "registration_form" in request.POST and session.can_register:
-                registration_form = PlayerRegistrationForm(
-                    request.POST,
-                    session=session,
-                    passwords_display=not authenticated_user,
-                )
-                if registration_form.is_valid():
-                    if authenticated_user:
-                        user = request.user
-                    else:
-                        user = CustomUser.objects.create_user(
-                            username=registration_form.cleaned_data["player_username"],
-                            password=registration_form.cleaned_data["password1"],
-                            is_player=True,
-                        )
-
-                    try:
-                        new_player = Player.objects.create(
-                            name=registration_form.cleaned_data["player_name"],
-                            user=user,
-                            session=session,
-                        )
-                    except Exception as e:
-                        # Problem when creating new player, we clean up the mess
-                        if not authenticated_user:
-                            user.delete()
-                        logger = logging.getLogger("Core_SessionPortal")
-                        logger.exception("An exception occurred while creating a player", e)
-                        context["player_creation_error"] = repr(e)
-                    if authenticated_user:
-                        # If registering a player for a user already logged-in, we redirect to home
-                        return redirect("core:session_home", session_slug_name=session.slug_name)
-                    if "player_creation_error" not in context:
-                        # Otherwise we clean the data and stay on the same page
-                        context["new_player"] = new_player
+    authenticated_user = request.user.is_authenticated
+    context = {
+        "session": session,
+        "is_user_admin": is_user_admin,
+    }
+    if request.method == "POST":
+        print(request.POST)
+        if "registration_form" in request.POST and session.can_register:
+            registration_form = PlayerRegistrationForm(
+                request.POST,
+                session=session,
+                passwords_display=not authenticated_user,
+            )
+            if registration_form.is_valid():
+                if authenticated_user:
+                    user = request.user
                 else:
-                    context["registration_form"] = registration_form
-            elif "login_form" in request.POST:
-                login_form = PlayerLoginForm(request.POST, session=session)
-                if login_form.is_valid():
-                    user = authenticate(
-                        username=login_form.cleaned_data["user"].username,
-                        password=login_form.cleaned_data["password"],
+                    user = CustomUser.objects.create_user(
+                        username=registration_form.cleaned_data["player_username"],
+                        password=registration_form.cleaned_data["password1"],
+                        is_player=True,
                     )
+
+                try:
+                    new_player = Player.objects.create(
+                        name=registration_form.cleaned_data["player_name"],
+                        user=user,
+                        session=session,
+                    )
+                except Exception as e:
+                    # Problem when creating new player, we clean up the mess
+                    if not authenticated_user:
+                        user.delete()
+                    logger = logging.getLogger("Core_SessionPortal")
+                    logger.exception("An exception occurred while creating a player", e)
+                    context["player_creation_error"] = repr(e)
+                if authenticated_user:
+                    # If registering a player for a user already logged-in, we redirect to home
+                    return redirect("core:session_home", session_slug_name=session.slug_name)
+                if "player_creation_error" not in context:
+                    # Otherwise we clean the data and stay on the same page
+                    context["new_player"] = new_player
+            else:
+                context["registration_form"] = registration_form
+        elif "login_form" in request.POST:
+            login_form = PlayerLoginForm(request.POST, session=session)
+            if login_form.is_valid():
+                user = authenticate(
+                    username=login_form.cleaned_data["user"].username,
+                    password=login_form.cleaned_data["password"],
+                )
+                if user:
+                    login(request, user)
+                    if "player" in login_form.cleaned_data:
+                        # If we are loging in a player, we redirected to home
+                        return redirect(
+                            "core:session_home", session_slug_name=session.slug_name
+                        )
+                    # If not, we are loging in a user, thus we stay here
+                    authenticated_user = True
+                # Something weird happened: form is valid but authenticate fails
+                context["general_login_error"] = True
+            else:
+                context["login_form"] = login_form
+
+        elif "guest_form" in request.POST and not session.need_registration:
+            guest_form = SessionGuestRegistration(request.POST, session=session)
+            if guest_form.is_valid():
+                user = CustomUser.objects.create_user(
+                    username=guest_form.cleaned_data["guest_username"],
+                    password=guest_password(
+                        guest_form.cleaned_data["guest_username"]
+                    ),
+                    is_player=True,
+                    is_guest_player=True,
+                )
+
+                try:
+                    Player.objects.create(
+                        name=guest_form.cleaned_data["guest_name"],
+                        user=user,
+                        session=session,
+                        is_guest=True,
+                    )
+                except Exception as e:
+                    # We know the user was initially not authenticated, so we can safely delete it.
+                    user.delete()
+                    logger = logging.getLogger("Core_SessionPortal")
+                    logger.exception("An exception occurred while creating a guest", e)
+                    context["guest_creation_error"] = repr(e)
+                if "guest_creation_error" not in context:
+                    user = authenticate(username=user.username, password=guest_password(user.username))
                     if user:
                         login(request, user)
-                        if "player" in login_form.cleaned_data:
-                            # If we are loging in a player, we redirected to home
-                            return redirect(
-                                "core:session_home", session_slug_name=session.slug_name
-                            )
-                        # If not, we are loging in a user, thus we stay here
-                        authenticated_user = True
+                        return redirect("core:session_home", session_slug_name=session.slug_name)
                     # Something weird happened: form is valid but authenticate fails
                     context["general_login_error"] = True
-                else:
-                    context["login_form"] = login_form
-
-            elif "guest_form" in request.POST and not session.need_registration:
-                guest_form = SessionGuestRegistration(request.POST, session=session)
-                if guest_form.is_valid():
-                    user = CustomUser.objects.create_user(
-                        username=guest_form.cleaned_data["guest_username"],
-                        password=guest_password(
-                            guest_form.cleaned_data["guest_username"]
-                        ),
-                        is_player=True,
-                        is_guest_player=True,
-                    )
-
-                    try:
-                        Player.objects.create(
-                            name=guest_form.cleaned_data["guest_name"],
-                            user=user,
-                            session=session,
-                            is_guest=True,
-                        )
-                    except Exception as e:
-                        # We know the user was initially not authenticated, so we can safely delete it.
-                        user.delete()
-                        logger = logging.getLogger("Core_SessionPortal")
-                        logger.exception("An exception occurred while creating a guest", e)
-                        context["guest_creation_error"] = repr(e)
-                    if "guest_creation_error" not in context:
-                        user = authenticate(username=user.username, password=guest_password(user.username))
-                        if user:
-                            login(request, user)
-                            return redirect("core:session_home", session_slug_name=session.slug_name)
-                        # Something weird happened: form is valid but authenticate fails
-                        context["general_login_error"] = True
-                else:
-                    context["guest_form"] = guest_form
             else:
-                raise Http404("POST request received, but no valid form type was found")
+                context["guest_form"] = guest_form
+        else:
+            raise Http404("POST request received, but no valid form type was found")
 
-        # This value changes when login a user
-        context["authenticated_user"] = authenticated_user
+    # This value changes when login a user
+    context["authenticated_user"] = authenticated_user
 
-        # We put in the context all the forms that are needed and not already in there
-        if session.can_register and "registration_form" not in context:
-            context["registration_form"] = PlayerRegistrationForm(session=session,
-                                                                  passwords_display=not authenticated_user)
-        if not session.need_registration and "guest_from" not in context:
-            context["guest_form"] = SessionGuestRegistration(session=session)
-        if authenticated_user:
-            player_profile = Player.objects.filter(session=session, user=request.user)
-            if player_profile.exists():
-                player_profile = player_profile.first()
-                context["player_profile"] = player_profile
-        elif "login_form" not in context:
-            context["login_form"] = PlayerLoginForm(session=session)
-        return render(request, "core/session_portal.html", context)
-    raise Http404(
-        f"The session {session.name} is either not visible, or a user that is not administrating it"
-        " is trying to access it."
-    )
+    # We put in the context all the forms that are needed and not already in there
+    if session.can_register and "registration_form" not in context:
+        context["registration_form"] = PlayerRegistrationForm(session=session,
+                                                              passwords_display=not authenticated_user)
+    if not session.need_registration and "guest_from" not in context:
+        context["guest_form"] = SessionGuestRegistration(session=session)
+    if authenticated_user:
+        player_profile = Player.objects.filter(session=session, user=request.user)
+        if player_profile.exists():
+            player_profile = player_profile.first()
+            context["player_profile"] = player_profile
+    elif "login_form" not in context:
+        context["login_form"] = PlayerLoginForm(session=session)
+    return render(request, "core/session_portal.html", context)
 
 
+@session_visible_or_admin_decorator
 def session_home(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
     games = Game.objects.filter(session=session, visible=True)
@@ -323,189 +332,193 @@ def session_home(request, session_slug_name):
     return render(request, "core/session_home.html", locals())
 
 
+@session_admin_decorator
 def session_admin(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
-    admin_user = is_session_admin(session, request.user)
 
-    if admin_user:
-        try:
-            player_user = Player.objects.get(session=session, user=request.user)
-        except Player.DoesNotExist:
-            player_user = None
+    context = {}
 
-        # Modify session form
-        if request.method == "POST":
-            form_type = request.POST["form_type"]
-            if form_type == "modify_session_form":
-                modify_session_form = ModifySessionForm(request.POST, session=session)
-                if modify_session_form.is_valid():
-                    session.name = modify_session_form.cleaned_data["name"]
-                    session.long_name = modify_session_form.cleaned_data["long_name"]
-                    session.need_registration = modify_session_form.cleaned_data[
-                        "need_registration"
-                    ]
-                    session.can_register = modify_session_form.cleaned_data[
-                        "can_register"
-                    ]
-                    session.visible = modify_session_form.cleaned_data["visible"]
-                    session.save()
+    # Modify session form
+    if request.method == "POST":
+        if "modify_session_form" in request.POST:
+            modify_session_form = CreateSessionForm(request.POST, session=session)
+            if modify_session_form.is_valid():
+                session.name = modify_session_form.cleaned_data["name"]
+                session.long_name = modify_session_form.cleaned_data["long_name"]
+                session.need_registration = modify_session_form.cleaned_data[
+                    "need_registration"
+                ]
+                session.can_register = modify_session_form.cleaned_data[
+                    "can_register"
+                ]
+                session.visible = modify_session_form.cleaned_data["visible"]
+                session.save()
 
-                    session_modified = True
-
-                    modify_session_form = ModifySessionForm(session=session)
-            else:
-                modify_session_form = ModifySessionForm(session=session)
+                context["session_modified"] = True
+                modify_session_form = CreateSessionForm(session=session)
         else:
-            modify_session_form = ModifySessionForm(session=session)
+            raise Http404("POST request but form type unknown.")
+    else:
+        modify_session_form = CreateSessionForm(session=session)
 
-        # Add player form
-        if request.method == "POST":
-            form_type = request.POST["form_type"]
-            if form_type == "add_player_form":
-                add_player_form = PlayerRegistrationForm(request.POST, session=session)
-                if add_player_form.is_valid():
-                    user = CustomUser.objects.create_user(
-                        username=add_player_form.cleaned_data["player_username"],
-                        password=add_player_form.cleaned_data["password1"],
-                        is_player=True,
+    context["session"] = session
+    context["modify_session_form"] = modify_session_form
+    return render(request, "core/session_admin.html", context)
+
+
+@session_visible_or_admin_decorator
+def session_admin_games(request, session_slug_name):
+    session = get_object_or_404(Session, slug_name=session_slug_name)
+    # Create game form
+    if request.method == "POST":
+        form_type = request.POST["form_type"]
+        if form_type == "create_game_form":
+            create_game_form = CreateGameForm(request.POST, session=session)
+            if create_game_form.is_valid():
+                try:
+                    new_game = Game.objects.create(
+                        game_type=create_game_form.cleaned_data["game_type"],
+                        name=create_game_form.cleaned_data["name"],
+                        url_tag=create_game_form.cleaned_data["url_tag"],
+                        session=session,
+                        playable=create_game_form.cleaned_data["playable"],
+                        visible=create_game_form.cleaned_data["visible"],
+                        results_visible=create_game_form.cleaned_data[
+                            "results_visible"
+                        ],
+                        need_teams=create_game_form.cleaned_data["need_teams"],
+                        description=create_game_form.cleaned_data["description"],
                     )
-                    try:
-                        new_player = Player.objects.create(
-                            name=add_player_form.cleaned_data["player_name"],
-                            user=user,
-                            session=session,
-                        )
-                        player_added = True
-                        add_player_form = PlayerRegistrationForm(session=session)
-                    except Exception as e:
-                        user.delete()
-                        add_player_error = e
-            else:
-                add_player_form = PlayerRegistrationForm(session=session)
-        else:
-            add_player_form = PlayerRegistrationForm(session=session)
-
-        players = Player.objects.filter(session=session, is_guest=False).exclude(
-            user__id__in=session.admins.all()
-        )
-        guests = Player.objects.filter(session=session, is_guest=True)
-
-        # Delete player form
-        if request.method == "POST":
-            form_type = request.POST["form_type"]
-            if form_type in ("delete_player_form", "delete_guest_form"):
-                player_id = request.POST["remove_player_id"]
-                player = Player.objects.get(id=player_id)
-                if form_type == "delete_player_form":
-                    deleted_player_name = player.name
-                elif form_type == "delete_guest_form":
-                    delete_guest_name = player.name
-                player.user.delete()
-                player.delete()
-
-        # Password updates form
-        update_password_forms = {}
-        if (
-            request.method == "POST"
-            and request.POST["form_type"] == "update_password_form"
-        ):
-            player_id = int(request.POST["update_password_player_id"])
-            for player in players:
-                if player.id == player_id:
-                    update_password_form = UpdatePasswordForm(
-                        request.POST, session=session
-                    )
-                    update_password_forms[player] = update_password_form
-                    if update_password_form.is_valid():
-                        player.user.set_password(
-                            update_password_form.cleaned_data["password2"]
-                        )
-                        player.user.save()
-                        password_updated_player_name = player.name
-                else:
-                    update_password_forms[player] = UpdatePasswordForm(session=session)
-        else:
-            for player in players:
-                update_password_forms[player] = UpdatePasswordForm(session=session)
-
-        # Create game form
-        if request.method == "POST":
-            form_type = request.POST["form_type"]
-            if form_type == "create_game_form":
-                create_game_form = CreateGameForm(request.POST, session=session)
-                if create_game_form.is_valid():
-                    try:
-                        new_game = Game.objects.create(
-                            game_type=create_game_form.cleaned_data["game_type"],
-                            name=create_game_form.cleaned_data["name"],
-                            url_tag=create_game_form.cleaned_data["url_tag"],
-                            session=session,
-                            playable=create_game_form.cleaned_data["playable"],
-                            visible=create_game_form.cleaned_data["visible"],
-                            results_visible=create_game_form.cleaned_data[
-                                "results_visible"
-                            ],
-                            need_teams=create_game_form.cleaned_data["need_teams"],
-                            description=create_game_form.cleaned_data["description"],
-                        )
-                        create_game_form = CreateGameForm(session=session)
-                        game_created = True
-                    except Exception as e:
-                        game_creation_error = repr(e)
-            else:
-                create_game_form = CreateGameForm(session=session)
+                    create_game_form = CreateGameForm(session=session)
+                    game_created = True
+                except Exception as e:
+                    game_creation_error = repr(e)
         else:
             create_game_form = CreateGameForm(session=session)
+    else:
+        create_game_form = CreateGameForm(session=session)
 
-        # Delete game form
+    # Delete game form
+    if request.method == "POST":
+        form_type = request.POST["form_type"]
+        if form_type == "delete_game_form":
+            deleted_game_id = request.POST["remove_game_id"]
+            deleted_game = Game.objects.get(id=deleted_game_id)
+            deleted_game_name = deleted_game.name
+            deleted_game.delete()
+
+    games = Game.objects.filter(session=session)
+
+    # Modify game form
+    modify_game_forms = []
+    for game in games:
         if request.method == "POST":
             form_type = request.POST["form_type"]
-            if form_type == "delete_game_form":
-                deleted_game_id = request.POST["remove_game_id"]
-                deleted_game = Game.objects.get(id=deleted_game_id)
-                deleted_game_name = deleted_game.name
-                deleted_game.delete()
+            if form_type == "modify_game_form_" + str(game.url_tag):
+                modify_game_form = ModifyGameForm(
+                    request.POST, session=session, game=game, prefix=game.url_tag
+                )
+                if modify_game_form.is_valid():
+                    game.name = modify_game_form.cleaned_data["name"]
+                    game.url_tag = modify_game_form.cleaned_data["url_tag"]
+                    game.playable = modify_game_form.cleaned_data["playable"]
+                    game.visible = modify_game_form.cleaned_data["visible"]
+                    game.results_visible = modify_game_form.cleaned_data[
+                        "results_visible"
+                    ]
+                    game.need_teams = modify_game_form.cleaned_data["need_teams"]
+                    game.description = modify_game_form.cleaned_data["description"]
+                    game.save()
 
-        games = Game.objects.filter(session=session)
-
-        # Modify game form
-        modify_game_forms = []
-        for game in games:
-            if request.method == "POST":
-                form_type = request.POST["form_type"]
-                if form_type == "modify_game_form_" + str(game.url_tag):
-                    modify_game_form = ModifyGameForm(
-                        request.POST, session=session, game=game, prefix=game.url_tag
-                    )
-                    if modify_game_form.is_valid():
-                        game.name = modify_game_form.cleaned_data["name"]
-                        game.url_tag = modify_game_form.cleaned_data["url_tag"]
-                        game.playable = modify_game_form.cleaned_data["playable"]
-                        game.visible = modify_game_form.cleaned_data["visible"]
-                        game.results_visible = modify_game_form.cleaned_data[
-                            "results_visible"
-                        ]
-                        game.need_teams = modify_game_form.cleaned_data["need_teams"]
-                        game.description = modify_game_form.cleaned_data["description"]
-                        game.save()
-
-                        modify_game_form = ModifyGameForm(
-                            session=session, game=game, prefix=game.url_tag
-                        )
-
-                        modified_game_name = game.name
-                        modified_game_form = modify_game_form
-                else:
                     modify_game_form = ModifyGameForm(
                         session=session, game=game, prefix=game.url_tag
                     )
+
+                    modified_game_name = game.name
+                    modified_game_form = modify_game_form
             else:
                 modify_game_form = ModifyGameForm(
                     session=session, game=game, prefix=game.url_tag
                 )
-            modify_game_forms.append(modify_game_form)
+        else:
+            modify_game_form = ModifyGameForm(
+                session=session, game=game, prefix=game.url_tag
+            )
+        modify_game_forms.append(modify_game_form)
 
-    return render(request, "core/session_admin.html", locals())
+
+@session_visible_or_admin_decorator
+def session_admin_players(request, session_slug_name):
+    session = get_object_or_404(Session, slug_name=session_slug_name)
+    # Add player form
+    if request.method == "POST":
+        form_type = request.POST["form_type"]
+        if form_type == "add_player_form":
+            add_player_form = PlayerRegistrationForm(request.POST, session=session)
+            if add_player_form.is_valid():
+                user = CustomUser.objects.create_user(
+                    username=add_player_form.cleaned_data["player_username"],
+                    password=add_player_form.cleaned_data["password1"],
+                    is_player=True,
+                )
+                try:
+                    new_player = Player.objects.create(
+                        name=add_player_form.cleaned_data["player_name"],
+                        user=user,
+                        session=session,
+                    )
+                    player_added = True
+                    add_player_form = PlayerRegistrationForm(session=session)
+                except Exception as e:
+                    user.delete()
+                    add_player_error = e
+        else:
+            add_player_form = PlayerRegistrationForm(session=session)
+    else:
+        add_player_form = PlayerRegistrationForm(session=session)
+
+    players = Player.objects.filter(session=session, is_guest=False).exclude(
+        user__id__in=session.admins.all()
+    )
+    guests = Player.objects.filter(session=session, is_guest=True)
+
+    # Delete player form
+    if request.method == "POST":
+        form_type = request.POST["form_type"]
+        if form_type in ("delete_player_form", "delete_guest_form"):
+            player_id = request.POST["remove_player_id"]
+            player = Player.objects.get(id=player_id)
+            if form_type == "delete_player_form":
+                deleted_player_name = player.name
+            elif form_type == "delete_guest_form":
+                delete_guest_name = player.name
+            player.user.delete()
+            player.delete()
+
+    # Password updates form
+    update_password_forms = {}
+    if (
+        request.method == "POST"
+        and request.POST["form_type"] == "update_password_form"
+    ):
+        player_id = int(request.POST["update_password_player_id"])
+        for player in players:
+            if player.id == player_id:
+                update_password_form = UpdatePasswordForm(
+                    request.POST, session=session
+                )
+                update_password_forms[player] = update_password_form
+                if update_password_form.is_valid():
+                    player.user.set_password(
+                        update_password_form.cleaned_data["password2"]
+                    )
+                    player.user.save()
+                    password_updated_player_name = player.name
+            else:
+                update_password_forms[player] = UpdatePasswordForm(session=session)
+    else:
+        for player in players:
+            update_password_forms[player] = UpdatePasswordForm(session=session)
 
 
 def team(request, session_slug_name, game_url_tag):

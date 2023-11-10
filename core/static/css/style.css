@@ -138,6 +138,19 @@ body {
     min-height: 100vh;
 }
 
+#force-player-logout {
+	background-color: var(--color-gray-verydark);
+    color: white;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#force-player-logout .button {
+    background-color: var(--color-green-dark);
+}
+
 header {
 	background-color: var(--color-gray-verydark);
 	color: white;
@@ -173,6 +186,11 @@ section {
 	background-color: white;
 	border: 1px solid var(--color-gray-verydark);
 	border-radius: 5px;
+}
+
+.warning-section {
+	background: var(--color-orange-verylight);
+	border: var(--color-orange-dark) solid 2px;
 }
 
 footer {

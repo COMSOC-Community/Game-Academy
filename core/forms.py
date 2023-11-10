@@ -148,9 +148,27 @@ class CreateSessionForm(forms.Form):
         "the session. It is useful to prepare things in advance for instance.",
     )
 
+    def __init__(self, *args, **kwargs):
+        self.session = None  # Not none if session is passed, i.e., the form is used to modify a session
+        if "session" in kwargs:
+            self.session = kwargs.pop("session", None)
+            kwargs.update(
+                initial={
+                    "slug_name": self.session.slug_name,
+                    "name": self.session.name,
+                    "long_name": self.session.long_name,
+                    "need_registration": self.session.need_registration,
+                    "can_register": self.session.can_register,
+                    "visible": self.session.visible,
+                }
+            )
+        super(CreateSessionForm, self).__init__(*args, **kwargs)
+        if self.session:
+            self.fields["slug_name"].disabled = True
+
     def clean_slug_name(self):
         slug_name = self.cleaned_data["slug_name"]
-        if Session.objects.filter(slug_name=slug_name).exists():
+        if not self.session and Session.objects.filter(slug_name=slug_name).exists():
             raise forms.ValidationError(
                 "A session with this URL tag already exists. It has to be unique."
             )
@@ -158,7 +176,8 @@ class CreateSessionForm(forms.Form):
 
     def clean_name(self):
         name = self.cleaned_data["name"]
-        if Session.objects.filter(name=name).exists():
+        new_name = self.session and name != self.session.name
+        if new_name and Session.objects.filter(name=name).exists():
             raise forms.ValidationError(
                 "A session with this name already exists. It has to be unique."
             )
@@ -166,7 +185,8 @@ class CreateSessionForm(forms.Form):
 
     def clean_long_name(self):
         long_name = self.cleaned_data["long_name"]
-        if Session.objects.filter(long_name=long_name).exists():
+        new_long_name = self.session and long_name != self.session.long_name
+        if new_long_name and Session.objects.filter(long_name=long_name).exists():
             raise forms.ValidationError(
                 "A session with this long name already exists. It has to be unique."
             )
@@ -335,82 +355,6 @@ class SessionGuestRegistration(forms.Form):
         else:
             self.cleaned_data["guest_username"] = username
             return guest_name
-
-
-class ModifySessionForm(forms.Form):
-    name = forms.CharField(
-        label="Name of the session",
-        label_suffix="",
-        max_length=Session._meta.get_field("name").max_length,
-        help_text="The name of the session is the name commonly used to refer to the session. It is "
-        "typically the string used to find the session on the main page of the website, "
-        "or the one showed on the title of the tab in the browser.",
-    )
-    long_name = forms.CharField(
-        label="Long name of the session",
-        label_suffix="",
-        max_length=Session._meta.get_field("long_name").max_length,
-        help_text="The long name of the session is a more descriptive title. It is mainly used "
-        "in paragraphs, or titles.",
-    )
-    need_registration = forms.BooleanField(
-        label="Registration needed",
-        label_suffix="",
-        initial=True,
-        required=False,
-        help_text="If registration is needed, only registered players will be able "
-        "to play within the session. Otherwise, there will be an option "
-        "to play as a guest.",
-    )
-    can_register = forms.BooleanField(
-        label="Registration open",
-        label_suffix="",
-        initial=False,
-        required=False,
-        help_text="If the registration is open users can register to the session.",
-    )
-    visible = forms.BooleanField(
-        label="Visible",
-        label_suffix="",
-        initial=True,
-        required=False,
-        help_text="If the session is not visible, only admins can see the pages related to "
-        "the session. It is useful to prepare things in advance for instance.",
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
-
-        kwargs.update(
-            initial={
-                "name": self.session.name,
-                "long_name": self.session.long_name,
-                "need_registration": self.session.need_registration,
-                "can_register": self.session.can_register,
-                "visible": self.session.visible,
-            }
-        )
-
-        super(ModifySessionForm, self).__init__(*args, **kwargs)
-
-    def clean_name(self):
-        name = self.cleaned_data["name"]
-        if name != self.session.name and Session.objects.filter(name=name).exists():
-            raise forms.ValidationError(
-                "A session with this name already exists. It has to be unique."
-            )
-        return name
-
-    def clean_long_name(self):
-        long_name = self.cleaned_data["long_name"]
-        if (
-            long_name != self.session.long_name
-            and Session.objects.filter(long_name=long_name).exists()
-        ):
-            raise forms.ValidationError(
-                "A session with this long name already exists. It has to be unique."
-            )
-        return long_name
 
 
 class CreateGameForm(forms.Form):

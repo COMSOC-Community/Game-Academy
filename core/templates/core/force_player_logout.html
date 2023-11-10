@@ -1,0 +1,24 @@
+{% include 'include/html_header.html' %}
+
+<body id="force-player-logout">
+
+<h1>Leaving your session</h1>
+
+<p class="center-align">
+    Your account is limited to the session {{ session.name }} and you are leaving its scope. Before continuing you
+    need to log out.
+</p>
+
+<div class="side-by-side-wrapper">
+    <div class="side-by-side-box">
+        <form action="{% url 'core:force_player_logout' session.slug_name %}" method="post">
+            {% csrf_token %}
+        <button type="submit" class="button" name="logout_and_continue">Logout and Continue</button>
+    </form>
+    </div>
+    <div class="side-by-side-box">
+        <a href="{{ url_back }}" class="button">Get Back to Session</a>
+    </div>
+</div>
+
+</body>

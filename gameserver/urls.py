@@ -21,7 +21,7 @@ urlpatterns = [
 for game_setting in INSTALLED_GAMES_SETTING.values():
     urlpatterns.append(
         re_path(
-            r"^session/(?P<session_slug_name>[\w-]+)/"
+            r"^s/(?P<session_slug_name>[\w-]+)/"
             + re.escape(str(game_setting.url_tag))
             + r"/(?P<game_url_tag>[\w-]+)/",
             include(
