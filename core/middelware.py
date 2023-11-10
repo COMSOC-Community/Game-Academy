@@ -26,7 +26,6 @@ class EnforceSessionScopeMiddelware(AuthenticationMiddleware):
         accessed_session_slug = None
         if path.startswith(SESSION_ROOT_PATH):
             accessed_session_slug = path.split("/")[SESSION_SLUG_POSITION]
-        print(accessed_session_slug)
         if not accessed_session_slug or accessed_session_slug != session.slug_name:
             response = redirect("core:force_player_logout", session.slug_name)
             response[
