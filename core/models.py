@@ -25,7 +25,6 @@ class Session(models.Model):
     need_registration = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
     admins = models.ManyToManyField(CustomUser, related_name="administrated_sessions")
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ["slug_name"]
@@ -40,7 +39,7 @@ class Player(models.Model):
     )
     name = models.SlugField(max_length=100, blank=False, null=False)
     session = models.ForeignKey(
-        Session, on_delete=models.CASCADE, blank=False, null=False
+        Session, on_delete=models.CASCADE, blank=False, null=False, related_name="players"
     )
     is_guest = models.BooleanField(default=False)
 

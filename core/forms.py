@@ -149,9 +149,8 @@ class CreateSessionForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = None  # Not none if session is passed, i.e., the form is used to modify a session
-        if "session" in kwargs:
-            self.session = kwargs.pop("session", None)
+        self.session = kwargs.pop("session", None)  # Not none if session is passed, i.e., the form is used to modify a session
+        if self.session:
             kwargs.update(
                 initial={
                     "slug_name": self.session.slug_name,
@@ -176,7 +175,7 @@ class CreateSessionForm(forms.Form):
 
     def clean_name(self):
         name = self.cleaned_data["name"]
-        new_name = self.session and name != self.session.name
+        new_name = not self.session or name != self.session.name
         if new_name and Session.objects.filter(name=name).exists():
             raise forms.ValidationError(
                 "A session with this name already exists. It has to be unique."
@@ -185,7 +184,7 @@ class CreateSessionForm(forms.Form):
 
     def clean_long_name(self):
         long_name = self.cleaned_data["long_name"]
-        new_long_name = self.session and long_name != self.session.long_name
+        new_long_name = not self.session or long_name != self.session.long_name
         if new_long_name and Session.objects.filter(long_name=long_name).exists():
             raise forms.ValidationError(
                 "A session with this long name already exists. It has to be unique."
@@ -217,10 +216,8 @@ class PlayerLoginForm(forms.Form):
 
     def clean(self):
         super().clean()
-
         player_name = self.cleaned_data["player_name"]
         user = None
-        print(self.cleaned_data["search_user"])
         if self.cleaned_data["search_user"]:
             user = CustomUser.objects.filter(username=player_name)
             if user.exists():
@@ -423,82 +420,37 @@ class CreateGameForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session", None)
-        super(CreateGameForm, self).__init__(*args, **kwargs)
-
-    def clean_name(self):
-        name = self.cleaned_data["name"]
-        if Game.objects.filter(session=self.session, name=name).exists():
-            raise forms.ValidationError(
-                "A game with this name already exists for this session."
-            )
-        else:
-            return name
-
-    def clean_url_tag(self):
-        url_tag = self.cleaned_data["url_tag"]
-        if Game.objects.filter(session=self.session, url_tag=url_tag).exists():
-            raise forms.ValidationError(
-                "A game with this URL tag already exists for this session."
-            )
-        else:
-            return url_tag
-
-
-class ModifyGameForm(forms.Form):
-    name = forms.CharField(label="Name", label_suffix="", max_length=100)
-    url_tag = forms.SlugField(label="URL tag", label_suffix="", max_length=50)
-    playable = forms.BooleanField(
-        label="Can be played", label_suffix="", required=False, initial=False
-    )
-    visible = forms.BooleanField(
-        label="Is visible", label_suffix="", required=False, initial=False
-    )
-    results_visible = forms.BooleanField(
-        label="Results visible", label_suffix="", required=False, initial=False
-    )
-    need_teams = forms.BooleanField(
-        label="Played in teams", label_suffix="", required=False
-    )
-    description = forms.CharField(
-        label="Description", label_suffix="", widget=forms.Textarea()
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
         self.game = kwargs.pop("game", None)
-
-        kwargs.update(
-            initial={
-                "name": self.game.name,
-                "url_tag": self.game.url_tag,
-                "playable": self.game.playable,
-                "visible": self.game.visible,
-                "results_visible": self.game.results_visible,
-                "need_teams": self.game.need_teams,
-                "description": self.game.description,
-            }
-        )
-
-        super(ModifyGameForm, self).__init__(*args, **kwargs)
+        if self.game:
+            kwargs.update(
+                initial={
+                    "game_type": self.game.game_type,
+                    "name": self.game.name,
+                    "url_tag": self.game.url_tag,
+                    "playable": self.game.playable,
+                    "visible": self.game.visible,
+                    "results_visible": self.game.results_visible,
+                    "need_teams": self.game.need_teams,
+                    "description": self.game.description,
+                }
+            )
+        super(CreateGameForm, self).__init__(*args, **kwargs)
+        if self.game:
+            self.fields["game_type"].disabled = True
 
     def clean_name(self):
         name = self.cleaned_data["name"]
-        if (
-            name != self.game.name
-            and Game.objects.filter(session=self.session, name=name).exists()
-        ):
+        new_name = not self.game or name != self.game.name
+        if new_name and Game.objects.filter(session=self.session, name=name).exists():
             raise forms.ValidationError(
                 "A game with this name already exists for this session."
             )
-        else:
-            return name
+        return name
 
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]
-        if (
-            url_tag != self.game.url_tag
-            and Game.objects.filter(session=self.session, url_tag=url_tag).exists()
-        ):
+        new_url_tag = not self.game or url_tag != self.game.url_tag
+        if new_url_tag and Game.objects.filter(session=self.session, url_tag=url_tag).exists():
             raise forms.ValidationError(
                 "A game with this URL tag already exists for this session."
             )

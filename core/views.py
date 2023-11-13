@@ -3,12 +3,11 @@ import logging
 from django.contrib.auth import login, logout, authenticate
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from .authorisations import can_create_sessions, is_session_admin
-from .constants import guest_password, SESSION_GROUP_PREFIX
-from .decorators import session_visible_or_admin_decorator, session_admin_decorator
+from .constants import guest_password
+from .decorators import session_admin_decorator
 from .forms import (
     LoginForm,
     PlayerLoginForm,
@@ -19,7 +18,6 @@ from .forms import (
     SessionFinderForm,
     CreateSessionForm,
     CreateGameForm,
-    ModifyGameForm,
     CreateTeamForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
@@ -144,51 +142,34 @@ def logout_user(request):
 
 def create_session(request):
     user_can_create_session = can_create_sessions(request.user)
-    create_session_form = None
-    session_obj = None
-    session_creation_error = None
-    session_created = False
+
+    context = {}
     if user_can_create_session:
         if request.method == "POST":
-            create_session_form = CreateSessionForm(request.POST)
-            if create_session_form.is_valid():
-                session_group = Group.objects.create(
-                    name=SESSION_GROUP_PREFIX
-                    + str(create_session_form.cleaned_data["slug_name"])
-                )
-                try:
+            if "create_session_form" in request.POST:
+                create_session_form = CreateSessionForm(request.POST)
+                if create_session_form.is_valid():
                     session_obj = Session.objects.create(
                         slug_name=create_session_form.cleaned_data["slug_name"],
                         name=create_session_form.cleaned_data["name"],
                         long_name=create_session_form.cleaned_data["long_name"],
                         can_register=create_session_form.cleaned_data["can_register"],
                         visible=create_session_form.cleaned_data["visible"],
-                        group=session_group,
                     )
                     session_obj.admins.add(request.user)
-                    session_group.user_set.add(request.user)
-                    session_obj.group = session_group
                     create_session_form = CreateSessionForm()
-                    session_created = True
-                except Exception as e:
-                    logger = logging.getLogger("Core_CreateSession")
-                    logger.exception("An exception occured while creating a session", e)
-                    session_group.delete()
-                    session_creation_error = repr(e)
+                    context["session_created"] = True
+                    context["session_obj"] = session_obj
+            else:
+                raise Http404("POST request received but form type unknown.")
         else:
             create_session_form = CreateSessionForm()
-
-    context = {
-        "user_can_create_session": user_can_create_session,
-        "create_session_form": create_session_form,
-        "session_created": session_created,
-        "session_creation_error": session_creation_error,
-        "session_obj": session_obj,
-    }
+    else:
+        raise Http404("This user cannot create sessions.")
+    context["create_session_form"] = create_session_form
     return render(request, "core/create_session.html", context)
 
 
-@session_visible_or_admin_decorator
 def session_portal(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
     is_user_admin = is_session_admin(session, request.user)
@@ -199,7 +180,6 @@ def session_portal(request, session_slug_name):
         "is_user_admin": is_user_admin,
     }
     if request.method == "POST":
-        print(request.POST)
         if "registration_form" in request.POST and session.can_register:
             registration_form = PlayerRegistrationForm(
                 request.POST,
@@ -224,11 +204,11 @@ def session_portal(request, session_slug_name):
                     )
                 except Exception as e:
                     # Problem when creating new player, we clean up the mess
+                    context["player_creation_error"] = repr(e)
                     if not authenticated_user:
                         user.delete()
                     logger = logging.getLogger("Core_SessionPortal")
                     logger.exception("An exception occurred while creating a player", e)
-                    context["player_creation_error"] = repr(e)
                 if authenticated_user:
                     # If registering a player for a user already logged-in, we redirect to home
                     return redirect("core:session_home", session_slug_name=session.slug_name)
@@ -314,20 +294,22 @@ def session_portal(request, session_slug_name):
     return render(request, "core/session_portal.html", context)
 
 
-@session_visible_or_admin_decorator
 def session_home(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
     games = Game.objects.filter(session=session, visible=True)
     admin_user = is_session_admin(session, request.user)
 
-    if admin_user:
-        invisible_games = Game.objects.filter(session=session, visible=False)
+    context = {
+        "session": session,
+        "games": games,
+        "admin_user": admin_user
+    }
 
-    if request.user.is_authenticated:
-        try:
-            player_user = Player.objects.get(session=session, user=request.user)
-        except Player.DoesNotExist:
-            player_user = None
+    if admin_user:
+        context["invisible_games"] = Game.objects.filter(session=session, visible=False)
+
+    if request.user.is_player:
+        context["player_profile"] = request.user.players.first()
 
     return render(request, "core/session_home.html", locals())
 
@@ -366,90 +348,77 @@ def session_admin(request, session_slug_name):
     return render(request, "core/session_admin.html", context)
 
 
-@session_visible_or_admin_decorator
 def session_admin_games(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
+    context = {"session": session}
+
     # Create game form
-    if request.method == "POST":
-        form_type = request.POST["form_type"]
-        if form_type == "create_game_form":
-            create_game_form = CreateGameForm(request.POST, session=session)
-            if create_game_form.is_valid():
-                try:
-                    new_game = Game.objects.create(
-                        game_type=create_game_form.cleaned_data["game_type"],
-                        name=create_game_form.cleaned_data["name"],
-                        url_tag=create_game_form.cleaned_data["url_tag"],
-                        session=session,
-                        playable=create_game_form.cleaned_data["playable"],
-                        visible=create_game_form.cleaned_data["visible"],
-                        results_visible=create_game_form.cleaned_data[
-                            "results_visible"
-                        ],
-                        need_teams=create_game_form.cleaned_data["need_teams"],
-                        description=create_game_form.cleaned_data["description"],
-                    )
-                    create_game_form = CreateGameForm(session=session)
-                    game_created = True
-                except Exception as e:
-                    game_creation_error = repr(e)
-        else:
+    create_game_form = CreateGameForm(session=session)
+    if request.method == "POST" and "create_game_form" in request.POST:
+        create_game_form = CreateGameForm(request.POST, session=session)
+        if create_game_form.is_valid():
+            new_game = Game.objects.create(
+                game_type=create_game_form.cleaned_data["game_type"],
+                name=create_game_form.cleaned_data["name"],
+                url_tag=create_game_form.cleaned_data["url_tag"],
+                session=session,
+                playable=create_game_form.cleaned_data["playable"],
+                visible=create_game_form.cleaned_data["visible"],
+                results_visible=create_game_form.cleaned_data[
+                    "results_visible"
+                ],
+                need_teams=create_game_form.cleaned_data["need_teams"],
+                description=create_game_form.cleaned_data["description"],
+            )
             create_game_form = CreateGameForm(session=session)
-    else:
-        create_game_form = CreateGameForm(session=session)
+            context["new_game"] = new_game
 
     # Delete game form
-    if request.method == "POST":
-        form_type = request.POST["form_type"]
-        if form_type == "delete_game_form":
-            deleted_game_id = request.POST["remove_game_id"]
-            deleted_game = Game.objects.get(id=deleted_game_id)
-            deleted_game_name = deleted_game.name
-            deleted_game.delete()
+    if request.method == "POST" and "delete_game_form" in request.POST:
+        deleted_game_id = request.POST["remove_game_id"]
+        deleted_game = Game.objects.get(id=deleted_game_id)
+        deleted_game.delete()
+        context["deleted_game_name"] = deleted_game.name
 
     games = Game.objects.filter(session=session)
 
     # Modify game form
     modify_game_forms = []
     for game in games:
-        if request.method == "POST":
-            form_type = request.POST["form_type"]
-            if form_type == "modify_game_form_" + str(game.url_tag):
-                modify_game_form = ModifyGameForm(
-                    request.POST, session=session, game=game, prefix=game.url_tag
-                )
-                if modify_game_form.is_valid():
-                    game.name = modify_game_form.cleaned_data["name"]
-                    game.url_tag = modify_game_form.cleaned_data["url_tag"]
-                    game.playable = modify_game_form.cleaned_data["playable"]
-                    game.visible = modify_game_form.cleaned_data["visible"]
-                    game.results_visible = modify_game_form.cleaned_data[
-                        "results_visible"
-                    ]
-                    game.need_teams = modify_game_form.cleaned_data["need_teams"]
-                    game.description = modify_game_form.cleaned_data["description"]
-                    game.save()
+        if request.method == "POST" and "modify_game_form_" + str(game.url_tag) in request.POST:
+            modify_game_form = CreateGameForm(
+                request.POST, session=session, game=game, prefix=game.url_tag
+            )
+            if modify_game_form.is_valid():
+                game.name = modify_game_form.cleaned_data["name"]
+                game.url_tag = modify_game_form.cleaned_data["url_tag"]
+                game.playable = modify_game_form.cleaned_data["playable"]
+                game.visible = modify_game_form.cleaned_data["visible"]
+                game.results_visible = modify_game_form.cleaned_data[
+                    "results_visible"
+                ]
+                game.need_teams = modify_game_form.cleaned_data["need_teams"]
+                game.description = modify_game_form.cleaned_data["description"]
+                game.save()
 
-                    modify_game_form = ModifyGameForm(
-                        session=session, game=game, prefix=game.url_tag
-                    )
-
-                    modified_game_name = game.name
-                    modified_game_form = modify_game_form
-            else:
-                modify_game_form = ModifyGameForm(
+                modify_game_form = CreateGameForm(
                     session=session, game=game, prefix=game.url_tag
                 )
+                context["modified_game"] = game
         else:
-            modify_game_form = ModifyGameForm(
+            modify_game_form = CreateGameForm(
                 session=session, game=game, prefix=game.url_tag
             )
         modify_game_forms.append(modify_game_form)
 
+    context["create_game_form"] = create_game_form
+    context["modify_game_forms"] = modify_game_forms
+    return render(request, "core/session_admin_games.html", context)
 
-@session_visible_or_admin_decorator
+
 def session_admin_players(request, session_slug_name):
     session = get_object_or_404(Session, slug_name=session_slug_name)
+    context = {"session": session}
     # Add player form
     if request.method == "POST":
         form_type = request.POST["form_type"]
@@ -519,6 +488,7 @@ def session_admin_players(request, session_slug_name):
     else:
         for player in players:
             update_password_forms[player] = UpdatePasswordForm(session=session)
+    return render(request, "core/session_admin_players.html", context)
 
 
 def team(request, session_slug_name, game_url_tag):

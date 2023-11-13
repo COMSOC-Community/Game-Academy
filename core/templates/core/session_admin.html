@@ -8,7 +8,7 @@
     <h1>{{ session.long_name|title }} &mdash; Admin</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% url 'core:session_portal' session.slug_name %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
     <section>
@@ -39,9 +39,16 @@
             </div>
         {% endif %}
 
-        <form action="{% url 'core:session_admin' session.slug_name %}" method="post">
-            {% include "include/form_table_template.html" with form=modify_session_form form_type='modify_session_form' submit_button_label='Modify Session' %}
-        </form>
+        {% if modify_session_form %}
+            <form action="{% url 'core:session_admin' session.slug_name %}" method="post">
+                {% include "include/form_table_template.html" with form=modify_session_form form_type='modify_session_form' submit_button_label='Modify Session' %}
+            </form>
+        {% endif %}
+    </section>
 
+    <section>
+    <h2>Danger Zone</h2>
+
+    <p>Here you can delete the session.</p>
     </section>
 {% endblock %}

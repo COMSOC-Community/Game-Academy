@@ -8,35 +8,28 @@
 
 {% block content %}
     <section>
-        {% if user_can_create_session %}
-            {% if session_created %}
-                <div class="form-success-message">
-                    <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
+        {% if session_created %}
+            <div class="form-success-message">
+                <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
 
-                    <p>You can access the main page of the session
-                        <a href="{% url 'core:session_portal' session_obj.slug_name %}">here</a>.
-                    </p>
-                </div>
-            {% else %}
-                <p>
-                    Sessions are the main components of this website. Once created, you will be able to add games and
-                    players to a session. If you are using this website for a course, a session will typically represent one
-                    edition of the course.
+                <p>You can access the main page of the session
+                    <a href="{% url 'core:session_portal' session_obj.slug_name %}">here</a>.
                 </p>
-
-                <p>
-                    Use the form below to create a session.
-                </p>
-
-                {% if session_creation_error %}
-                    <p class="form-error">There was a general problem here: {{ session_creation_error }}. Please report that to the admin.</p>
-                {% endif %}
-                <form action="{% url 'core:create_session' %}" method="post">
-                    {% include "include/form_table_template.html" with form=create_session_form form_type='create_session_form' submit_button_label='Create Session' %}
-                </form>
-            {% endif %}
+            </div>
         {% else %}
-            <p>This page is not available to you.</p>
+            <p>
+                Sessions are the main components of this website. Once created, you will be able to add games and
+                players to a session. If you are using this website for a course, a session will typically represent one
+                edition of the course.
+            </p>
+
+            <p>
+                Use the form below to create a session.
+            </p>
+
+            <form action="{% url 'core:create_session' %}" method="post">
+                {% include "include/form_table_template.html" with form=create_session_form form_type='create_session_form' submit_button_label='Create Session' %}
+            </form>
         {% endif %}
     </section>
 {% endblock %}

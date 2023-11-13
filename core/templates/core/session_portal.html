@@ -6,7 +6,7 @@
     <h1>{{ session.long_name|title }}</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% url 'core:session_portal' session.slug_name %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
     {% if not session.visible %}

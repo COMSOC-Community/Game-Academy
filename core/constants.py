@@ -1,8 +1,3 @@
-SESSION_MANAGER_GROUP = "SessionManager"
-PLAYER_GROUP = "Player"
-GUEST_PLAYER_GROUP = "GuestPlayer"
-
-SESSION_GROUP_PREFIX = "Session_Group_"
 GUEST_PASSWORD_PREFIX = "ThisIsThePasswordForTheGuest_"
 
 

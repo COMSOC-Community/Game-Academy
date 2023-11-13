@@ -8,144 +8,130 @@
     <h1>{{ session.long_name|title }} &mdash; Admin</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% url 'core:session_portal' session.slug_name %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
-    <h2 id="users">Users</h2>
-
-        <p>
-            Need to manage the players of this session? You can do so here.
-        </p>
-
-        <p>
-            First, you can add some players using the following form.
-        </p>
-
+    <section>
+    <h2 id="users">Adding Players</h2>
         {% if player_added %}
             <div class="form-success-message">
                 <p>The player {{ new_player.name }} has been successfully added to the session.</p>
             </div>
         {% endif %}
 
+    {% if add_player_form %}
         <form action="{% url 'core:session_admin' session.slug_name %}#users" method="post">
-            {% csrf_token %}
-            {% if add_player_form.non_field_errors %}
-                <ul class="errorlist">
-                    {% for error in add_player_form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+           {% include "include/form_table_template.html" with form=add_player_form form_type="add_player_form" submit_button_label='Add Player' %}
+        </form>
+    {% endif %}
+    <p>
+        Below is a list of all the players that registered for this session.
+    </p>
 
-            {% for hidden_field in add_player_form.hidden_fields %}
-                {% if hidden_field.errors %}
-                    <ul class="errorlist">
-                    {% for error in hidden_field.errors %}
-                        <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
-                    {% endfor %}
-                    </ul>
-                {% endif %}
-                {{ hidden_field }}
-            {% endfor %}
+    <h3 id="admin">Admins</h3>
 
-            <table class="center-margin form-table">
-                {% for field in add_player_form.visible_fields %}
+    {% if session.admins.all %}
+        <table class="center-margin lined-table">
+            <thead>
+                <tr>
+                    <th>(Django) Username</th>
+                    <th>Player Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin in session.admins.all %}
                     <tr>
-                        <td class="form-field-label">
-                            {{ field.label_tag }}
-                            {% if field.help_text %}
-                                <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
-                            {% endif %}
+                        <td>{{ admin.username }}</td>
+                        {% if admin.player %}
+                            <td>{{ admin.player.name }}</td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>This session does not have admins.</p>
+    {% endif %}
+
+    <h3 id="players">Players</h3>
+
+    {% if deleted_player_name %}
+        <div class="form-success-message">
+            <p>The player {{ deleted_player_name }} has been successfully removed from the session.</p>
+        </div>
+    {% endif %}
+
+    {% if password_updated_player_name %}
+        <div class="form-success-message">
+            <p>The password of player {{ password_updated_player_name }} has been successfully updated.</p>
+        </div>
+    {% endif %}
+
+    {% if players %}
+        <table class="center-margin lined-table">
+            <tbody>
+                {% for player in players %}
+                    <tr>
+                        <td>{{ player.name }}</td>
+                        <td>
+                            <form action="{% url 'core:session_admin' session.slug_name %}#players" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="update_password_player_id" value={{ player.id }} />
+                                <input type='hidden' name='form_type' value='update_password_form'>
+                                <table>
+                                    {% with update_password_forms|get_key_dict:player as update_password_form %}
+                                        <tr><td>{{ update_password_form.password1 }}</td></tr>
+                                        <tr><td>{{ update_password_form.password2 }}</td></tr>
+                                    {% endwith %}
+                                    <tr><td><input class="green-button" type="submit" value="Update Password"/></td></tr>
+                                </table>
+                            </form>
                         </td>
                         <td>
-                            {{ field }}
-                            {% if field.errors %}
-                                {% for error in field.errors %}
-                                    <br><span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            {% endif %}
+                            <form action="{% url 'core:session_admin' session.slug_name %}#players" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="remove_player_id" value={{ player.id }} />
+                                <input type='hidden' name='form_type' value='delete_player_form'>
+                                <input class="red-button" type="submit" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}
-            </table>
+            </tbody>
+        </table>
+    {% else %}
+        <p>No players registered yet.</p>
+    {% endif %}
 
-            <input type='hidden' name='form_type' value='add_player_form'>
-            <p class="center-align">
-                <input class="green-button" type="submit" value="Add Player">
-            </p>
-        </form>
+    {% if not session.registration_open %}
+        <h3 id="guests">Guests Users</h3>
 
-        <p>
-            Below is a list of all the players that registered for this session.
-        </p>
+        {% if delete_guest_name %}
+            <div class="form-success-message">
+                <p>The guest {{ delete_guest_name }} has been successfully removed from the session.</p>
+            </div>
+        {% endif %}
 
-        <h3 id="admin">Admins</h3>
-
-        {% if session.admins.all %}
+        {% if guests %}
             <table class="center-margin lined-table">
                 <thead>
                     <tr>
-                        <th>(Django) Username</th>
-                        <th>Player Name</th>
+                        <th>Guest Name</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for admin in session.admins.all %}
+                    {% for guest in guests %}
                         <tr>
-                            <td>{{ admin.username }}</td>
-                            {% if admin.player %}
-                                <td>{{ admin.player.name }}</td>
-                            {% else %}
-                                <td></td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>This session does not have admins.</p>
-        {% endif %}
-
-        <h3 id="players">Players</h3>
-
-        {% if deleted_player_name %}
-            <div class="form-success-message">
-                <p>The player {{ deleted_player_name }} has been successfully removed from the session.</p>
-            </div>
-        {% endif %}
-
-        {% if password_updated_player_name %}
-            <div class="form-success-message">
-                <p>The password of player {{ password_updated_player_name }} has been successfully updated.</p>
-            </div>
-        {% endif %}
-
-        {% if players %}
-            <table class="center-margin lined-table">
-                <tbody>
-                    {% for player in players %}
-                        <tr>
-                            <td>{{ player.name }}</td>
+                            <td>{{ guest.name }}</td>
                             <td>
-                                <form action="{% url 'core:session_admin' session.slug_name %}#players" method="post">
+                                <form action="{% url 'core:session_admin' session.slug_name %}#guests" method="post">
                                     {% csrf_token %}
-                                    <input type="hidden" name="update_password_player_id" value={{ player.id }} />
-                                    <input type='hidden' name='form_type' value='update_password_form'>
-                                    <table>
-                                        {% with update_password_forms|get_key_dict:player as update_password_form %}
-                                            <tr><td>{{ update_password_form.password1 }}</td></tr>
-                                            <tr><td>{{ update_password_form.password2 }}</td></tr>
-                                        {% endwith %}
-                                        <tr><td><input class="green-button" type="submit" value="Update Password"/></td></tr>
-                                    </table>
-                                </form>
-                            </td>
-                            <td>
-                                <form action="{% url 'core:session_admin' session.slug_name %}#players" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="remove_player_id" value={{ player.id }} />
-                                    <input type='hidden' name='form_type' value='delete_player_form'>
-                                    <input class="red-button" type="submit" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
+                                    <input type="hidden" name='remove_player_id' value={{ guest.id }} />
+                                    <input type='hidden' name='form_type' value='delete_guest_form'>
+                                    <input class="red-button" type="submit" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
                                 </form>
                             </td>
                         </tr>
@@ -153,44 +139,8 @@
                 </tbody>
             </table>
         {% else %}
-            <p>No players registered yet.</p>
+            <p>There are no guest users yet.</p>
         {% endif %}
-
-        {% if not session.registration_open %}
-            <h3 id="guests">Guests Users</h3>
-
-            {% if delete_guest_name %}
-                <div class="form-success-message">
-                    <p>The guest {{ delete_guest_name }} has been successfully removed from the session.</p>
-                </div>
-            {% endif %}
-
-            {% if guests %}
-                <table class="center-margin lined-table">
-                    <thead>
-                        <tr>
-                            <th>Guest Name</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for guest in guests %}
-                            <tr>
-                                <td>{{ guest.name }}</td>
-                                <td>
-                                    <form action="{% url 'core:session_admin' session.slug_name %}#guests" method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name='remove_player_id' value={{ guest.id }} />
-                                        <input type='hidden' name='form_type' value='delete_guest_form'>
-                                        <input class="red-button" type="submit" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
-                                    </form>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>There are no guest users yet.</p>
-            {% endif %}
-        {% endif %}
+    {% endif %}
+    </section>
 {% endblock %}

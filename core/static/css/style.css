@@ -262,6 +262,7 @@ Side panel
 	border-bottom-right-radius: 5px;
 	border-top-right-radius: 5px;
     width: 20%;
+	max-height: 100%;
 	box-sizing: border-box;
     position: fixed;
     top: 50%; /* Vertically center the side panel */

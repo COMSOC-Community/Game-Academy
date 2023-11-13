@@ -14,7 +14,6 @@ class IndexViewTest(TestCase):
         )
         self.user.is_active = True
         self.user.save()
-        group = Group.objects.create(name="TestGroup")
         self.session = Session.objects.create(
             slug_name="your-session-slug",
             name="Your Session Name",
@@ -22,7 +21,6 @@ class IndexViewTest(TestCase):
             can_register=True,
             need_registration=True,
             visible=True,
-            group=group,
         )
         self.admin_user = CustomUser.objects.create_user(
             username="admin_user",
