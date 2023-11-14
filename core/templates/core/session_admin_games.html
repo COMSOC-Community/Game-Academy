@@ -15,7 +15,7 @@
         {% include "include/session_admin_navigation.html" %}
     </section>
 
-    <section>
+    <section id="add_game">
         <h2>Add a Game</h2>
 
         <p>If you want to add new games to the session, fill in this form:</p>
@@ -27,14 +27,14 @@
         {% endif %}
 
         {% if create_game_form %}
-            <form action="{% url 'core:session_admin_games' session.slug_name %}" method="post">
+            <form action="{% url 'core:session_admin_games' session.slug_name %}#add_game" method="post">
                 {% include "include/form_table_template.html" with form=create_game_form form_type='create_game_form' submit_button_label='Add Game' %}
             </form>
         {% endif %}
     </section>
 
     {% if modify_game_forms %}
-        <section>
+        <section id="modify_games">
             <h2>Modify Games</h2>
 
             <p>Here are the games that have been created for this session. You can modify them below.</p>
@@ -48,7 +48,7 @@
             {% if modify_game_forms %}
                 <div class="grid2-wrapper game-grid">
                     {% for modify_game_form in modify_game_forms %}
-                        <div class="grid-item">
+                        <div class="grid-item" id="modify_{{ modify_game_form.game.id }}">
                             <div class="side-by-side-wrapper game-grid-title">
                                 <div class="side-by-side-box">
                                     <h3 id="games_{{ modify_game_form.game.name }}">
@@ -56,7 +56,7 @@
                                     </h3>
                                 </div>
                                 <div class="side-by-side-box">
-                                    <form action="{% url 'core:session_admin_games' session.slug_name %}" method="post">
+                                    <form action="{% url 'core:session_admin_games' session.slug_name %}#modify_games" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="remove_game_id" value={{ modify_game_form.game.id }} />
                                         <p class="center-align">
@@ -80,7 +80,7 @@
                                 </div>
                             {% endif %}
 
-                            <form action="{% url 'core:session_admin_games' session.slug_name %}" method="post">
+                            <form action="{% url 'core:session_admin_games' session.slug_name %}#modify_{{ modify_game_form.game.id }}" method="post">
                                 {% with 'modify_game_form_'|add:modify_game_form.game.url_tag as form_type %}
                                     {% include "include/form_table_template.html" with form=modify_game_form form_type=form_type submit_button_label='Modify Game' %}
                                 {% endwith %}

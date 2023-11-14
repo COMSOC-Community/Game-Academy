@@ -349,6 +349,7 @@ Forms
 	border: var(--color-success-dark) solid 2px;
 	border-radius: 10px;
 	padding: 10px 20px;
+	margin-bottom: 10px;
 }
 .form-success-message p {
 	margin: 0;
@@ -359,6 +360,7 @@ Forms
 	border: var(--color-error-dark) solid 2px;
 	border-radius: 10px;
 	padding: 0 20px;
+	margin-bottom: 10px;
 }
 
 .button {

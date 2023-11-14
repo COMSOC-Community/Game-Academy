@@ -15,8 +15,8 @@
         {% include "include/session_admin_navigation.html" %}
     </section>
 
-    <section>
-        <h2 id="add_player">Adding Players</h2>
+    <section id="add_player">
+        <h2>Adding Players</h2>
             {% if new_player %}
                 <div class="form-success-message">
                     <p>The player {{ new_player.name }} has been successfully added to the session.</p>
@@ -56,7 +56,7 @@
         </table>
     </section>
 
-    <section>
+    <section id="players">
         <h2>Players</h2>
 
         {% if deleted_player_name %}
@@ -77,13 +77,16 @@
                     {% for player in players %}
                         <tr>
                             <td>{{ player.name }}</td>
-                            <td><span class="button"><a href="{% url "core:session_admin_player_password" session.slug_name player.name %}">Change Password</a></span></td>
                             <td>
-                                <form action="{% url 'core:session_admin' session.slug_name %}#players" method="post">
+                                <span class="button">
+                                    <a href="{% url "core:session_admin_player_password" session.slug_name player.name %}">Change Password</a>
+                                </span>
+                            </td>
+                            <td>
+                                <form action="{% url 'core:session_admin_players' session.slug_name %}#players" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="remove_player_id" value={{ player.id }} />
-                                    <input type='hidden' name='form_type' value='delete_player_form'>
-                                    <input class="button color-error" type="submit" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
+                                    <input class="button color-error" type="submit" name="delete_player_form" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
                                 </form>
                             </td>
                         </tr>
@@ -95,7 +98,7 @@
         {% endif %}
     </section>
 
-    <section>
+    <section id="guests">
         <h2>Guests Users</h2>
 
         {% if session.need_registration %}
@@ -104,9 +107,9 @@
                 on <a href="{% url 'core:session_admin' session.slug_name %}">this page</a>.
             </p>
         {% else %}
-            {% if delete_guest_name %}
+            {% if deleted_guest_name %}
                 <div class="form-success-message">
-                    <p>The guest {{ delete_guest_name }} has been successfully removed from the session.</p>
+                    <p>The guest {{ deleted_guest_name }} has been successfully removed from the session.</p>
                 </div>
             {% endif %}
 
@@ -117,11 +120,10 @@
                             <tr>
                                 <td>{{ guest.name }}</td>
                                 <td>
-                                    <form action="{% url 'core:session_admin' session.slug_name %}#guests" method="post">
+                                    <form action="{% url 'core:session_admin_players' session.slug_name %}#guests" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name='remove_player_id' value={{ guest.id }} />
-                                        <input type='hidden' name='form_type' value='delete_guest_form'>
-                                        <input class="button color-error" type="submit" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
+                                        <input class="button color-error" type="submit" name="delete_guest_form" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
                                     </form>
                                 </td>
                             </tr>
