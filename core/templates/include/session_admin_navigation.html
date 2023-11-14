@@ -1,0 +1,16 @@
+<p>
+    You are in the admin pages the session <em>{{ session.long_name }}</em>. Several pages are available depending on what you
+    want to do.
+</p>
+
+<div class="admin-nav-wrapper">
+    <div class="admin-nav-item">
+        <span class="button"><a href="{% url "core:session_admin" session.slug_name %}">Main Parameters</a></span>
+    </div>
+    <div class="admin-nav-item">
+        <span class="button"><a href="{% url "core:session_admin_players" session.slug_name %}">Users and Players</a></span>
+    </div>
+    <div class="admin-nav-item">
+        <span class="button"><a href="{% url 'core:session_admin_games' session.slug_name %}">Games of the Session</a></span>
+    </div>
+</div>

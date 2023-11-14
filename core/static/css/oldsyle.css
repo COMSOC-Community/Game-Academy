@@ -57,26 +57,7 @@ em {
 	font-size: 80%;
 }
 
-.lined-table {
-	border-collapse: collapse;
-}
 
-.lined-table > tbody > tr > td, .lined-table > tbody > tr > th, .lined-table > thead > tr > td, .lined-table > thead > tr > th  {
-	padding: 5px 10px;
-	text-align: center;
-}
-
-.lined-table tr {
-	border-top: var(--frame-color) solid 1px;
-}
-
-.lined-table tr:first-child {
-	border-top: var(--color-orange-dark) solid 2px;
-}
-
-.lined-table tr:last-child {
-	border-bottom: var(--color-orange-dark) solid 2px;
-}
 
 /* ==
 Forms

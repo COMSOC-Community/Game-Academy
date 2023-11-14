@@ -12,20 +12,9 @@
 
 {% block content %}
     <section>
-        <p>
-            Logged-in as <em>{{ request.user.display_name }}</em>.
-        </p>
-
-        <p>
-            This is the admin page for the session {{ session.long_name }}. You will find here all the tools to manage
-            your session. We provide below some links to the different sections of this page.
-        </p>
-
-        <ul>
-            <li><a href="{% url 'core:session_admin_players' session.slug_name %}">The users related to this session</a></li>
-            <li><a href="{% url 'core:session_admin_games' session.slug_name %}">The games of the session</a></li>
-        </ul>
+        {% include "include/session_admin_navigation.html" %}
     </section>
+
     <section>
         <h2>General Parameters</h2>
         <p>
@@ -46,9 +35,15 @@
         {% endif %}
     </section>
 
-    <section>
+    <section class="color-error-light">
     <h2>Danger Zone</h2>
 
     <p>Here you can delete the session.</p>
+
+    {% if delete_session_form %}
+        <form action="{% url 'core:session_admin' session.slug_name %}" method="post">
+            {% include "include/form_table_template.html" with form=delete_session_form form_type='delete_session_form' submit_button_label='Delete Session' %}
+        </form>
+    {% endif %}
     </section>
 {% endblock %}

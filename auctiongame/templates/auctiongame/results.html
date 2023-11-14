@@ -98,7 +98,7 @@
                         </div>
                         <script>
                             var histoData_{{ auction_id }} = [
-                                    {% with 'histo_auct'|addstr:auction_id|addstr:'_js_data' as histo_attr %}
+                                    {% with 'histo_auct'|add:auction_id|add:'_js_data' as histo_attr %}
                                         {{ game.result_auct|get_attr:histo_attr|safe }}
                                     {% endwith %}
                                 ];

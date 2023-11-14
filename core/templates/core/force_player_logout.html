@@ -1,6 +1,6 @@
 {% include 'include/html_header.html' %}
 
-<body id="force-player-logout">
+<body id="plain-page">
 
 <h1>Leaving your session</h1>
 
@@ -17,7 +17,7 @@
     </form>
     </div>
     <div class="side-by-side-box">
-        <a href="{{ url_back }}" class="button">Get Back to Session</a>
+        <a href="{{ url_back|urlencode }}" class="button">Get Back to Session</a>
     </div>
 </div>
 

@@ -10,6 +10,7 @@ urlpatterns = [
     re_path(r"^$", views.index, name="index"),
     re_path(r"^logout[/]$", views.logout_user, name="logout"),
     re_path(r"^createsession[/]", views.create_session, name="create_session"),
+    re_path(r"^message[/]", views.message, name="message"),
     re_path(
         r"^s/(?P<session_slug_name>[\w-]+)[/]?$",
         views.session_portal,
@@ -35,6 +36,11 @@ urlpatterns = [
         r"^s/(?P<session_slug_name>[\w-]+)/admin/players[/]?$",
         views.session_admin_players,
         name="session_admin_players",
+    ),
+    re_path(
+        r"^s/(?P<session_slug_name>[\w-]+)/admin/player/(?P<player_name>[\w-]+)/password[/]?$",
+        views.session_admin_player_password,
+        name="session_admin_player_password",
     ),
 ]
 

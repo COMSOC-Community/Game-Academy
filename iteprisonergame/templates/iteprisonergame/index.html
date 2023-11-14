@@ -72,7 +72,7 @@
                 {% if game.playable and not current_team %}
                     <td style="padding-right: 20px;">
                         <span class="orange-button">
-                            {% with 'core:team_'|addstr:game.game_setting.package_url_namespace as url_name %}
+                            {% with 'core:team_'|add:game.game_setting.package_url_namespace as url_name %}
                                 <a href="{% url url_name session.slug_name game.url_tag %}">Create or Join a Team</a>
                             {% endwith %}
                         </span>

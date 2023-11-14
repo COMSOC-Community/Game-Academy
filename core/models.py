@@ -25,6 +25,7 @@ class Session(models.Model):
     need_registration = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
     admins = models.ManyToManyField(CustomUser, related_name="administrated_sessions")
+    super_admins = models.ManyToManyField(CustomUser, related_name="super_administrated_sessions")
 
     class Meta:
         ordering = ["slug_name"]

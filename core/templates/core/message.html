@@ -1,0 +1,18 @@
+{% include 'include/html_header.html' %}
+
+<body id="plain-page">
+
+<p class="center-align">
+    {{ message }}
+</p>
+
+<p>You will soon be redirected. If nothing happens, click <a href="{{ next_url|urlencode }}">here</a>.</p>
+
+<script>
+    function redirect () {
+        window.location.href = "{{ next_url|urlencode }}" ;
+    }
+    setTimeout(redirect, 3000);
+</script>
+
+</body>

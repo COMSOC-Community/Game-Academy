@@ -28,10 +28,12 @@
         {% endif %}
         <tr class="form-field-row">
             <td>
-                <span>{{ field.label }}</span>
-                {% if field.help_text %}
-                    <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
-                {% endif %}
+                <label for="{{ field.auto_id }}">
+                    <span>{{ field.label }}</span>
+                    {% if field.help_text %}
+                        <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                    {% endif %}
+                </label>
             </td>
             <td>
                 {{ field }}

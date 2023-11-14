@@ -25,21 +25,29 @@
         </p>
 
         {% if games %}
-            {% for game in games %}
-                <h2>{{ game.game_setting.long_name }} - {{ game.name }}</h2>
+            <div class="grid2-wrapper game-grid">
+                {% for game in games %}
+                    <div class="grid-item">
+                        <div class="game-grid-title">
+                            <h3 id="games_{{ game.name }}">
+                                {{ game.game_setting.long_name }} - {{ game.name }}
+                            </h3>
+                        </div>
 
-                {% if game.description %}
-                    <p>{{ game.description }}</p>
-                {% endif %}
+                        {% if game.description %}
+                            <p>{{ game.description }}</p>
+                        {% endif %}
 
-                {% with game.game_setting.package_url_namespace|addstr:':index' as index_url_shortcut %}
-                    <p class="center-align">
-                        <span class="green-button">
-                            <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>
-                        </span>
-                    </p>
-                {% endwith %}
-            {% endfor %}
+                        {% with game.game_setting.package_url_namespace|add:':index' as index_url_shortcut %}
+                            <p class="center-align">
+                                <span class="green-button">
+                                    <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>
+                                </span>
+                            </p>
+                        {% endwith %}
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
             <p>No games are currently available.</p>
         {% endif %}
@@ -53,7 +61,7 @@
                         <p>{{ game.description }}</p>
                     {% endif %}
 
-                    {% with game.game_setting.package_url_namespace|addstr:':index' as index_url_shortcut %}
+                    {% with game.game_setting.package_url_namespace|add:':index' as index_url_shortcut %}
                         <p class="center-align">
                             <span class="green-button">
                                 <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>

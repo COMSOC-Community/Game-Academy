@@ -29,7 +29,7 @@ class SessionFinderForm(forms.Form):
 class LoginForm(forms.Form):
     username = forms.CharField(
         label="Username",
-        max_length=100,
+        max_length=CustomUser._meta.get_field("username").max_length,
         widget=forms.TextInput(attrs={"placeholder": "Username"}),
     )
     password = forms.CharField(
@@ -54,7 +54,7 @@ class LoginForm(forms.Form):
 class UserRegistrationForm(forms.Form):
     username = forms.CharField(
         label="Username",
-        max_length=100,
+        max_length=CustomUser._meta.get_field("username").max_length,
         widget=forms.TextInput(attrs={"placeholder": "Username"}),
     )
     email = forms.EmailField(
@@ -192,6 +192,28 @@ class CreateSessionForm(forms.Form):
         return long_name
 
 
+class DeleteSessionForm(forms.Form):
+    delete = forms.BooleanField(
+        label="Delete the session",
+        label_suffix="",
+        initial=False
+    )
+    password = forms.CharField(
+        label="Your Password",
+        widget=forms.PasswordInput(attrs={"placeholder": "Password"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(DeleteSessionForm, self).__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        user = authenticate(username=self.user.username, password=password)
+        if not user:
+            raise forms.ValidationError("The password is incorrect.")
+
+
 class PlayerLoginForm(forms.Form):
     player_name = forms.SlugField(
         label="Player name",
@@ -211,7 +233,7 @@ class PlayerLoginForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
+        self.session = kwargs.pop("session")
         super(PlayerLoginForm, self).__init__(*args, **kwargs)
 
     def clean(self):
@@ -267,12 +289,16 @@ class PlayerRegistrationForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
+        self.session = kwargs.pop("session")
         self.passwords_display = kwargs.pop("passwords_display", True)
+        self.player = kwargs.pop("player", None)
         super(PlayerRegistrationForm, self).__init__(*args, **kwargs)
         if not self.passwords_display:
             self.fields.pop("password1")
             self.fields.pop("password2")
+        if self.player:
+            self.fields["player_name"].initial = self.player.name
+            self.fields["player_name"].disabled = True
 
     def clean_password1(self):
         password1 = self.cleaned_data["password1"]
@@ -291,15 +317,16 @@ class PlayerRegistrationForm(forms.Form):
 
     def clean_player_name(self):
         player_name = self.cleaned_data["player_name"].title()
-        username = player_username(self.session, player_name)
-        if CustomUser.objects.filter(
-            username=username
-        ).exists() or Player.objects.filter(session=self.session, name=player_name):
-            raise forms.ValidationError(
-                "This player name is already used by someone in this session. Choose another "
-                "one."
-            )
-        self.cleaned_data["player_username"] = username
+        if not self.player:
+            username = player_username(self.session, player_name)
+            if CustomUser.objects.filter(
+                username=username
+            ).exists() or Player.objects.filter(session=self.session, name=player_name):
+                raise forms.ValidationError(
+                    "This player name is already used by someone in this session. Choose another "
+                    "one."
+                )
+            self.cleaned_data["player_username"] = username
         return player_name
 
 
@@ -316,7 +343,7 @@ class UpdatePasswordForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
+        self.session = kwargs.pop("session")
         super(UpdatePasswordForm, self).__init__(*args, **kwargs)
 
     def clean_password2(self):
@@ -335,7 +362,7 @@ class SessionGuestRegistration(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
+        self.session = kwargs.pop("session")
         super(SessionGuestRegistration, self).__init__(*args, **kwargs)
 
     def clean_guest_name(self):
@@ -419,7 +446,7 @@ class CreateGameForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)
+        self.session = kwargs.pop("session")
         self.game = kwargs.pop("game", None)
         if self.game:
             kwargs.update(
@@ -462,7 +489,7 @@ class CreateTeamForm(forms.Form):
     name = forms.CharField(max_length=Team._meta.get_field("name").max_length)
 
     def __init__(self, *args, **kwargs):
-        self.game = kwargs.pop("game", None)
+        self.game = kwargs.pop("game")
         super(CreateTeamForm, self).__init__(*args, **kwargs)
 
     def clean_name(self):
