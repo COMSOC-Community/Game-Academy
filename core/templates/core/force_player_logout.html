@@ -1,4 +1,10 @@
-{% include 'include/html_header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'include/head_base_content.html' %}
+    <title>{% block title %}Game Server{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+</head>
 
 <body id="plain-page">
 
@@ -9,15 +15,15 @@
     need to log out.
 </p>
 
-<div class="side-by-side-wrapper">
-    <div class="side-by-side-box">
+<div class="side-by-side-centered-wrapper">
+    <div>
         <form action="{% url 'core:force_player_logout' session.url_tag %}" method="post">
             {% csrf_token %}
-        <button type="submit" class="button" name="logout_and_continue">Logout and Continue</button>
+        <button type="submit" class="button color-error-dark" name="logout_and_continue">Logout and Continue</button>
     </form>
     </div>
-    <div class="side-by-side-box">
-        <a href="{{ url_back|urlencode }}" class="button">Get Back to Session</a>
+    <div>
+        <a href="{{ url_back|urlencode }}" class="button color-success-dark">Get Back to Session</a>
     </div>
 </div>
 

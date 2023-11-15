@@ -10,8 +10,11 @@ from core.models import Session
 OPEN_VIEWS = [
     "core:index",
     "core:logout",
+    "core:message",
     "core:session_portal",
     "core:force_player_logout",
+    "admin:index",
+    "admin:login",
 ]
 
 # Views outside of session that can be accessed by players

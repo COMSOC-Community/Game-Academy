@@ -1,4 +1,10 @@
-{% include 'include/html_header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'include/head_base_content.html' %}
+    <title>{% block title %}Game Server{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+</head>
 
 <body>
     {% if request.user.is_authenticated %}
@@ -20,6 +26,7 @@
                     <ul>
                         <li><a href="{% url 'core:index' %}">Main page</a></li>
                         <li><a href="{% url 'core:create_session' %}">Create a session</a></li>
+                        <li><a href="{% url 'core:change_password' %}">Change your Password</a></li>
                     </ul>
                     {% if request.user.administrated_sessions.all %}
                         <h4>Sessions you administrate</h4>

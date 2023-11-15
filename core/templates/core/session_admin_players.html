@@ -4,9 +4,15 @@
 
 {% block title %}Session {{ session.name }} &mdash; Admin{% endblock %}
 
+{% block extra_head %}
+    <script src="{% static 'js/filtered_collection.js' %}" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
 {% block header %}
     <h1>{{ session.long_name|title }} &mdash; Admin</h1>
 {% endblock %}
+
 
 {% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
@@ -30,30 +36,80 @@
         {% endif %}
     </section>
 
-    <section>
+    <section id="admins">
         <h2>Admins</h2>
-        <table class="center-margin lined-table">
-            <thead>
-                <tr>
-                    <th>(Django) Username</th>
-                    <th>Is Super Admin?</th>
-                </tr>
-            </thead>
-            <tbody>
+
+        {% if removed_admin %}
+            <div class="form-success-message">
+                The user {{ removed_admin.display_name }} is no longer an admin.
+            </div>
+        {% endif %}
+
+        <div class="filtered-collection-wrapper">
+            <div class="filtered-collection-filter">
+            <div class="side-by-side-pushed-wrapper" style="flex-wrap: nowrap;">
+                <input type="text" placeholder="Filter by username...">
+                <span class="result-count"></span>
+            </div>
+            </div>
+            <div class="filtered-collection-content">
                 {% for super_admin in super_admins %}
-                    <tr>
-                        <td>{{ super_admin.username }}</td>
-                        <td>&#10004;</td>
-                    </tr>
+                    <div class="filtered-collection-item" data-value="{{ super_admin.display_name }}">
+                        <div class="side-by-side-pushed-wrapper">
+                            <div>
+                                <span>
+                                    <i class="fas fa-crown"></i> {{ super_admin.display_name }}
+                                    {% if super_admin.is_player %}<i class="fas fa-user"></i>{% endif %}
+                                </span>
+                            </div>
+                            <div></div>
+                        </div>
+                    </div>
                 {% endfor %}
                 {% for admin in admins %}
-                    <tr>
-                        <td>{{ admin.username }}</td>
-                        <td>&#10008;</td>
-                    </tr>
+                    <div class="filtered-collection-item" data-value="{{ admin.display_name }}">
+                        <div class="side-by-side-pushed-wrapper">
+                            <div>
+                                <span>
+                                    {{ admin.display_name }}
+                                    {% if admin.is_player %}<i class="fas fa-user"></i>{% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                {% if is_user_super_admin %}
+                                    <td>
+                                        <form action="{% url 'core:session_admin_players' session.url_tag %}#admins" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="remove_admin_id" value={{ admin.id }} />
+                                            <input class="button warning-error" type="submit" name="remove_admin_form" value="Remove"/>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
+
+        <p style="margin-bottom: 0;"><i class="fas fa-crown"></i> : super admin</p>
+        <p><i class="fas fa-user"></i> : user limited to this session</p>
+
+        {% if new_admin %}
+            <div class="form-success-message">
+                The user {{ new_admin.display_name }} is now an admin.
+            </div>
+        {% endif %}
+
+        {% if make_admin_form %}
+            <p style="margin-top: 20px">
+                You are a super admin of this session, you thus have the ability to promote users as admins. Use the form
+                below to do so.
+            </p>
+            <form action="{% url 'core:session_admin_players' session.url_tag %}#admins" method="post">
+                {% include "include/form_table_template.html" with form=make_admin_form form_type='make_admin_form' submit_button_label='Make Admin' %}
+            </form>
+        {% endif %}
     </section>
 
     <section id="players">
@@ -72,27 +128,35 @@
         {% endif %}
 
         {% if players %}
-            <table class="center-margin lined-table">
-                <tbody>
+            <div class="filtered-collection-wrapper">
+                <div class="filtered-collection-filter">
+                    <div class="side-by-side-pushed-wrapper" style="flex-wrap: nowrap;">
+                        <input type="text" placeholder="Filter by username...">
+                        <span class="result-count"></span>
+                    </div>
+                </div>
+                <div class="filtered-collection-content">
                     {% for player in players %}
-                        <tr>
-                            <td>{{ player.name }}</td>
-                            <td>
-                                <span class="button">
-                                    <a href="{% url "core:session_admin_player_password" session.url_tag player.name %}">Change Password</a>
-                                </span>
-                            </td>
-                            <td>
-                                <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="remove_player_id" value={{ player.id }} />
-                                    <input class="button color-error" type="submit" name="delete_player_form" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
-                                </form>
-                            </td>
-                        </tr>
+                        <div class="filtered-collection-item" data-value="{{ player.name }}">
+                            <div class="side-by-side-pushed-wrapper">
+                                <div>
+                                    <span>{{ player.name }}</span>
+                                </div>
+                                <div>
+                                    <span class="button" style="margin-right: 20px">
+                                        <a href="{% url "core:session_admin_player_password" session.url_tag player.name %}">Change Password</a>
+                                    </span>
+                                    <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="remove_player_id" value={{ player.id }} />
+                                        <input class="button color-error" type="submit" name="delete_player_form" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+            </div>
         {% else %}
             <p>No players registered yet.</p>
         {% endif %}
@@ -114,22 +178,32 @@
             {% endif %}
 
             {% if guests %}
-                <table class="center-margin lined-table">
-                    <tbody>
+                <div class="filtered-collection-wrapper">
+                    <div class="filtered-collection-filter">
+                    <div class="side-by-side-pushed-wrapper" style="flex-wrap: nowrap;">
+                        <input type="text" placeholder="Filter by guest name...">
+                        <span class="result-count"></span>
+                    </div>
+                    </div>
+                    <div class="filtered-collection-content">
                         {% for guest in guests %}
-                            <tr>
-                                <td>{{ guest.name }}</td>
-                                <td>
-                                    <form action="{% url 'core:session_admin_players' session.url_tag %}#guests" method="post">
+                            <div class="filtered-collection-item" data-value="{{ guest.name }}">
+                                <div class="side-by-side-pushed-wrapper">
+                                    <div>
+                                        <span>{{ guest.name }}</span>
+                                    </div>
+                                    <div>
+                                        <form action="{% url 'core:session_admin_players' session.url_tag %}#guests" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name='remove_player_id' value={{ guest.id }} />
                                         <input class="button color-error" type="submit" name="delete_guest_form" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
                                     </form>
-                                </td>
-                            </tr>
+                                    </div>
+                                </div>
+                            </div>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             {% else %}
                 <p>There are no guest users yet.</p>
             {% endif %}

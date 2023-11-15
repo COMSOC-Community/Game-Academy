@@ -44,8 +44,8 @@
         {% else %}
             {% if registration_form %}
                 {% if login_form or guest_form %}
-                    <div class="side-by-side-wrapper">
-                        <div class="side-by-side-box">
+                    <div class="side-by-side-two-columns-wrapper">
+                        <div>
                 {% endif %}
                 <h3>Create</h3>
                     {% if new_player %}
@@ -80,7 +80,7 @@
                     {% endif %}
                 {% if login_form or guest_form %}
                     </div>
-                    <div class="side-by-side-box">
+                    <div>
                         <h3>Log in</h3>
                 {% endif %}
             {% else %}
@@ -103,8 +103,8 @@
             {% endif %}
 
             {% if not registration_form and login_form and guest_form %}
-                <div class="side-by-side-wrapper">
-                    <div class="side-by-side-box">
+                <div class="side-by-side-two-columns-wrapper">
+                    <div>
             {% endif %}
 
             {% if login_form %}
@@ -113,7 +113,7 @@
                 </form>
                 {% if not registration_form and guest_form %}
                     </div>
-                    <div class="side-by-side-box">
+                    <div>
                 {% endif %}
             {% endif %}
 

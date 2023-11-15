@@ -49,13 +49,13 @@
                 <div class="grid2-wrapper game-grid">
                     {% for modify_game_form in modify_game_forms %}
                         <div class="grid-item" id="modify_{{ modify_game_form.game.id }}">
-                            <div class="side-by-side-wrapper game-grid-title">
-                                <div class="side-by-side-box">
+                            <div class="side-by-side-pushed-wrapper game-grid-title">
+                                <div>
                                     <h3 id="games_{{ modify_game_form.game.name }}">
                                         {{ modify_game_form.game.game_setting.long_name }} - {{ modify_game_form.game.name }}
                                     </h3>
                                 </div>
-                                <div class="side-by-side-box">
+                                <div>
                                     <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_games" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="remove_game_id" value={{ modify_game_form.game.id }} />

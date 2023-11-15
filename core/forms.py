@@ -70,10 +70,19 @@ class UserRegistrationForm(forms.Form):
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
     )
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super(UserRegistrationForm, self).__init__(*args, **kwargs)
+
+        if self.user:
+            self.fields.pop("email")
+            self.fields["username"].disabled = True
+            self.fields["username"].initial = self.user.username
+
     def clean_username(self):
         username = self.cleaned_data["username"]
 
-        if CustomUser.objects.filter(username=username).exists():
+        if not self.user and CustomUser.objects.filter(username=username).exists():
             raise forms.ValidationError(
                 "A user with this username already exists. Please choose a different one."
             )
@@ -459,6 +468,61 @@ class CreateGameForm(forms.Form):
             )
         else:
             return url_tag
+
+
+class MakeAdminForm(forms.Form):
+    username = forms.CharField(
+        label="Username",
+        max_length=CustomUser._meta.get_field("username").max_length,
+        required=False
+    )
+    playername = forms.CharField(
+        label="Player name",
+        max_length=CustomUser._meta.get_field("username").max_length,
+        required=False
+    )
+    super_admin = forms.BooleanField(
+        label="Super admin",
+        label_suffix="",
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.session = kwargs.pop("session")
+        super(MakeAdminForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get("username")
+        playername = cleaned_data.get("playername")
+        if not username and not playername:
+            raise forms.ValidationError("You need to input either a username or a player name.")
+        if username and playername:
+            raise forms.ValidationError("You cannot provide both a username and a player name, choose one.")
+        if username:
+            try:
+                user = CustomUser.objects.get(username=username)
+                cleaned_data["user"] = user
+            except CustomUser.DoesNotExist:
+                self.add_error(
+                    "username",
+                    forms.ValidationError(
+                        "This username has not been found in the database."
+                    ),
+                )
+        if playername:
+            try:
+                player = Player.objects.get(name=playername, session=self.session)
+                print(player)
+                cleaned_data["user"] = player.user
+            except Player.DoesNotExist:
+                self.add_error(
+                    "playername",
+                    forms.ValidationError(
+                        "No player with this name is registered for this session."
+                    ),
+                )
+        return cleaned_data
 
 
 class CreateTeamForm(forms.Form):

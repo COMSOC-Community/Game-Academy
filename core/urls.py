@@ -9,6 +9,7 @@ app_name = "core"
 urlpatterns = [
     re_path(r"^$", views.index, name="index"),
     re_path(r"^logout[/]$", views.logout_user, name="logout"),
+    re_path(r"^password[/]$", views.change_password, name="change_password"),
     re_path(r"^createsession[/]", views.create_session, name="create_session"),
     re_path(r"^message[/]", views.message, name="message"),
     re_path(

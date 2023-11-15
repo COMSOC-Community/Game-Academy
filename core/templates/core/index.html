@@ -41,14 +41,14 @@
         <section>
             <h2>Register or Login</h2>
 
-            <div class="side-by-side-wrapper">
-                <div class="side-by-side-box">
+            <div class="side-by-side-centered-wrapper">
+                <div>
                     <form action="{% url 'core:index' %}" method="post">
                         {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Login' %}
                     </form>
                 </div>
 
-                <div class="side-by-side-box">
+                <div>
                     {% if user_created %}
                         <p>User <em>{{ user.username }}</em> has been created. You can now log in.</p>
                     {% else %}

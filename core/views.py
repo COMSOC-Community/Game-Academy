@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -18,7 +18,7 @@ from .forms import (
     SessionFinderForm,
     CreateSessionForm,
     CreateGameForm,
-    CreateTeamForm, DeleteSessionForm,
+    CreateTeamForm, DeleteSessionForm, MakeAdminForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 
@@ -161,11 +161,35 @@ def index(request):
     return render(request, "core/index.html", context=context)
 
 
+# ================
+#    USER VIEWS
+# ================
+
+
 def logout_user(request):
     logout(request)
-    if "next" in request.GET:
-        return redirect(request.GET["next"])
+    next_url = request.GET.get("next")
+    if next_url:
+        if url_has_allowed_host_and_scheme(
+                url=next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure()
+        ):
+            return redirect(next_url)
     return redirect("core:index")
+
+
+def change_password(request):
+    update_password_form = UserRegistrationForm(user=request.user)
+    if request.method == "POST" and "update_password_form" in request.POST:
+        update_password_form = UserRegistrationForm(request.POST, user=request.user)
+        if update_password_form.is_valid():
+            request.user.set_password(update_password_form.cleaned_data["password1"])
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            request.session['_message_view_message'] = f"Your password has been changed."
+            return redirect("core:message")
+    return render(request, "core/change_password.html", {"update_password_form": update_password_form})
 
 
 # ===================
@@ -468,11 +492,6 @@ def session_admin_players(request, session_url_tag):
         "is_user_super_admin": is_user_super_admin
     }
 
-    super_admins = session.super_admins.all()
-    admins = session.admins.exclude(id__in=super_admins)
-    context["super_admins"] = super_admins
-    context["admins"] = admins
-
     # Add player form
     add_player_form = PlayerRegistrationForm(session=session)
     if request.method == "POST" and "add_player_form" in request.POST:
@@ -512,6 +531,34 @@ def session_admin_players(request, session_url_tag):
         player.user.delete()
         player.delete()
 
+    # Make admin form
+    if is_user_super_admin:
+        make_admin_form = MakeAdminForm(session=session)
+        if request.method == "POST" and "make_admin_form" in request.POST:
+            make_admin_form = MakeAdminForm(request.POST, session=session)
+            if make_admin_form.is_valid():
+                user = make_admin_form.cleaned_data["user"]
+                session.admins.add(user)
+                if make_admin_form.cleaned_data["super_admin"]:
+                    session.super_admins.add(user)
+                make_admin_form = MakeAdminForm(session=session)
+                context["new_admin"] = user
+        context["make_admin_form"] = make_admin_form
+
+    # Remove admin form
+    if is_user_super_admin:
+        if request.method == "POST" and "remove_admin_form" in request.POST:
+            admin_id = request.POST["remove_admin_id"]
+            admin = CustomUser.objects.get(id=admin_id)
+            session.super_admins.remove(admin)
+            session.admins.remove(admin)
+            context["removed_admin"] = admin
+
+    super_admins = session.super_admins.all()
+    admins = session.admins.exclude(id__in=super_admins)
+    context["super_admins"] = super_admins
+    context["admins"] = admins
+
     context["players"] = players
     context["guests"] = guests
     return render(request, "core/session_admin_players.html", context)
@@ -532,7 +579,7 @@ def session_admin_player_password(request, session_url_tag, player_name):
         if update_password_form.is_valid():
             player.user.set_password(update_password_form.cleaned_data["password1"])
             player.user.save()
-
+            update_session_auth_hash(request, player.user)
     context["update_password_form"] = update_password_form
     return render(request, "core/session_admin_player_password.html", context)
 

@@ -1,4 +1,10 @@
-{% include 'include/html_header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'include/head_base_content.html' %}
+    <title>{% block title %}Game Server{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+</head>
 
 <body id="plain-page">
 
