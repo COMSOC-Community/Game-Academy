@@ -8,7 +8,7 @@
     <h1>{{ session.long_name|title }} &mdash; Admin</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
     <section>
@@ -27,7 +27,7 @@
         {% endif %}
 
         {% if create_game_form %}
-            <form action="{% url 'core:session_admin_games' session.slug_name %}#add_game" method="post">
+            <form action="{% url 'core:session_admin_games' session.url_tag %}#add_game" method="post">
                 {% include "include/form_table_template.html" with form=create_game_form form_type='create_game_form' submit_button_label='Add Game' %}
             </form>
         {% endif %}
@@ -56,7 +56,7 @@
                                     </h3>
                                 </div>
                                 <div class="side-by-side-box">
-                                    <form action="{% url 'core:session_admin_games' session.slug_name %}#modify_games" method="post">
+                                    <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_games" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="remove_game_id" value={{ modify_game_form.game.id }} />
                                         <p class="center-align">
@@ -69,7 +69,7 @@
                             {% with modify_game_form.game.game_setting.package_url_namespace|add:':index' as index_url_shortcut %}
                                 <p class="center-align">
                                     <span class="button">
-                                        <a href="{% url index_url_shortcut session.slug_name modify_game_form.game.url_tag %}">To the game</a>
+                                        <a href="{% url index_url_shortcut session.url_tag modify_game_form.game.url_tag %}">To the game</a>
                                     </span>
                                 </p>
                             {% endwith %}
@@ -80,7 +80,7 @@
                                 </div>
                             {% endif %}
 
-                            <form action="{% url 'core:session_admin_games' session.slug_name %}#modify_{{ modify_game_form.game.id }}" method="post">
+                            <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ modify_game_form.game.id }}" method="post">
                                 {% with 'modify_game_form_'|add:modify_game_form.game.url_tag as form_type %}
                                     {% include "include/form_table_template.html" with form=modify_game_form form_type=form_type submit_button_label='Modify Game' %}
                                 {% endwith %}

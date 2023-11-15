@@ -12,8 +12,8 @@
                 {% if request.user.is_player %}
                     {% with request.user.players.first.session as session %}
                         <ul>
-                            <li><a href="{% url 'core:session_portal' session.slug_name %}">Session portal</a></li>
-                            <li><a href="{% url 'core:session_home' session.slug_name %}">Session home</a></li>
+                            <li><a href="{% url 'core:session_portal' session.url_tag %}">Session portal</a></li>
+                            <li><a href="{% url 'core:session_home' session.url_tag %}">Session home</a></li>
                         </ul>
                     {% endwith %}
                 {% else %}
@@ -27,9 +27,9 @@
                             {% for session in request.user.administrated_sessions.all %}
                                 <li>{{ session.name }}</li>
                                 <ul>
-                                    <li><a href="{% url "core:session_portal" session.slug_name %}">Portal</a></li>
-                                    <li><a href="{% url "core:session_home" session.slug_name %}">Home page</a></li>
-                                    <li><a href="{% url "core:session_admin" session.slug_name %}">Admin page</a></li>
+                                    <li><a href="{% url "core:session_portal" session.url_tag %}">Portal</a></li>
+                                    <li><a href="{% url "core:session_home" session.url_tag %}">Home page</a></li>
+                                    <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
                                 </ul>
                             {% endfor %}
                         </ul>
@@ -39,7 +39,7 @@
                         <ul>
                             {% for player in request.user.players.all %}
                                 <li>
-                                    {{ player.name }} for session <a href="{% url "core:session_portal" player.session.slug_name %}">{{ player.session.name }}</a>
+                                    {{ player.name }} for session <a href="{% url "core:session_portal" player.session.url_tag %}">{{ player.session.name }}</a>
                                 </li>
                             {% endfor %}
                         </ul>

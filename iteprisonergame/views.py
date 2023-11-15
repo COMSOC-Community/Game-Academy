@@ -12,8 +12,8 @@ from .apps import NAME
 from .models import Answer
 
 
-def index(request, session_slug_name, game_url_tag):
-    session = get_object_or_404(Session, slug_name=session_slug_name)
+def index(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
@@ -43,8 +43,8 @@ def index(request, session_slug_name, game_url_tag):
     return render(request, os.path.join("iteprisonergame", "index.html"), locals())
 
 
-def submit_answer(request, session_slug_name, game_url_tag):
-    session = get_object_or_404(Session, slug_name=session_slug_name)
+def submit_answer(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
@@ -97,8 +97,8 @@ def submit_answer(request, session_slug_name, game_url_tag):
     )
 
 
-def results(request, session_slug_name, game_url_tag):
-    session = get_object_or_404(Session, slug_name=session_slug_name)
+def results(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
@@ -121,12 +121,12 @@ def results(request, session_slug_name, game_url_tag):
                 elif request.POST["form_type"] == "run_management":
                     management.call_command(
                         "ipd_computeresults",
-                        session=session.slug_name,
+                        session=session.url_tag,
                         game=game.url_tag,
                     )
                     management.call_command(
                         "ipd_generategraphdata",
-                        session=session.slug_name,
+                        session=session.url_tag,
                         game=game.url_tag,
                     )
 

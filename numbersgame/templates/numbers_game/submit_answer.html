@@ -18,11 +18,11 @@
 
             <div class="navigation">
                 <span class="navigation-button">
-                    <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+                    <a href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
                 </span>
                 <br>
                 <span class="navigation-button">
-                    <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+                    <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
                 </span>
             </div>
 
@@ -39,12 +39,12 @@
 
                 <p>
                     You will be redirected soon to the {{ game.game_setting.long_name }} page.
-                    If not, <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">click here</a>!
+                    If not, <a href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">click here</a>!
                 </p>
 
                 <script>
                     function redirect () {
-                        window.location.href = "{% url 'numbers_game:index' session.slug_name game.url_tag %}" ;
+                        window.location.href = "{% url 'numbers_game:index' session.url_tag game.url_tag %}" ;
                     }
                     setTimeout(redirect, 3000);
                 </script>
@@ -64,7 +64,7 @@
                         </div>
                     {% endif %}
 
-                    <form action="{% url 'numbers_game:submit_answer' session.slug_name game.url_tag %}" method="post">
+                    <form action="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}" method="post">
                         {% csrf_token %}
 
                         {% if submit_answer_form.non_field_errors %}
@@ -122,24 +122,24 @@
 
         <div class="navigation">
             <span class="navigation-button">
-                <a href="{% url 'numbers_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+                <a href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
             </span>
             <br>
             <span class="navigation-button">
-                <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+                <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
             </span>
         </div>
 
         {% else %}
             <p>
-                You are not authenticated for this session. Go to the <a href="{% url 'core:session_portal' session.slug_name %}">
+                You are not authenticated for this session. Go to the <a href="{% url 'core:session_portal' session.url_tag %}">
                 session index</a> page to log in.
             </p>
         {% endif %}
     {% else %}
         <p>
             It is not possible to play this game.
-            Get back to the <a href="{% url "numbers_game:index" session.slug_name game.url_tag %}">home page</a> of the
+            Get back to the <a href="{% url "numbers_game:index" session.url_tag game.url_tag %}">home page</a> of the
             game.
         </p>
     {% endif %}

@@ -8,7 +8,7 @@
     <h1>{{ session.long_name|title }}</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
     {% if not session.visible %}
@@ -41,7 +41,7 @@
                         {% with game.game_setting.package_url_namespace|add:':index' as index_url_shortcut %}
                             <p class="center-align">
                                 <span class="green-button">
-                                    <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>
+                                    <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
                                 </span>
                             </p>
                         {% endwith %}
@@ -64,7 +64,7 @@
                     {% with game.game_setting.package_url_namespace|add:':index' as index_url_shortcut %}
                         <p class="center-align">
                             <span class="green-button">
-                                <a href="{% url index_url_shortcut session.slug_name game.url_tag %}">To the game</a>
+                                <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
                             </span>
                         </p>
                     {% endwith %}

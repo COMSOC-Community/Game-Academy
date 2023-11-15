@@ -13,7 +13,7 @@
                 <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
 
                 <p>You can access the main page of the session
-                    <a href="{% url 'core:session_portal' session_obj.slug_name %}">here</a>.
+                    <a href="{% url 'core:session_portal' session_obj.url_tag %}">here</a>.
                 </p>
             </div>
         {% else %}

@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
 
 
 class Session(models.Model):
-    slug_name = models.SlugField(unique=True, max_length=50, blank=False, null=False)
+    url_tag = models.SlugField(unique=True, max_length=50, blank=False, null=False)
     name = models.CharField(unique=True, max_length=50, blank=False, null=False)
     long_name = models.CharField(max_length=100, blank=False, null=False)
     can_register = models.BooleanField(default=True)
@@ -28,10 +28,10 @@ class Session(models.Model):
     super_admins = models.ManyToManyField(CustomUser, related_name="super_administrated_sessions")
 
     class Meta:
-        ordering = ["slug_name"]
+        ordering = ["url_tag"]
 
     def __str__(self):
-        return str(self.slug_name)
+        return str(self.url_tag)
 
 
 class Player(models.Model):

@@ -21,7 +21,7 @@ class Command(BaseCommand):
                 "ERROR: you need to give the URL tag of a session with the --session argument"
             )
             return
-        session = Session.objects.filter(slug_name=options["session"])
+        session = Session.objects.filter(url_tag=options["session"])
         if not session.exists():
             print(
                 "ERROR: no session with URL tag {} has been found".format(

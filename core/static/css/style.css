@@ -138,7 +138,7 @@ section {
 }
 
 .warning-section {
-	background: var(--color-warning);
+	background: var(--color-warning-light);
 	border: var(--color-warning-dark) solid 2px;
 }
 

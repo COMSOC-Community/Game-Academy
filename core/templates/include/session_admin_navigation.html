@@ -5,12 +5,12 @@
 
 <div class="admin-nav-wrapper">
     <div class="admin-nav-item">
-        <span class="button"><a href="{% url "core:session_admin" session.slug_name %}">Main Parameters</a></span>
+        <a class="button" href="{% url "core:session_admin" session.url_tag %}">Main Parameters</a>
     </div>
     <div class="admin-nav-item">
-        <span class="button"><a href="{% url "core:session_admin_players" session.slug_name %}">Users and Players</a></span>
+        <a class="button" href="{% url "core:session_admin_players" session.url_tag %}">Users and Players</a>
     </div>
     <div class="admin-nav-item">
-        <span class="button"><a href="{% url 'core:session_admin_games' session.slug_name %}">Games of the Session</a></span>
+        <a class="button" href="{% url 'core:session_admin_games' session.url_tag %}">Games of the Session</a>
     </div>
 </div>

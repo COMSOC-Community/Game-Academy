@@ -18,7 +18,7 @@ class SessionFinderForm(forms.Form):
         session = Session.objects.filter(name=session_name)
         if session.exists():
             session = session.first()
-            self.cleaned_data["session_slug_name"] = session.slug_name
+            self.cleaned_data["session_url_tag"] = session.url_tag
             return session_name
         else:
             raise forms.ValidationError(
@@ -97,10 +97,10 @@ class UserRegistrationForm(forms.Form):
 
 
 class CreateSessionForm(forms.Form):
-    slug_name = forms.SlugField(
+    url_tag = forms.SlugField(
         label="URL tag of the session",
         label_suffix="",
-        max_length=Session._meta.get_field("slug_name").max_length,
+        max_length=Session._meta.get_field("url_tag").max_length,
         help_text="The URL tag is the part of the URL path dedicated to the session. It will "
         "look like /session/SESSION_URL_TAG/. It has to be a 'slug', i.e., it can "
         "only contains letters, numbers, underscores or hyphens.",
@@ -153,7 +153,7 @@ class CreateSessionForm(forms.Form):
         if self.session:
             kwargs.update(
                 initial={
-                    "slug_name": self.session.slug_name,
+                    "url_tag": self.session.url_tag,
                     "name": self.session.name,
                     "long_name": self.session.long_name,
                     "need_registration": self.session.need_registration,
@@ -163,15 +163,15 @@ class CreateSessionForm(forms.Form):
             )
         super(CreateSessionForm, self).__init__(*args, **kwargs)
         if self.session:
-            self.fields["slug_name"].disabled = True
+            self.fields["url_tag"].disabled = True
 
-    def clean_slug_name(self):
-        slug_name = self.cleaned_data["slug_name"]
-        if not self.session and Session.objects.filter(slug_name=slug_name).exists():
+    def clean_url_tag(self):
+        url_tag = self.cleaned_data["url_tag"]
+        if not self.session and Session.objects.filter(url_tag=url_tag).exists():
             raise forms.ValidationError(
                 "A session with this URL tag already exists. It has to be unique."
             )
-        return slug_name
+        return url_tag
 
     def clean_name(self):
         name = self.cleaned_data["name"]
@@ -328,30 +328,6 @@ class PlayerRegistrationForm(forms.Form):
                 )
             self.cleaned_data["player_username"] = username
         return player_name
-
-
-class UpdatePasswordForm(forms.Form):
-    password1 = forms.CharField(
-        label="Password",
-        label_suffix="",
-        widget=forms.PasswordInput(attrs={"placeholder": "New Password"}),
-    )
-    password2 = forms.CharField(
-        label="Repeat password",
-        label_suffix="",
-        widget=forms.PasswordInput(attrs={"placeholder": "Repeat"}),
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session")
-        super(UpdatePasswordForm, self).__init__(*args, **kwargs)
-
-    def clean_password2(self):
-        password1 = self.cleaned_data["password1"]
-        password2 = self.cleaned_data["password2"]
-        if password1 != password2:
-            raise forms.ValidationError("The two passwords do not match.")
-        return password2
 
 
 class SessionGuestRegistration(forms.Form):

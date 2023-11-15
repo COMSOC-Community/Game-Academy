@@ -19,11 +19,11 @@
 
     <div class="navigation">
         <span class="navigation-button">
-            <a href="{% url 'itepris_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+            <a href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
         </span>
         <br>
         <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
         </span>
     </div>
 
@@ -34,7 +34,7 @@
 
                 {% if game.playable %}
                     <p>Players can currently submit their answers.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
                         {% csrf_token %}
                         <input type="hidden" name="form_type" value="game_playable"/>
                         <p class="center-align">
@@ -43,7 +43,7 @@
                     </form>
                 {% else %}
                     <p>The game is closed, player can no longer submit their answers.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
                         {% csrf_token %}
                         <input type="hidden" name="form_type" value="game_playable"/>
                         <p class="center-align">
@@ -54,7 +54,7 @@
 
                 {% if game.results_visible %}
                     <p>The results are visible by all players.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
                         {% csrf_token %}
                         <input type="hidden" name="form_type" value="results_visible"/>
                         <p class="center-align">
@@ -63,7 +63,7 @@
                     </form>
                 {% else %}
                     <p>Players cannot currently see the results.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
                         {% csrf_token %}
                         <input type="hidden" name="form_type" value="results_visible"/>
                         <p class="center-align">
@@ -75,7 +75,7 @@
                     To manually run the management commands, click the following button. This is normally unnecessary,
                     unless you changed the entries of the database directly, or performed some other manual actions.
                 </p>
-                <form method="post" action="{% url 'itepris_game:results' session.slug_name game.url_tag %}">
+                <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
                     {% csrf_token %}
                         <input type="hidden" name="form_type" value="run_management"/>
                     <p class="center-align">
@@ -427,11 +427,11 @@
 
     <div class="navigation">
         <span class="navigation-button">
-            <a href="{% url 'itepris_game:index' session.slug_name game.url_tag %}">&#8610;&nbsp;To game home</a>
+            <a href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
         </span>
         <br>
         <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
         </span>
     </div>
 {% else %}

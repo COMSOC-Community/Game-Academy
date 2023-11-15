@@ -6,57 +6,75 @@ from django.urls import reverse, resolve
 import core.authorisations
 from core.models import Session
 
-SESSION_SCOPE_IGNORED_VIEWS = [
-    "core:logout",
-    "core:force_player_logout"
-]
-
-LOGIN_IGNORED_VIEWS = [
+# Views that do not require authenticated users
+OPEN_VIEWS = [
     "core:index",
     "core:logout",
     "core:session_portal",
     "core:force_player_logout",
 ]
 
-SESSION_VISIBILITY_IGNORED_VIEWS = [
+# Views outside of session that can be accessed by players
+PLAYER_OPEN_VIEWS = [
+    "core:logout",
     "core:force_player_logout"
 ]
+
+# Views within a session that can be accessed by anyone (i.e., non-players)
+SESSION_OPEN_VIEWS = [
+    "core:session_portal",
+]
+
+# Views within a session that can be accessed even if session is not visible
+HIDDEN_SESSION_OPEN_VIEWS = [
+    "core:force_player_logout"
+]
+
+try:
+    assert set(SESSION_OPEN_VIEWS).issubset(set(OPEN_VIEWS))
+except AssertionError:
+    raise ValueError("SESSION_OPEN_VIEWS is not a subset of OPEN_VIEWS")
 
 SESSION_ROOT_PATH = "/s/"
 SESSION_SLUG_POSITION = 2
 
 
-class EnforceLoginScopeMiddelware(AuthenticationMiddleware):
+class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
 
     @staticmethod
     def _enforce_login_scope(request):
         path = request.path
         resolver = resolve(path)
         view = resolver.view_name
-        if view not in LOGIN_IGNORED_VIEWS and not request.user.is_authenticated:
+        if view not in OPEN_VIEWS and not request.user.is_authenticated:
             raise Http404("Middleware block: this view is not accessible to unauthenticated users.")
 
-        accessed_session_slug = None
+        accessed_session_url_tag = None
         # Test for login
-        if path.startswith(SESSION_ROOT_PATH) and request.user.is_authenticated:
-            accessed_session_slug = path.split("/")[SESSION_SLUG_POSITION]
-            session = get_object_or_404(Session, slug_name=accessed_session_slug)
-            is_session_admin = core.authorisations.is_session_admin(session, request.user)
-            is_session_player = request.user.is_player and request.user.players.first().session == session
-            if view not in LOGIN_IGNORED_VIEWS and not is_session_admin and not is_session_player:
-                raise Http404("Middleware block: this view is not accessible to this user (not admin, not player).")
-            if view not in SESSION_VISIBILITY_IGNORED_VIEWS and not is_session_admin and not session.visible:
+        if path.startswith(SESSION_ROOT_PATH):
+            accessed_session_url_tag = path.split("/")[SESSION_SLUG_POSITION]
+            session = get_object_or_404(Session, url_tag=accessed_session_url_tag)
+            if core.authorisations.is_session_admin(session, request.user):
+                return
+            if session.visible:
+                if view in SESSION_OPEN_VIEWS:
+                    return
+                # We know user is authenticated (assert above, and first test)
+                if not request.user.is_player and request.user.players.first().session == session:
+                    raise Http404("Middleware block: this session view is not accessible to this user "
+                                  "(not admin, not player).")
+            elif view not in HIDDEN_SESSION_OPEN_VIEWS:
                 raise Http404("Middleware block: hidden session views are only accessible to admins")
 
         # Enforce session scope
         if request.user.is_authenticated and request.user.is_player:
-            if view in SESSION_SCOPE_IGNORED_VIEWS:
+            if view in PLAYER_OPEN_VIEWS:
                 return
             session = request.user.players.first().session
-            if not accessed_session_slug or accessed_session_slug != session.slug_name:
-                response = redirect("core:force_player_logout", session.slug_name)
+            if not accessed_session_url_tag or accessed_session_url_tag != session.url_tag:
+                response = redirect("core:force_player_logout", session.url_tag)
                 response[
-                    "Location"] += f"?next={path}&prev={reverse('core:session_home', args=(session.slug_name,))}"
+                    "Location"] += f"?next={path}&prev={reverse('core:session_home', args=(session.url_tag,))}"
                 return response
 
     def process_request(self, request):

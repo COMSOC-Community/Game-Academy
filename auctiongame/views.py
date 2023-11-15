@@ -13,8 +13,8 @@ from .apps import NAME
 from .models import Answer
 
 
-def index(request, session_slug_name, game_url_tag):
-    session = get_object_or_404(Session, slug_name=session_slug_name)
+def index(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
@@ -39,8 +39,8 @@ def index(request, session_slug_name, game_url_tag):
     return render(request, os.path.join("auctiongame", "index.html"), locals())
 
 
-def submit_answer(request, session_slug_name, game_url_tag):
-    session = get_object_or_404(Session, slug_name=session_slug_name)
+def submit_answer(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
@@ -91,8 +91,8 @@ def submit_answer(request, session_slug_name, game_url_tag):
     return render(request, os.path.join("auctiongame", "submit_answer.html"), locals())
 
 
-def results(request, session_slug_name, game_url_tag):
-    session = get_object_or_404(Session, slug_name=session_slug_name)
+def results(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
@@ -115,7 +115,7 @@ def results(request, session_slug_name, game_url_tag):
                 elif request.POST["form_type"] == "run_management":
                     management.call_command(
                         "auct_generategraph",
-                        session=session.slug_name,
+                        session=session.url_tag,
                         game=game.url_tag,
                     )
 

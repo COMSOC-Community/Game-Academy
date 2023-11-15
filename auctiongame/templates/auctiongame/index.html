@@ -17,7 +17,7 @@
 
     <div class="navigation">
         <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
         </span>
     </div>
 
@@ -25,19 +25,19 @@
         <div class="warning-section">
             <p>
                 Since you are logged in as an admin, you can also access the
-                <a href="{% url 'core:session_admin' session.slug_name %}">admin page</a>. You will be able to manage the
+                <a href="{% url 'core:session_admin' session.url_tag %}">admin page</a>. You will be able to manage the
                 game from there.
             </p>
             {% if not game.playable %}
                 <p>
                     The game cannot be played at the moment. You can access the answer page
-                    <a href="{% url "auction_game:submit_answer" session.slug_name game.url_tag %}">here</a>.
+                    <a href="{% url "auction_game:submit_answer" session.url_tag game.url_tag %}">here</a>.
                 </p>
             {% endif %}
             {% if not game.results_visible %}
                 <p>
                     The results are currently not visible to the players. You can access them
-                    <a href="{% url "auction_game:results" session.slug_name game.url_tag %}">here</a>. Note that admin
+                    <a href="{% url "auction_game:results" session.url_tag game.url_tag %}">here</a>. Note that admin
                     shortcuts are present there.
                 </p>
             {% endif %}
@@ -63,14 +63,14 @@
                 {% if game.playable and not current_answer.bid %}
                     <td style="padding-right: 20px;">
                         <span class="orange-button">
-                            <a href="{% url 'auction_game:submit_answer' session.slug_name game.url_tag %}">Submit your answer</a>
+                            <a href="{% url 'auction_game:submit_answer' session.url_tag game.url_tag %}">Submit your answer</a>
                         </span>
                     </td>
                 {% endif %}
                 {% if game.results_visible %}
                     <td style="padding-left: 20px;">
                         <span class="orange-button">
-                            <a href="{% url 'auction_game:results' session.slug_name game.url_tag %}">See the results</a>
+                            <a href="{% url 'auction_game:results' session.url_tag game.url_tag %}">See the results</a>
                         </span>
                     </td>
                 {% endif %}
@@ -80,7 +80,7 @@
 
     <div class="navigation">
         <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.slug_name %}">&#8610;&nbsp;To session home</a>
+            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
         </span>
     </div>
 {% else %}

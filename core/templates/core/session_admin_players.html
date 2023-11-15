@@ -8,7 +8,7 @@
     <h1>{{ session.long_name|title }} &mdash; Admin</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
     <section>
@@ -24,7 +24,7 @@
             {% endif %}
 
         {% if add_player_form %}
-            <form action="{% url 'core:session_admin_players' session.slug_name %}#add_player" method="post">
+            <form action="{% url 'core:session_admin_players' session.url_tag %}#add_player" method="post">
                {% include "include/form_table_template.html" with form=add_player_form form_type="add_player_form" submit_button_label='Add Player' %}
             </form>
         {% endif %}
@@ -79,11 +79,11 @@
                             <td>{{ player.name }}</td>
                             <td>
                                 <span class="button">
-                                    <a href="{% url "core:session_admin_player_password" session.slug_name player.name %}">Change Password</a>
+                                    <a href="{% url "core:session_admin_player_password" session.url_tag player.name %}">Change Password</a>
                                 </span>
                             </td>
                             <td>
-                                <form action="{% url 'core:session_admin_players' session.slug_name %}#players" method="post">
+                                <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="remove_player_id" value={{ player.id }} />
                                     <input class="button color-error" type="submit" name="delete_player_form" value="Delete Player" onclick="return confirm('Deleting a player is irreversible.')"/>
@@ -104,7 +104,7 @@
         {% if session.need_registration %}
             <p>
                 This session does not allow for guests to play. If you want to enable this, you can change the settings
-                on <a href="{% url 'core:session_admin' session.slug_name %}">this page</a>.
+                on <a href="{% url 'core:session_admin' session.url_tag %}">this page</a>.
             </p>
         {% else %}
             {% if deleted_guest_name %}
@@ -120,7 +120,7 @@
                             <tr>
                                 <td>{{ guest.name }}</td>
                                 <td>
-                                    <form action="{% url 'core:session_admin_players' session.slug_name %}#guests" method="post">
+                                    <form action="{% url 'core:session_admin_players' session.url_tag %}#guests" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name='remove_player_id' value={{ guest.id }} />
                                         <input class="button color-error" type="submit" name="delete_guest_form" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>

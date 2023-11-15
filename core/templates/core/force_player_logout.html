@@ -11,7 +11,7 @@
 
 <div class="side-by-side-wrapper">
     <div class="side-by-side-box">
-        <form action="{% url 'core:force_player_logout' session.slug_name %}" method="post">
+        <form action="{% url 'core:force_player_logout' session.url_tag %}" method="post">
             {% csrf_token %}
         <button type="submit" class="button" name="logout_and_continue">Logout and Continue</button>
     </form>

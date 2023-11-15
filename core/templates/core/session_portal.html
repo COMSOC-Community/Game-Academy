@@ -6,7 +6,7 @@
     <h1>{{ session.long_name|title }}</h1>
 {% endblock %}
 
-{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.slug_name %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
 
 {% block content %}
     {% if not session.visible %}
@@ -39,7 +39,7 @@
             </p>
 
             <p class="center-align">
-                <span><a class="button" href="{% url 'core:session_home' session.slug_name %}">Join the session as {{ player_profile.name }}</a></span>
+                <span><a class="button" href="{% url 'core:session_home' session.url_tag %}">Join the session as {{ player_profile.name }}</a></span>
             </p>
         {% else %}
             {% if registration_form %}
@@ -74,7 +74,7 @@
                         {% if player_creation_error %}
                             <p class="form-error">There was a general problem here: {{ player_creation_error }}. Please report that to the admin.</p>
                         {% endif %}
-                        <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
+                        <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
                             {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register as a Player' %}
                         </form>
                     {% endif %}
@@ -108,7 +108,7 @@
             {% endif %}
 
             {% if login_form %}
-                <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
+                <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
                     {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
                 </form>
                 {% if not registration_form and guest_form %}
@@ -121,7 +121,7 @@
                 {% if login_form and registration_form %}
                     <div class="hr-separator"></div>
                 {% endif %}
-                <form action="{% url 'core:session_portal' session.slug_name %}" method="post">
+                <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
                     {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
                 </form>
                 {% if not registration_form and login_form %}
