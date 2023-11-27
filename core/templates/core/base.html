@@ -20,6 +20,9 @@
                         <ul>
                             <li><a href="{% url 'core:session_portal' session.url_tag %}">Session portal</a></li>
                             <li><a href="{% url 'core:session_home' session.url_tag %}">Session home</a></li>
+                            {% if request.user.administrated_sessions.all %}
+                                <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
+                            {% endif %}
                         </ul>
                     {% endwith %}
                 {% else %}

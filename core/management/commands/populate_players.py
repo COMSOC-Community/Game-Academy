@@ -1,7 +1,6 @@
 import random
 
 from django.core.management.base import BaseCommand
-from django.utils.crypto import get_random_string
 
 from core.constants import player_username, guest_username
 from core.models import Session, Player, CustomUser
@@ -30,9 +29,9 @@ class Command(BaseCommand):
         # Generate and populate players
         num_created = 0
         for _ in range(num_players):
-            player_name = get_random_string(3).lower()
+            player_name = random.choices(list(map(chr, range(97, 123))), k=3)
             while Player.objects.filter(name=player_name).exists():
-                player_name = get_random_string(3).lower()
+                player_name = random.choices(list(map(chr, range(97, 123))), k=3)
             guest = False
             if not session.need_registration:
                 guest = random.random() > 0.5

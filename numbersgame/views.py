@@ -18,25 +18,16 @@ def index(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
+    context = {"session": session, "game": game, "admin_user": is_session_admin(session, request.user)}
+    try:
+        player = Player.objects.get(session=session, user=request.user)
+        context["player"] = player
+        answer = Answer.objects.get(game=game, player=player)
+        context["answer"] = answer
+    except (Player.DoesNotExist, Answer.DoesNotExist):
+        pass
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
-
-    if request.user.is_authenticated:
-        try:
-            player = Player.objects.get(session=session, user=request.user)
-        except Player.DoesNotExist:
-            player = None
-        if player is not None:
-            try:
-                answer = Answer.objects.get(game=game, player=request.user.player)
-            except Answer.DoesNotExist:
-                answer = None
-
-    return render(request, os.path.join("numbers_game", "index.html"), locals())
+    return render(request, os.path.join("numbers_game", "index.html"), context)
 
 
 def submit_answer(request, session_url_tag, game_url_tag):

@@ -62,7 +62,17 @@
                                     {% if super_admin.is_player %}<i class="fas fa-user"></i>{% endif %}
                                 </span>
                             </div>
-                            <div></div>
+                            <div>
+                                {% if is_user_super_admin and super_admin != request.user %}
+                                    <td>
+                                        <form action="{% url 'core:session_admin_players' session.url_tag %}#admins" method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="remove_admin_id" value={{ super_admin.id }} />
+                                            <input class="button warning-error" type="submit" name="remove_admin_form" value="Remove"/>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

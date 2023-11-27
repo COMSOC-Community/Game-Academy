@@ -1,12 +1,12 @@
-GUEST_PASSWORD_PREFIX = "ThisIsThePasswordForTheGuest_"
+GUEST_PASSWORD_PREFIX = "GuestPass_"
 
 
 def player_username(session, player_name):
-    return "GamePlayer_{}_{}".format(session.url_tag, player_name)
+    return "Player_{}_{}".format(session.url_tag, player_name)
 
 
 def guest_username(session, guest_name):
-    return "GameGuest_{}_{}".format(session.url_tag, guest_name)
+    return "Guest_{}_{}".format(session.url_tag, guest_name)
 
 
 def guest_password(username):

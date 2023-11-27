@@ -4,7 +4,8 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, resolve
 
 import core.authorisations
-from core.models import Session
+from core.models import Session, Game
+from gameserver.games import INSTALLED_GAMES_SETTING
 
 # Views that do not require authenticated users
 OPEN_VIEWS = [
@@ -39,7 +40,9 @@ except AssertionError:
     raise ValueError("SESSION_OPEN_VIEWS is not a subset of OPEN_VIEWS")
 
 SESSION_ROOT_PATH = "/s/"
-SESSION_SLUG_POSITION = 2
+SESSION_URL_TAG_POSITION = 2
+GAME_TYPE_URL_TAG_POSITION = 3
+GAME_URL_TAG_POSITION = 4
 
 
 class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
@@ -55,7 +58,8 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
         accessed_session_url_tag = None
         # Test for login
         if path.startswith(SESSION_ROOT_PATH):
-            accessed_session_url_tag = path.split("/")[SESSION_SLUG_POSITION]
+            split_path = path.split("/")
+            accessed_session_url_tag = split_path[SESSION_URL_TAG_POSITION]
             session = get_object_or_404(Session, url_tag=accessed_session_url_tag)
             if core.authorisations.is_session_admin(session, request.user):
                 return
@@ -68,6 +72,18 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                                   "(not admin, not player).")
             elif view not in HIDDEN_SESSION_OPEN_VIEWS:
                 raise Http404("Middleware block: hidden session views are only accessible to admins")
+
+            # If we are here we know that if the view is hidden, then the user is an admin
+            if len(split_path) > GAME_TYPE_URL_TAG_POSITION:
+                game_type = split_path[GAME_TYPE_URL_TAG_POSITION]
+                for game_setting in INSTALLED_GAMES_SETTING:
+                    if game_type == game_setting.url_tag:
+                        game = get_object_or_404(Game,
+                                                 session=session,
+                                                 url_tag=split_path[GAME_URL_TAG_POSITION],
+                                                 game_type=game_setting.name)
+                        if not game.visible:
+                            raise Http404("Middleware block: this game is not visible and the user is not an admin")
 
         # Enforce session scope
         if request.user.is_authenticated and request.user.is_player:
