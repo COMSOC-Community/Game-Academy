@@ -18,7 +18,11 @@ def index(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    context = {"session": session, "game": game, "admin_user": is_session_admin(session, request.user)}
+    context = {
+        "session": session,
+        "game": game,
+        "admin_user": is_session_admin(session, request.user),
+    }
     try:
         player = Player.objects.get(session=session, user=request.user)
         context["player"] = player

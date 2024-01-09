@@ -158,7 +158,9 @@ class CreateSessionForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop("session", None)  # Not none if session is passed, i.e., the form is used to modify a session
+        self.session = kwargs.pop(
+            "session", None
+        )  # Not none if session is passed, i.e., the form is used to modify a session
         if self.session:
             kwargs.update(
                 initial={
@@ -203,9 +205,7 @@ class CreateSessionForm(forms.Form):
 
 class DeleteSessionForm(forms.Form):
     delete = forms.BooleanField(
-        label="Delete the session",
-        label_suffix="",
-        initial=False
+        label="Delete the session", label_suffix="", initial=False
     )
     password = forms.CharField(
         label="Your Password",
@@ -462,7 +462,10 @@ class CreateGameForm(forms.Form):
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]
         new_url_tag = not self.game or url_tag != self.game.url_tag
-        if new_url_tag and Game.objects.filter(session=self.session, url_tag=url_tag).exists():
+        if (
+            new_url_tag
+            and Game.objects.filter(session=self.session, url_tag=url_tag).exists()
+        ):
             raise forms.ValidationError(
                 "A game with this URL tag already exists for this session."
             )
@@ -474,17 +477,15 @@ class MakeAdminForm(forms.Form):
     username = forms.CharField(
         label="Username",
         max_length=CustomUser._meta.get_field("username").max_length,
-        required=False
+        required=False,
     )
     playername = forms.CharField(
         label="Player name",
         max_length=CustomUser._meta.get_field("username").max_length,
-        required=False
+        required=False,
     )
     super_admin = forms.BooleanField(
-        label="Super admin",
-        label_suffix="",
-        required=False
+        label="Super admin", label_suffix="", required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -496,9 +497,13 @@ class MakeAdminForm(forms.Form):
         username = cleaned_data.get("username")
         playername = cleaned_data.get("playername")
         if not username and not playername:
-            raise forms.ValidationError("You need to input either a username or a player name.")
+            raise forms.ValidationError(
+                "You need to input either a username or a player name."
+            )
         if username and playername:
-            raise forms.ValidationError("You cannot provide both a username and a player name, choose one.")
+            raise forms.ValidationError(
+                "You cannot provide both a username and a player name, choose one."
+            )
         if username:
             try:
                 user = CustomUser.objects.get(username=username)

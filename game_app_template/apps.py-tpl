@@ -1,12 +1,12 @@
 from gameserver.games import GameConfig
 
-NAME = "auctiongame"
-LONGNAME = "Auction Game"
-URL_TAG = "auction"
-URL_NAMESPACE = "auction_game"
+NAME = "{{ app_name }}"
+LONGNAME = "{{ app_long_name }}"
+URL_TAG = "{{ app_url_tag }}"
+URL_NAMESPACE = "{{ app_url_namespace }}"
 
 
-class AuctionGameConfig(GameConfig):
+class {{ camel_case_app_name }}Config(GameConfig):
     name = NAME
 
     def __init__(self, app_name, app_module):

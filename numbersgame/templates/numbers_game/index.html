@@ -1,68 +1,36 @@
-{% extends 'core/base.html' %}
+{% extends 'core/base_game_home.html' %}
 
-{% block title %}Welcome to Game Server{% endblock %}
+{% block game_description %}
+    <p>
+        This is the main page for the {{ game.game_setting.long_name }}. Remember the rules of the game: every player
+        submits a rational number between 0 and 100 and the player closest to 2/3 of the average of the answers wins the game.
+    </p>
 
-{% block header %}
-    <h1>Welcome to the Game Server</h1>
-    <p>Learn while playing, and play while learning!</p>
-{% endblock %}
-
-{% block content %}
-    {% if admin_user %}
-        <section class="warning-section">
-            <p>
-                Since you are logged in as an admin, you can also access the
-                <a href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">admin page</a>. You will be able to manage the
-                game from there.
-            </p>
-            {% if not game.playable %}
-                <p>
-                    The game cannot be played at the moment. You can access the answer page
-                    <a href="{% url "numbers_game:submit_answer" session.url_tag game.url_tag %}">here</a>.
-                </p>
-            {% endif %}
-            {% if not game.results_visible %}
-                <p>
-                    The results are currently not visible to the players. You can access them
-                    <a href="{% url "numbers_game:results" session.url_tag game.url_tag %}">here</a>. Note that admin
-                    shortcuts are present there.
-                </p>
-            {% endif %}
-        </section>
+    {% if answer %}
+        <p>
+            You have already submitted an answer, you cannot submit another one. Your answer is
+            <em>{{ answer.formatted_answer }}</em>.
+        </p>
     {% endif %}
 
-    <section>
-        <p>
-            This is the main page for the {{ game.game_setting.long_name }}. Remember the rules of the game: every player
-            submits a rational number between 0 and 100 and the player closest to 2/3 of the average of the answers wins the game.
-        </p>
-
-        {% if answer %}
-            <p>
-                You have already submitted an answer, you cannot submit another one. Your answer is
-                <em>{{ answer.formatted_answer }}</em>.
-            </p>
-        {% endif %}
-
-        <table class="center-margin">
-            <tbody>
-                <tr>
-                    {% if game.playable and not answer%}
-                        <td style="padding-right: 20px;">
-                            <span class="orange-button">
-                                <a href="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}">Submit your answer</a>
-                            </span>
-                        </td>
-                    {% endif %}
-                    {% if game.results_visible %}
-                        <td style="padding-left: 20px;">
-                            <span class="orange-button">
-                                <a href="{% url 'numbers_game:results' session.url_tag game.url_tag %}">See the results</a>
-                            </span>
-                        </td>
-                    {% endif %}
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <table class="center-margin">
+        <tbody>
+            <tr>
+                {% if game.playable and not answer%}
+                    <td style="padding-right: 20px;">
+                        <span class="orange-button">
+                            <a href="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}">Submit your answer</a>
+                        </span>
+                    </td>
+                {% endif %}
+                {% if game.results_visible %}
+                    <td style="padding-left: 20px;">
+                        <span class="orange-button">
+                            <a href="{% url 'numbers_game:results' session.url_tag game.url_tag %}">See the results</a>
+                        </span>
+                    </td>
+                {% endif %}
+            </tr>
+        </tbody>
+    </table>
 {% endblock %}

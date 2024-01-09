@@ -3,6 +3,17 @@ from django.db import models
 from core.models import Player, Game
 
 
+class Setting(models.Model):
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="numbers_setting"
+    )
+    multiplicative_constant = models.FloatField(
+        default=2 / 3,
+        help_text="The winning number is the closest one to the average submitted number times the "
+        "multiplicative constant.",
+    )
+
+
 class Answer(models.Model):
     game = models.ForeignKey(
         Game, on_delete=models.CASCADE, related_name="numbers_answers"

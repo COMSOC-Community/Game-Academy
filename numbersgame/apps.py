@@ -3,7 +3,7 @@ from gameserver.games import GameConfig
 NAME = "numbersgame"
 LONGNAME = "Numbers Game"
 URL_TAG = "numbers"
-PACKAGE_URL_NAMESPACE = "numbers_game"
+URL_NAMESPACE = "numbers_game"
 
 
 class NumbersGameConfig(GameConfig):
@@ -16,5 +16,5 @@ class NumbersGameConfig(GameConfig):
             LONGNAME,
             __package__,
             URL_TAG,
-            PACKAGE_URL_NAMESPACE,
+            URL_NAMESPACE,
         )

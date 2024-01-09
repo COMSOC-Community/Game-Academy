@@ -1,12 +1,18 @@
 import logging
 
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.core import management
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from .authorisations import can_create_sessions, is_session_admin, is_session_super_admin
+from gameserver.games import INSTALLED_GAMES_SETTING
+from .authorisations import (
+    can_create_sessions,
+    is_session_admin,
+    is_session_super_admin,
+)
 from .constants import guest_password
 from .decorators import session_admin_decorator
 from .forms import (
@@ -18,7 +24,9 @@ from .forms import (
     SessionFinderForm,
     CreateSessionForm,
     CreateGameForm,
-    CreateTeamForm, DeleteSessionForm, MakeAdminForm,
+    CreateTeamForm,
+    DeleteSessionForm,
+    MakeAdminForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 
@@ -55,47 +63,53 @@ def error_500_view(request):
 # ===================
 
 
+def validate_next_url(request, next_url):
+    return url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    )
+
+
 def force_player_logout(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
-    if request.method == 'POST':
-        if 'logout_and_continue' in request.POST:
+    if request.method == "POST":
+        if "logout_and_continue" in request.POST:
             logout(request)
             if "next" in request.GET:
                 next_url = request.GET["next"]
-                if url_has_allowed_host_and_scheme(
-                        url=next_url,
-                        allowed_hosts={request.get_host()},
-                        require_https=request.is_secure()
-                ):
+                if validate_next_url(request, next_url):
                     return redirect(next_url)
             return redirect("core:index")
         else:
             raise Http404("POST request but unknown form type")
 
-    url_back = reverse('core:session_home', args=(session.url_tag,))
+    url_back = reverse("core:session_home", args=(session.url_tag,))
     if "prev" in request.GET:
         prev_url = request.GET["prev"]
         if url_has_allowed_host_and_scheme(
-                url=prev_url,
-                allowed_hosts={request.get_host()},
-                require_https=request.is_secure()
+            url=prev_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
         ):
             url_back = prev_url
-    return render(request, "core/force_player_logout.html", {"session": session, "url_back": url_back})
+    return render(
+        request,
+        "core/force_player_logout.html",
+        {"session": session, "url_back": url_back},
+    )
 
 
 def message(request):
     context = {
         "next_url": reverse("core:index"),
-        "message": request.session.pop("_message_view_message", "This is the default message")
+        "message": request.session.pop(
+            "_message_view_message", "This is the default message"
+        ),
     }
     next_url = request.session.pop("_message_view_next_url", None)
     if next_url:
-        if url_has_allowed_host_and_scheme(
-                url=next_url,
-                allowed_hosts={request.get_host()},
-                require_https=request.is_secure()
-        ):
+        if validate_next_url(request, next_url):
             context["next_url"] = next_url
     return render(request, "core/message.html", context)
 
@@ -103,6 +117,7 @@ def message(request):
 # ====================
 #    GENERAL INDEX
 # ====================
+
 
 def index(request):
     user_created = False
@@ -113,9 +128,7 @@ def index(request):
             if session_finder_form.is_valid():
                 return redirect(
                     "core:session_portal",
-                    session_url_tag=session_finder_form.cleaned_data[
-                        "session_url_tag"
-                    ],
+                    session_url_tag=session_finder_form.cleaned_data["session_url_tag"],
                 )
             login_form = LoginForm()
             registration_form = UserRegistrationForm()
@@ -170,11 +183,7 @@ def logout_user(request):
     logout(request)
     next_url = request.GET.get("next")
     if next_url:
-        if url_has_allowed_host_and_scheme(
-                url=next_url,
-                allowed_hosts={request.get_host()},
-                require_https=request.is_secure()
-        ):
+        if validate_next_url(request, next_url):
             return redirect(next_url)
     return redirect("core:index")
 
@@ -187,14 +196,20 @@ def change_password(request):
             request.user.set_password(update_password_form.cleaned_data["password1"])
             request.user.save()
             update_session_auth_hash(request, request.user)
-            request.session['_message_view_message'] = f"Your password has been changed."
+            request.session[
+                "_message_view_message"
+            ] = f"Your password has been changed."
             return redirect("core:message")
-    return render(request, "core/change_password.html", {"update_password_form": update_password_form})
+    return render(
+        request,
+        "core/change_password.html",
+        {"update_password_form": update_password_form},
+    )
 
 
-# ===================
-#    SESSION VIEWS
-# ===================
+# ===========================
+#    GENERAL SESSION VIEWS
+# ===========================
 
 
 def create_session(request):
@@ -269,7 +284,9 @@ def session_portal(request, session_url_tag):
                     logger.exception("An exception occurred while creating a player", e)
                 if authenticated_user:
                     # If registering a player for a user already logged-in, we redirect to home
-                    return redirect("core:session_home", session_url_tag=session.url_tag)
+                    return redirect(
+                        "core:session_home", session_url_tag=session.url_tag
+                    )
                 if "player_creation_error" not in context:
                     # Otherwise we clean the data and stay on the same page
                     context["new_player"] = new_player
@@ -301,9 +318,7 @@ def session_portal(request, session_url_tag):
             if guest_form.is_valid():
                 user = CustomUser.objects.create_user(
                     username=guest_form.cleaned_data["guest_username"],
-                    password=guest_password(
-                        guest_form.cleaned_data["guest_username"]
-                    ),
+                    password=guest_password(guest_form.cleaned_data["guest_username"]),
                     is_player=True,
                     is_guest_player=True,
                 )
@@ -322,10 +337,14 @@ def session_portal(request, session_url_tag):
                     logger.exception("An exception occurred while creating a guest", e)
                     context["guest_creation_error"] = repr(e)
                 if "guest_creation_error" not in context:
-                    user = authenticate(username=user.username, password=guest_password(user.username))
+                    user = authenticate(
+                        username=user.username, password=guest_password(user.username)
+                    )
                     if user:
                         login(request, user)
-                        return redirect("core:session_home", session_url_tag=session.url_tag)
+                        return redirect(
+                            "core:session_home", session_url_tag=session.url_tag
+                        )
                     # Something weird happened: form is valid but authenticate fails
                     context["general_login_error"] = True
             else:
@@ -338,8 +357,9 @@ def session_portal(request, session_url_tag):
 
     # We put in the context all the forms that are needed and not already in there
     if session.can_register and "registration_form" not in context:
-        context["registration_form"] = PlayerRegistrationForm(session=session,
-                                                              passwords_display=not authenticated_user)
+        context["registration_form"] = PlayerRegistrationForm(
+            session=session, passwords_display=not authenticated_user
+        )
     if not session.need_registration and "guest_from" not in context:
         context["guest_form"] = SessionGuestRegistration(session=session)
     if authenticated_user:
@@ -357,11 +377,7 @@ def session_home(request, session_url_tag):
     games = Game.objects.filter(session=session, visible=True)
     admin_user = is_session_admin(session, request.user)
 
-    context = {
-        "session": session,
-        "games": games,
-        "admin_user": admin_user
-    }
+    context = {"session": session, "games": games, "admin_user": admin_user}
 
     if admin_user:
         context["invisible_games"] = Game.objects.filter(session=session, visible=False)
@@ -370,6 +386,11 @@ def session_home(request, session_url_tag):
         context["player_profile"] = request.user.players.first()
 
     return render(request, "core/session_home.html", locals())
+
+
+# =========================
+#    ADMIN SESSION VIEWS
+# =========================
 
 
 @session_admin_decorator
@@ -390,9 +411,7 @@ def session_admin(request, session_url_tag):
                 session.need_registration = modify_session_form.cleaned_data[
                     "need_registration"
                 ]
-                session.can_register = modify_session_form.cleaned_data[
-                    "can_register"
-                ]
+                session.can_register = modify_session_form.cleaned_data["can_register"]
                 session.visible = modify_session_form.cleaned_data["visible"]
                 session.save()
 
@@ -401,8 +420,10 @@ def session_admin(request, session_url_tag):
         elif "delete_session_form" in request.POST:
             delete_session_form = DeleteSessionForm(request.POST, user=request.user)
             if delete_session_form.is_valid():
-                request.session['_message_view_message'] = f"The session {session.name} has been deleted."
-                request.session['_message_view_next_url'] = reverse("core:index")
+                request.session[
+                    "_message_view_message"
+                ] = f"The session {session.name} has been deleted."
+                request.session["_message_view_next_url"] = reverse("core:index")
                 session.delete()
                 return redirect("core:message")
         else:
@@ -431,9 +452,7 @@ def session_admin_games(request, session_url_tag):
                 session=session,
                 playable=create_game_form.cleaned_data["playable"],
                 visible=create_game_form.cleaned_data["visible"],
-                results_visible=create_game_form.cleaned_data[
-                    "results_visible"
-                ],
+                results_visible=create_game_form.cleaned_data["results_visible"],
                 need_teams=create_game_form.cleaned_data["need_teams"],
                 description=create_game_form.cleaned_data["description"],
             )
@@ -452,7 +471,10 @@ def session_admin_games(request, session_url_tag):
     # Modify game form
     modify_game_forms = []
     for game in games:
-        if request.method == "POST" and "modify_game_form_" + str(game.url_tag) in request.POST:
+        if (
+            request.method == "POST"
+            and "modify_game_form_" + str(game.url_tag) in request.POST
+        ):
             modify_game_form = CreateGameForm(
                 request.POST, session=session, game=game, prefix=game.url_tag
             )
@@ -461,9 +483,7 @@ def session_admin_games(request, session_url_tag):
                 game.url_tag = modify_game_form.cleaned_data["url_tag"]
                 game.playable = modify_game_form.cleaned_data["playable"]
                 game.visible = modify_game_form.cleaned_data["visible"]
-                game.results_visible = modify_game_form.cleaned_data[
-                    "results_visible"
-                ]
+                game.results_visible = modify_game_form.cleaned_data["results_visible"]
                 game.need_teams = modify_game_form.cleaned_data["need_teams"]
                 game.description = modify_game_form.cleaned_data["description"]
                 game.save()
@@ -487,10 +507,7 @@ def session_admin_games(request, session_url_tag):
 def session_admin_players(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     is_user_super_admin = is_session_super_admin(session, request.user)
-    context = {
-        "session": session,
-        "is_user_super_admin": is_user_super_admin
-    }
+    context = {"session": session, "is_user_super_admin": is_user_super_admin}
 
     # Add player form
     add_player_form = PlayerRegistrationForm(session=session)
@@ -521,7 +538,9 @@ def session_admin_players(request, session_url_tag):
     guests = Player.objects.filter(session=session, is_guest=True)
 
     # Delete player form
-    if request.method == "POST" and ("delete_player_form" in request.POST or "delete_guest_form" in request.POST):
+    if request.method == "POST" and (
+        "delete_player_form" in request.POST or "delete_guest_form" in request.POST
+    ):
         player_id = request.POST["remove_player_id"]
         player = Player.objects.get(id=player_id)
         if "delete_player_form" in request.POST:
@@ -568,20 +587,24 @@ def session_admin_players(request, session_url_tag):
 def session_admin_player_password(request, session_url_tag, player_name):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     player = get_object_or_404(Player, session=session, name=player_name.title())
-    context = {
-        "session": session,
-        "player": player
-    }
+    context = {"session": session, "player": player}
 
     update_password_form = PlayerRegistrationForm(session=session, player=player)
     if request.method == "POST" and "update_password_form" in request.POST:
-        update_password_form = PlayerRegistrationForm(request.POST, session=session, player=player)
+        update_password_form = PlayerRegistrationForm(
+            request.POST, session=session, player=player
+        )
         if update_password_form.is_valid():
             player.user.set_password(update_password_form.cleaned_data["password1"])
             player.user.save()
             update_session_auth_hash(request, player.user)
     context["update_password_form"] = update_password_form
     return render(request, "core/session_admin_player_password.html", context)
+
+
+# ================
+#    TEAM VIEWS
+# ================
 
 
 def team(request, session_url_tag, game_url_tag):
@@ -631,3 +654,65 @@ def team(request, session_url_tag, game_url_tag):
             create_team_form = CreateTeamForm(game=game)
 
     return render(request, "core/team.html", locals())
+
+
+# ======================
+#    ADMIN GAME VIEWS
+# ======================
+
+
+def quick_game_admin_render(request, session, game, info_message):
+    request.session["_message_view_message"] = info_message
+    if "next" in request.GET:
+        request.session["_message_view_next_url"] = request.GET["next"]
+    else:
+        request.session["_message_view_next_url"] = reverse(
+            INSTALLED_GAMES_SETTING[game.game_type].url_namespace + ":index",
+            kwargs={"session_url_tag": session.url_tag, "game_url_tag": game.url_tag},
+        )
+    return redirect("core:message")
+
+
+@session_admin_decorator
+def game_play_toggle(request, session_url_tag, game_url_tag, game_type):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=game_type
+    )
+    game.playable = not game.playable
+    game.save()
+    if game.playable:
+        info_message = "Players can now submit their answers."
+    else:
+        info_message = "Players can no longer submit answers."
+    return quick_game_admin_render(request, session, game, info_message)
+
+
+@session_admin_decorator
+def game_result_toggle(request, session_url_tag, game_url_tag, game_type):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=game_type
+    )
+    game.results_visible = not game.results_visible
+    game.save()
+
+    if game.results_visible:
+        info_message = "Players can now see the results."
+    else:
+        info_message = "Players can no longer see the results."
+    return quick_game_admin_render(request, session, game, info_message)
+
+
+@session_admin_decorator
+def game_run_management_cmds(request, session_url_tag, game_url_tag, game_type):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=game_type
+    )
+    management.call_command(
+        "ng_updateresults", session=session.url_tag, game=game.url_tag
+    )
+    return quick_game_admin_render(
+        request, session, game, "The management commands have been run."
+    )

@@ -3,7 +3,7 @@ from gameserver.games import GameConfig
 NAME = "centipedegame"
 LONGNAME = "Centipede Game"
 URL_TAG = "centipede"
-PACKAGE_URL_NAMESPACE = "centipede_game"
+URL_NAMESPACE = "centipede_game"
 
 
 class CentipedeGameConfig(GameConfig):
@@ -16,5 +16,5 @@ class CentipedeGameConfig(GameConfig):
             LONGNAME,
             __package__,
             URL_TAG,
-            PACKAGE_URL_NAMESPACE,
+            URL_NAMESPACE,
         )

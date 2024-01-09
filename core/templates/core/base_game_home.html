@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ game.name }}{% endblock %}
+
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+
+{% block header %}
+    <h1>{{ game.name }}</h1>
+    <p>{{ session.long_name|title }}</p>
+{% endblock %}
+
+{% block content %}
+    {% if admin_user %}
+        <section class="warning-section">
+            <p>
+                You are logged in as an admin. You can access the
+                <a href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">admin page</a>
+                of the game.
+            </p>
+            {% if not game.playable or not game.results_visible %}
+                <p>Hidden pages:</p>
+                <ul>
+                    {% if not game.playable %}
+                        <li>
+                            {% with game.game_setting.url_namespace|add:":submit_answer" as url_name %}
+                                <a href="{% url url_name session.url_tag game.url_tag %}">Answer page</a>
+                            {% endwith %}
+                        </li>
+                    {% endif %}
+                    {% if not game.results_visible %}
+                        <li>
+                            {% with game.game_setting.url_namespace|add:":results" as url_name %}
+                                <a href="{% url url_name session.url_tag game.url_tag %}">Results page</a>
+                            {% endwith %}
+                        </li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+
+            <p>Admin shortcuts:</p>
+            <ul>
+                <li>
+                    {% with "core:"|add:game.game_setting.url_tag|add:"_play_toggle" as url_name %}
+                        {% if game.playable %}
+                            The game can be played: <a href="{% url url_name session.url_tag game.url_tag %}">Close the game</a>
+                        {% else %}
+                            The game cannot be played: <a href="{% url url_name session.url_tag game.url_tag %}">Open the game</a>
+                        {% endif %}
+                    {% endwith %}
+                </li>
+                <li>
+                    {% with "core:"|add:game.game_setting.url_tag|add:"_result_toggle" as url_name %}
+                        {% if game.result_visible %}
+                            The results are visible: <a href="{% url url_name session.url_tag game.url_tag %}">Hide the results</a>
+                        {% else %}
+                            The results are hidden: <a href="{% url url_name session.url_tag game.url_tag %}">Reveal the results</a>
+                        {% endif %}
+                    {% endwith %}
+                </li>
+                <li>
+                    {% with "core:"|add:game.game_setting.url_tag|add:"_run_management" as url_name %}
+                        <a href="{% url url_name session.url_tag game.url_tag %}">Run management commands</a>,
+                    {% endwith %}
+                    typically unnecessary, unless you changed the entries of the database directly,
+                    or performed some other manual actions
+                </li>
+            </ul>
+        </section>
+    {% endif %}
+
+    <section>
+        {% block game_description %}
+            <p>
+                This is the main page for the {{ game.game_setting.long_name }}.
+            </p>
+        {% endblock %}
+    </section>
+{% endblock %}

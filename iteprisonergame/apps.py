@@ -3,7 +3,7 @@ from gameserver.games import GameConfig
 NAME = "iteprisonergame"
 LONGNAME = "Iterative Prisoners' Dilemma Game"
 URL_TAG = "itepris"
-PACKAGE_URL_NAMESPACE = "itepris_game"
+URL_NAMESPACE = "itepris_game"
 
 IPD_ROUNDS = [168, 359, 306, 622, 319]
 IPD_PAYOFFS = {
@@ -24,5 +24,5 @@ class ItePrisonerGameConfig(GameConfig):
             LONGNAME,
             __package__,
             URL_TAG,
-            PACKAGE_URL_NAMESPACE,
+            URL_NAMESPACE,
         )

@@ -19,10 +19,7 @@ OPEN_VIEWS = [
 ]
 
 # Views outside of session that can be accessed by players
-PLAYER_OPEN_VIEWS = [
-    "core:logout",
-    "core:force_player_logout"
-]
+PLAYER_OPEN_VIEWS = ["core:logout", "core:force_player_logout"]
 
 # Views within a session that can be accessed by anyone (i.e., non-players)
 SESSION_OPEN_VIEWS = [
@@ -30,9 +27,7 @@ SESSION_OPEN_VIEWS = [
 ]
 
 # Views within a session that can be accessed even if session is not visible
-HIDDEN_SESSION_OPEN_VIEWS = [
-    "core:force_player_logout"
-]
+HIDDEN_SESSION_OPEN_VIEWS = ["core:force_player_logout"]
 
 try:
     assert set(SESSION_OPEN_VIEWS).issubset(set(OPEN_VIEWS))
@@ -46,14 +41,15 @@ GAME_URL_TAG_POSITION = 4
 
 
 class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
-
     @staticmethod
     def _enforce_login_scope(request):
         path = request.path
         resolver = resolve(path)
         view = resolver.view_name
         if view not in OPEN_VIEWS and not request.user.is_authenticated:
-            raise Http404("Middleware block: this view is not accessible to unauthenticated users.")
+            raise Http404(
+                "Middleware block: this view is not accessible to unauthenticated users."
+            )
 
         accessed_session_url_tag = None
         # Test for login
@@ -67,40 +63,50 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                 if view in SESSION_OPEN_VIEWS:
                     return
                 # We know user is authenticated (assert above, and first test)
-                if not request.user.is_player and request.user.players.first().session == session:
-                    raise Http404("Middleware block: this session view is not accessible to this user "
-                                  "(not admin, not player).")
+                if (
+                    not request.user.is_player
+                    and request.user.players.first().session == session
+                ):
+                    raise Http404(
+                        "Middleware block: this session view is not accessible to this user "
+                        "(not admin, not player)."
+                    )
             elif view not in HIDDEN_SESSION_OPEN_VIEWS:
-                raise Http404("Middleware block: hidden session views are only accessible to admins")
+                raise Http404(
+                    "Middleware block: hidden session views are only accessible to admins"
+                )
 
             # If we are here we know that if the view is hidden, then the user is an admin
             if len(split_path) > GAME_TYPE_URL_TAG_POSITION:
                 game_type = split_path[GAME_TYPE_URL_TAG_POSITION]
-                for game_setting in INSTALLED_GAMES_SETTING:
+                for game_setting in INSTALLED_GAMES_SETTING.values():
                     if game_type == game_setting.url_tag:
-                        game = get_object_or_404(Game,
-                                                 session=session,
-                                                 url_tag=split_path[GAME_URL_TAG_POSITION],
-                                                 game_type=game_setting.name)
+                        game = get_object_or_404(
+                            Game,
+                            session=session,
+                            url_tag=split_path[GAME_URL_TAG_POSITION],
+                            game_type=game_setting.name,
+                        )
                         if not game.visible:
-                            raise Http404("Middleware block: this game is not visible and the user is not an admin")
+                            raise Http404(
+                                "Middleware block: this game is not visible and the user "
+                                "is not an admin"
+                            )
 
         # Enforce session scope
         if request.user.is_authenticated and request.user.is_player:
             if view in PLAYER_OPEN_VIEWS:
                 return
             session = request.user.players.first().session
-            if not accessed_session_url_tag or accessed_session_url_tag != session.url_tag:
+            if (
+                not accessed_session_url_tag
+                or accessed_session_url_tag != session.url_tag
+            ):
                 response = redirect("core:force_player_logout", session.url_tag)
                 response[
-                    "Location"] += f"?next={path}&prev={reverse('core:session_home', args=(session.url_tag,))}"
+                    "Location"
+                ] += f"?next={path}&prev={reverse('core:session_home', args=(session.url_tag,))}"
                 return response
 
     def process_request(self, request):
-        """
-        Use process_request instead of defining __call__ directly;
-        Django's middleware layer will process_request in a coroutine in __acall__ if it detects an async context.
-        Otherwise, it will use __call__.
-        https://github.com/django/django/blob/acde91745656a852a15db7611c08cabf93bb735b/django/utils/deprecation.py#L88-L148
-        """
         return self._enforce_login_scope(request)

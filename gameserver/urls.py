@@ -26,7 +26,7 @@ for game_setting in INSTALLED_GAMES_SETTING.values():
             + r"/(?P<game_url_tag>[\w-]+)/",
             include(
                 str(game_setting.package_name) + ".urls",
-                namespace=game_setting.package_url_namespace,
+                namespace=game_setting.url_namespace,
             ),
         )
     )
