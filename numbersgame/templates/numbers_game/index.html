@@ -1,36 +1,18 @@
-{% extends 'core/base_game_home.html' %}
+{% extends 'core/base_game.html' %}
 
-{% block game_description %}
-    <p>
-        This is the main page for the {{ game.game_setting.long_name }}. Remember the rules of the game: every player
-        submits a rational number between 0 and 100 and the player closest to 2/3 of the average of the answers wins the game.
-    </p>
-
-    {% if answer %}
+{% block game_content %}
+    <section>
         <p>
-            You have already submitted an answer, you cannot submit another one. Your answer is
-            <em>{{ answer.formatted_answer }}</em>.
+            This is the main page for the {{ game.game_config.long_name }}. Remember the rules of the game: every player
+            submits a rational number between 0 and 100. The player closest to {{ game.numbers_setting.factor_display }}
+            times the average of the answers wins the game.
         </p>
-    {% endif %}
 
-    <table class="center-margin">
-        <tbody>
-            <tr>
-                {% if game.playable and not answer%}
-                    <td style="padding-right: 20px;">
-                        <span class="orange-button">
-                            <a href="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}">Submit your answer</a>
-                        </span>
-                    </td>
-                {% endif %}
-                {% if game.results_visible %}
-                    <td style="padding-left: 20px;">
-                        <span class="orange-button">
-                            <a href="{% url 'numbers_game:results' session.url_tag game.url_tag %}">See the results</a>
-                        </span>
-                    </td>
-                {% endif %}
-            </tr>
-        </tbody>
-    </table>
+        {% if answer %}
+            <p>
+                You have already submitted an answer, you cannot submit another one. Your answer is
+                <em>{{ answer.formatted_answer }}</em>.
+            </p>
+        {% endif %}
+    </section>
 {% endblock %}

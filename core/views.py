@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from gameserver.games import INSTALLED_GAMES_SETTING
+from core.games import INSTALLED_GAMES
 from .authorisations import (
     can_create_sessions,
     is_session_admin,
@@ -496,7 +496,10 @@ def session_admin_games(request, session_url_tag):
             modify_game_form = CreateGameForm(
                 session=session, game=game, prefix=game.url_tag
             )
-        modify_game_forms.append(modify_game_form)
+            modify_game_setting_form = None
+            if game.game_config().setting_form is not None:
+                modify_game_setting_form = game.game_config().setting_form()
+        modify_game_forms.append((modify_game_form, modify_game_setting_form))
 
     context["create_game_form"] = create_game_form
     context["modify_game_forms"] = modify_game_forms
@@ -667,7 +670,7 @@ def quick_game_admin_render(request, session, game, info_message):
         request.session["_message_view_next_url"] = request.GET["next"]
     else:
         request.session["_message_view_next_url"] = reverse(
-            INSTALLED_GAMES_SETTING[game.game_type].url_namespace + ":index",
+            game.game_config.url_namespace + ":index",
             kwargs={"session_url_tag": session.url_tag, "game_url_tag": game.url_tag},
         )
     return redirect("core:message")

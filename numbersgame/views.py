@@ -39,7 +39,6 @@ def submit_answer(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    print(game.numbers_answers)
     admin_user = is_session_admin(session, request.user)
 
     if not game.visible and not admin_user:
@@ -63,7 +62,6 @@ def submit_answer(request, session_url_tag, game_url_tag):
                         request.POST, game=game, player=request.user.player
                     )
                     if submit_answer_form.is_valid():
-                        print(game.numbers_answers)
                         new_answer = Answer.objects.create(
                             game=game,
                             player=request.user.player,

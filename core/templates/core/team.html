@@ -11,13 +11,13 @@
 
 <body>
 
-<h1>Teams for {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+<h1>Teams for {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
 
 {% if request.user.is_authenticated %}
     {% if admin_user or player_user %}
         <div class="navigation">
             <span class="navigation-button">
-                {% with game.game_setting.url_namespace|add:':index' as url_name %}
+                {% with game.game_config.url_namespace|add:':index' as url_name %}
                     <a href="{% url url_name session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
                 {% endwith %}
             </span>
@@ -34,7 +34,7 @@
         {% if team_created %}
             <p>
                 Your team {{ new_team.name }} has now been registered. You can start playing for the team.
-                {% with game.game_setting.url_namespace|add:':index' as url_name %}
+                {% with game.game_config.url_namespace|add:':index' as url_name %}
                     Go to the <a href="{% url url_name session.url_tag game.url_tag %}">game page</a>.
                 {% endwith %}
             </p>
@@ -42,7 +42,7 @@
             {% if team_joined %}
                 <p>
                     You have joined the team {{ joined_team.name }}. You can now play for the team.
-                    {% with game.game_setting.url_namespace|add:':index' as url_name %}
+                    {% with game.game_config.url_namespace|add:':index' as url_name %}
                         Go to the <a href="{% url url_name session.url_tag game.url_tag %}">game page</a>.
                     {% endwith %}
                 </p>
@@ -57,7 +57,7 @@
                         You will be automatically added to the team. Other players will then be able to join the team.
                     </p>
 
-                    {% with 'core:team_'|add:game.game_setting.url_namespace as url_name %}
+                    {% with 'core:team_'|add:game.game_config.url_namespace as url_name %}
                         <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
                     {% endwith %}
                         {% csrf_token %}
@@ -115,7 +115,7 @@
                             it here. Please do not join a team before having discussed it with its creator.
                         </p>
 
-                        {% with 'core:team_'|add:game.game_setting.url_namespace as url_name %}
+                        {% with 'core:team_'|add:game.game_config.url_namespace as url_name %}
                             <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
                         {% endwith %}
                             {% csrf_token %}
@@ -137,7 +137,7 @@
         {% endif %}
         <div class="navigation">
             <span class="navigation-button">
-                {% with game.game_setting.url_namespace|add:':index' as url_name %}
+                {% with game.game_config.url_namespace|add:':index' as url_name %}
                     <a href="{% url url_name session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
                 {% endwith %}
             </span>

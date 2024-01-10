@@ -13,7 +13,7 @@
 {% if request.user.is_authenticated %}
     {% if game.playable or admin_user %}
         {% if player or admin_user %}
-            <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+            <h1> {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
 
             <div class="navigation">
                 <span class="navigation-button">
@@ -37,7 +37,7 @@
                 <p>Your answer has been submitted, thanks!</p>
 
                 <p>
-                    You will be redirected soon to the {{ game.game_setting.long_name }} page.
+                    You will be redirected soon to the {{ game.game_config.long_name }} page.
                     If not, <a href="{% url 'auction_game:index' session.url_tag game.url_tag %}">click here</a>!
                 </p>
 
@@ -50,7 +50,7 @@
             {% else %}
                 {% if not current_answer.bid %}
                     <p>
-                        Fill out the form below to submit your answer to the {{ game.game_setting.long_name }}.
+                        Fill out the form below to submit your answer to the {{ game.game_config.long_name }}.
                     </p>
 
                     <p>

@@ -1,4 +1,4 @@
-from gameserver.games import GameConfig
+from core.games import GameConfig
 
 NAME = "auctiongame"
 LONGNAME = "Auction Game"

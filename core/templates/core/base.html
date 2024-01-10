@@ -12,62 +12,60 @@
     </header>
 
     {% if request.user.is_authenticated %}
+        <div class="side-panel">
+            <h3>
+                {{ request.user.display_name|title }}
+                <span><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
+            </h3>
+            <div class="side-panel-content">
+                <h4>Navigation</h4>
+                {% if request.user.is_player %}
+                    {% with request.user.players.first.session as session %}
+                        <ul>
+                            <li><a href="{% url 'core:session_portal' session.url_tag %}">Session portal</a></li>
+                            <li><a href="{% url 'core:session_home' session.url_tag %}">Session home</a></li>
+                            {% if request.user.administrated_sessions.all %}
+                                <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
+                            {% endif %}
+                        </ul>
+                    {% endwith %}
+                {% else %}
+                    <ul>
+                        <li><a href="{% url 'core:index' %}">Main page</a></li>
+                        <li><a href="{% url 'core:create_session' %}">Create a session</a></li>
+                        <li><a href="{% url 'core:change_password' %}">Change your Password</a></li>
+                    </ul>
+                    {% if request.user.administrated_sessions.all %}
+                        <h4>Sessions you administrate</h4>
+                        <ul>
+                            {% for session in request.user.administrated_sessions.all %}
+                                <li>{{ session.name }}</li>
+                                <ul>
+                                    <li><a href="{% url "core:session_portal" session.url_tag %}">Portal</a></li>
+                                    <li><a href="{% url "core:session_home" session.url_tag %}">Home page</a></li>
+                                    <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
+                                </ul>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    {% if request.user.players.all %}
+                        <h4>Player profile</h4>
+                        <ul>
+                            {% for player in request.user.players.all %}
+                                <li>
+                                    {{ player.name }} for session <a href="{% url "core:session_portal" player.session.url_tag %}">{{ player.session.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
         <main class="truncated-main">
     {% else %}
         <main class="full-main">
     {% endif %}
-
-        {% if request.user.is_authenticated %}
-            <div class="side-panel">
-                <h3>
-                    {{ request.user.display_name|title }}
-                    <span><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
-                </h3>
-                <div class="side-panel-content">
-                    <h4>Navigation</h4>
-                    {% if request.user.is_player %}
-                        {% with request.user.players.first.session as session %}
-                            <ul>
-                                <li><a href="{% url 'core:session_portal' session.url_tag %}">Session portal</a></li>
-                                <li><a href="{% url 'core:session_home' session.url_tag %}">Session home</a></li>
-                                {% if request.user.administrated_sessions.all %}
-                                    <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
-                                {% endif %}
-                            </ul>
-                        {% endwith %}
-                    {% else %}
-                        <ul>
-                            <li><a href="{% url 'core:index' %}">Main page</a></li>
-                            <li><a href="{% url 'core:create_session' %}">Create a session</a></li>
-                            <li><a href="{% url 'core:change_password' %}">Change your Password</a></li>
-                        </ul>
-                        {% if request.user.administrated_sessions.all %}
-                            <h4>Sessions you administrate</h4>
-                            <ul>
-                                {% for session in request.user.administrated_sessions.all %}
-                                    <li>{{ session.name }}</li>
-                                    <ul>
-                                        <li><a href="{% url "core:session_portal" session.url_tag %}">Portal</a></li>
-                                        <li><a href="{% url "core:session_home" session.url_tag %}">Home page</a></li>
-                                        <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
-                                    </ul>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        {% if request.user.players.all %}
-                            <h4>Player profile</h4>
-                            <ul>
-                                {% for player in request.user.players.all %}
-                                    <li>
-                                        {{ player.name }} for session <a href="{% url "core:session_portal" player.session.url_tag %}">{{ player.session.name }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
 
         {% block content %}{% endblock %}
     </main>
@@ -78,13 +76,25 @@
 
     {% if request.user.is_authenticated %}
         <script>
-            window.addEventListener('DOMContentLoaded', function () {
-                // Set the max-height of the side panel based on the height of header and footer
+            function adjustSidePanel() {
                 const header = document.querySelector('header');
                 const footer = document.querySelector('footer');
                 const sidePanel = document.querySelector('.side-panel');
-                const offset = 2 * Math.max(header.offsetHeight, footer.offsetHeight) + 10;
-                sidePanel.style.maxHeight = 'calc(100% - ' + offset + 'px)';
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                const visibleFooterHeight = Math.max(0, windowHeight - footer.getBoundingClientRect().top);
+                const visibleHeaderHeight = Math.max(0, header.getBoundingClientRect().bottom);
+                const maxHeightOffset = visibleHeaderHeight + visibleFooterHeight + 80;
+                const topOffset = visibleHeaderHeight + 40
+                sidePanel.style.top = topOffset + 'px';
+                sidePanel.style.maxHeight = 'calc(100% - ' + maxHeightOffset + 'px)';
+            }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                adjustSidePanel();
+            });
+
+            window.addEventListener("scroll", function() {
+                adjustSidePanel();
             });
         </script>
     {% endif %}

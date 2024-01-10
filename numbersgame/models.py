@@ -4,13 +4,19 @@ from core.models import Player, Game
 
 
 class Setting(models.Model):
-    game = models.ForeignKey(
+    game = models.OneToOneField(
         Game, on_delete=models.CASCADE, related_name="numbers_setting"
     )
-    multiplicative_constant = models.FloatField(
+    factor = models.FloatField(
         default=2 / 3,
         help_text="The winning number is the closest one to the average submitted number times the "
-        "multiplicative constant.",
+        "factor.",
+    )
+    factor_display = models.CharField(
+        default="2/3",
+        help_text="The strict used to display the multiplicative constant (useful when there are "
+        "infinitely many digits).",
+        max_length=30,
     )
 
 

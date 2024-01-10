@@ -1,6 +1,12 @@
 from django import forms
 
-from numbersgame.models import Answer
+from numbersgame.models import Answer, Setting
+
+
+class SettingForm(forms.ModelForm):
+    class Meta:
+        model = Setting
+        fields = ["factor", "factor_display"]
 
 
 class SubmitAnswerForm(forms.Form):

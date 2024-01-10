@@ -5,7 +5,7 @@ from django.urls import reverse, resolve
 
 import core.authorisations
 from core.models import Session, Game
-from gameserver.games import INSTALLED_GAMES_SETTING
+from core.games import INSTALLED_GAMES
 
 # Views that do not require authenticated users
 OPEN_VIEWS = [
@@ -78,14 +78,14 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
 
             # If we are here we know that if the view is hidden, then the user is an admin
             if len(split_path) > GAME_TYPE_URL_TAG_POSITION:
-                game_type = split_path[GAME_TYPE_URL_TAG_POSITION]
-                for game_setting in INSTALLED_GAMES_SETTING.values():
-                    if game_type == game_setting.url_tag:
+                game_type_url_tag = split_path[GAME_TYPE_URL_TAG_POSITION]
+                for game_config in INSTALLED_GAMES:
+                    if game_type_url_tag == game_config.url_tag:
                         game = get_object_or_404(
                             Game,
                             session=session,
                             url_tag=split_path[GAME_URL_TAG_POSITION],
-                            game_type=game_setting.name,
+                            game_type=game_config.name,
                         )
                         if not game.visible:
                             raise Http404(

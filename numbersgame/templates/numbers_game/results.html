@@ -1,204 +1,103 @@
+{% extends 'core/base_game.html' %}
+
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Numbers Game | Results</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-cartesian.min.js"></script>
-</head>
+{% endblock %}
 
-<body>
-
-{% if game.results_visible or admin_user %}
-
-    <h1>Results {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-        </span>
-        <br>
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-
-    <div class="adminDiv">
-
-        {% if admin_user %}
-            <div class="warning-section">
-                <p>Here are so admin shortcuts if you want to use them.</p>
-
-                {% if game.playable %}
-                    <p>Players can currently submit their answers.</p>
-                    <form method="post" action="{% url 'numbers_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="game_playable"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Close the Game"/>
-                        </p>
-                    </form>
-                {% else %}
-                    <p>The game is closed, player can no longer submit their answers.</p>
-                    <form method="post" action="{% url 'numbers_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="game_playable"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Open the Game"/>
-                        </p>
-                    </form>
-                {% endif %}
-
-                {% if game.results_visible %}
-                    <p>The results are visible by all players.</p>
-                    <form method="post" action="{% url 'numbers_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="results_visible"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Hide the Results"/>
-                        </p>
-                    </form>
-                {% else %}
-                    <p>Players cannot currently see the results.</p>
-                    <form method="post" action="{% url 'numbers_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="results_visible"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Show the Results"/>
-                        </p>
-                    </form>
-                {% endif %}
-                <p>
-                    To manually run the management commands, click the following button. This is normally unnecessary,
-                    unless you changed the entries of the database directly, or performed some other manual actions.
-                </p>
-                <form method="post" action="{% url 'numbers_game:results' session.url_tag game.url_tag %}">
-                    {% csrf_token %}
-                        <input type="hidden" name="form_type" value="run_management"/>
-                    <p class="center-align">
-                        <input class="green-button" type="submit" value="Run Management Commands"/>
-                    </p>
-                </form>
-            </div>
-        {% endif %}
-    </div>
-
-    <h2 class="collapsible">Sample answers</h2>
-
-    <div class="collapse_content" style="display: none;">
-        <table class="lined-table center-margin">
-            <tr>
-                <th>Answer</th>
-                <th>Justification</th>
-            </tr>
-            {% for answer in shuffled_answers %}
-                <tr class="show-one-by-one" style="display: none">
-                    <td>{{ answer.answer }}</td>
-                    <td>{{ answer.motivation }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-
-        <p class="center-align">
-            <button type="button" onclick="appearOneByOne();" class="green-button">
-                Display another answer
-            </button>
-        </p>
-    </div>
-
-    <p><br></p>
-
-    <h2 class="collapsible">Distribution of the answers</h2>
-
-    <div class="collapse_content" style="display: none;">
-        <div id="histogram" class="graph_wrap">
-        </div>
-        <script>
-            var histoData = [
-                    {{ game.result_ng.histo_js_data|safe }}
-                ];
-            var histoChart = anychart.column();
-            histoChart.title('Distribution of the answers received');
-            histoChart.yAxis().title('Answer');
-            histoChart.xAxis().title('Answer range');
-            var histoSerie = histoChart.column(histoData);
-            histoSerie.name('Number of answers')
-            histoSerie.stroke({color:'#ffffff'})
-            histoSerie.fill('#FF8000')
-            histoChart.container('histogram');
-            histoChart.draw();
-        </script>
-    </div>
-
-    <p><br></p>
-
-    <h2 class="collapsible">Details</h2>
-
-    <div class="collapse_content" style="display: none;">
-
-        <table class="lined-table center-margin">
-            <tr>
-                <th>Average answer</th>
-                <td>{{ game.result.average }}</td>
-            </tr>
-            <tr>
-                <th>2/3 of the average</th>
-                <td>{{ game.result.corrected_average }}</td>
-            </tr>
-            <tr>
-                <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
-                <td>{{ winning_answers_formatted }}</td>
-            </tr>
-            {% if admin_user %}
-                <tr>
-                    <th>Winner{{ winners|length|pluralize:',s' }}</th>
-                    <td>{{ winners_formatted }}</td>
-                </tr>
-            {% endif %}
-        </table>
-    </div>
-
-    <p><br></p>
-
-    <h2 class="collapsible">All answers anonymised</h2>
-
-    <div class="collapse_content" style="display: none;">
-        <table class="lined-table center-margin">
-            <tr>
-                <th>Answer</th>
-                <th>Gap</th>
-                <th>Justification</th>
-            </tr>
-            {% for answer in answers %}
-                <tr>
-                    <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
-                    <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
-                    <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
-
-    <p><br></p>
-
-    {% if admin_user %}
-        <h2 class="collapsible">All answers with names</h2>
+{% block game_content %}
+    <section>
+        <h1 class="collapsible">Sample answers</h1>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
                 <tr>
-                    <th>Player</th>
+                    <th>Answer</th>
+                    <th>Justification</th>
+                </tr>
+                {% for answer in shuffled_answers %}
+                    <tr class="show-one-by-one" style="display: none">
+                        <td>{{ answer.answer }}</td>
+                        <td>{{ answer.motivation }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <p class="center-align">
+                <button type="button" onclick="appearOneByOne();" class="green-button">
+                    Display another answer
+                </button>
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <h1 class="collapsible">Distribution of the answers</h1>
+
+        <div class="collapse_content" style="display: none;">
+            <div id="histogram" class="graph_wrap">
+            </div>
+            <script>
+                var histoData = [
+                        {{ game.result_ng.histo_js_data|safe }}
+                    ];
+                var histoChart = anychart.column();
+                histoChart.title('Distribution of the answers received');
+                histoChart.yAxis().title('Answer');
+                histoChart.xAxis().title('Answer range');
+                var histoSerie = histoChart.column(histoData);
+                histoSerie.name('Number of answers')
+                histoSerie.stroke({color:'#ffffff'})
+                histoSerie.fill('#FF8000')
+                histoChart.container('histogram');
+                histoChart.draw();
+            </script>
+        </div>
+    </section>
+
+    <section>
+        <h1 class="collapsible">Details</h1>
+
+        <div class="collapse_content" style="display: none;">
+
+            <table class="lined-table center-margin">
+                <tr>
+                    <th>Average answer</th>
+                    <td>{{ game.result.average }}</td>
+                </tr>
+                <tr>
+                    <th>2/3 of the average</th>
+                    <td>{{ game.result.corrected_average }}</td>
+                </tr>
+                <tr>
+                    <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
+                    <td>{{ winning_answers_formatted }}</td>
+                </tr>
+                {% if admin_user %}
+                    <tr>
+                        <th>Winner{{ winners|length|pluralize:',s' }}</th>
+                        <td>{{ winners_formatted }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h1 class="collapsible">All answers anonymised</h1>
+
+        <div class="collapse_content" style="display: none;">
+            <table class="lined-table center-margin">
+                <tr>
                     <th>Answer</th>
                     <th>Gap</th>
                     <th>Justification</th>
                 </tr>
                 {% for answer in answers %}
                     <tr>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
@@ -206,18 +105,36 @@
                 {% endfor %}
             </table>
         </div>
+    </section>
+
+    {% if admin_user %}
+        <section class="warning-section">
+            <h1 class="collapsible">All answers with names</h1>
+
+            <div class="collapse_content" style="display: none;">
+                <table class="lined-table center-margin">
+                    <tr>
+                        <th>Player</th>
+                        <th>Answer</th>
+                        <th>Gap</th>
+                        <th>Justification</th>
+                    </tr>
+                    {% for answer in answers %}
+                        <tr>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </section>
     {% endif %}
+{% endblock %}
 
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-        </span>
-        <br>
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
 
+{% block extra_scripts %}
     <script>
         var coll = document.getElementsByClassName("collapsible");
         var i;
@@ -242,12 +159,4 @@
             }
         }
     </script>
-{% else %}
-    <p>
-        The results for this game are not visible.
-        Get back to the <a href="{% url "numbers_game:index" session.url_tag game.url_tag %}">home page</a> of the
-        game.
-    </p>
-{% endif %}
-</body>
-</html>
+{% endblock %}

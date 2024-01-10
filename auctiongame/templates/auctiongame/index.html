@@ -13,7 +13,7 @@
 
 {% if request.user.is_authenticated %}
 
-    <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+    <h1> {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
 
     <div class="navigation">
         <span class="navigation-button">
@@ -45,7 +45,7 @@
     {% endif %}
 
     <p>
-        This is the main page for the {{ game.game_setting.long_name }}.
+        This is the main page for the {{ game.game_config.long_name }}.
         In this game players have to submit a bid to win an auction. Their true valuation for the auction is
         drawn at random from a binomial probability distribution.
     </p>

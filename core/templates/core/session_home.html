@@ -30,7 +30,7 @@
                     <div class="grid-item">
                         <div class="game-grid-title">
                             <h3 id="games_{{ game.name }}">
-                                {{ game.game_setting.long_name }} - {{ game.name }}
+                                {{ game.game_config.long_name }} - {{ game.name }}
                             </h3>
                         </div>
 
@@ -38,7 +38,7 @@
                             <p>{{ game.description }}</p>
                         {% endif %}
 
-                        {% with game.game_setting.url_namespace|add:':index' as index_url_shortcut %}
+                        {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
                             <p class="center-align">
                                 <span class="green-button">
                                     <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
@@ -55,13 +55,13 @@
         {% if admin_user and invisible_games %}
             <div class="warning-section">
                 {% for game in invisible_games %}
-                    <h2>{{ game.game_setting.long_name }} - {{ game.name }}</h2>
+                    <h2>{{ game.game_config.long_name }} - {{ game.name }}</h2>
 
                     {% if game.description %}
                         <p>{{ game.description }}</p>
                     {% endif %}
 
-                    {% with game.game_setting.url_namespace|add:':index' as index_url_shortcut %}
+                    {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
                         <p class="center-align">
                             <span class="green-button">
                                 <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>

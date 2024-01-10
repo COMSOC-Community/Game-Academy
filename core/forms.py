@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 
-from gameserver.games import INSTALLED_GAMES_CHOICES
+from core.games import INSTALLED_GAMES_CHOICES
 from .models import Session, Player, Game, Team, CustomUser
 from .constants import player_username, guest_username
 
@@ -518,7 +518,6 @@ class MakeAdminForm(forms.Form):
         if playername:
             try:
                 player = Player.objects.get(name=playername, session=self.session)
-                print(player)
                 cleaned_data["user"] = player.user
             except Player.DoesNotExist:
                 self.add_error(

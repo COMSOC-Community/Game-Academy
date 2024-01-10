@@ -14,13 +14,13 @@ class Command(BaseCommand):
 
     def handle(self, IP_NAME=None, *args, **options):
         if not options["session"]:
-            print(
+            self.stderr.write(
                 "ERROR: you need to give the URL tag of a session with the --session argument"
             )
             return
         session = Session.objects.filter(url_tag=options["session"])
         if not session.exists():
-            print(
+            self.stderr.write(
                 "ERROR: no session with URL tag {} has been found".format(
                     options["session"]
                 )
@@ -29,7 +29,7 @@ class Command(BaseCommand):
         session = session.first()
 
         if not options["game"]:
-            print(
+            self.stderr.write(
                 "ERROR: you need to give the URL tag of a game with the --game argument"
             )
             return
@@ -37,7 +37,7 @@ class Command(BaseCommand):
             session=session, url_tag=options["game"], game_type=NAME
         )
         if not game.exists():
-            print(
+            self.stderr.write(
                 "ERROR: no game with URL tag {} has been found".format(options["game"])
             )
             return

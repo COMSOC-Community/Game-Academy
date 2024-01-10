@@ -1,4 +1,4 @@
-from gameserver.games import GameConfig
+from core.games import GameConfig
 
 NAME = "numbersgame"
 LONGNAME = "Numbers Game"
@@ -18,3 +18,10 @@ class NumbersGameConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
         )
+
+    def extra_ready(self):
+        from numbersgame.models import Setting
+        from numbersgame.forms import SettingForm
+
+        self.setting_cls = Setting
+        self.setting_form = SettingForm

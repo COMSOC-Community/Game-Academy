@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import Group, AbstractUser
 
-from gameserver.games import INSTALLED_GAMES_SETTING
+from core.games import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES
 
 
 class CustomUser(AbstractUser):
@@ -59,7 +59,9 @@ class Player(models.Model):
 
 
 class Game(models.Model):
-    game_type = models.CharField(max_length=100, blank=False, null=False)
+    game_type = models.CharField(
+        max_length=100, blank=False, null=False, choices=INSTALLED_GAMES_CHOICES
+    )
     name = models.CharField(max_length=100, blank=False, null=False)
     url_tag = models.SlugField(max_length=10, blank=False, null=False)
     session = models.ForeignKey(
@@ -71,8 +73,10 @@ class Game(models.Model):
     need_teams = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
 
-    def game_setting(self):
-        return INSTALLED_GAMES_SETTING[self.game_type]
+    def __init__(self, *args, **kwargs):
+        super(Game, self).__init__(*args, **kwargs)
+
+        self.inner_game_config = None
 
     class Meta:
         ordering = ["session", "game_type", "name"]
@@ -80,6 +84,20 @@ class Game(models.Model):
 
     def __str__(self):
         return "[{}] {}".format(self.session, self.name)
+
+    def game_config(self):
+        if self.inner_game_config is None:
+            found = False
+            for game_config in INSTALLED_GAMES:
+                if game_config.name == self.game_type:
+                    self.inner_game_config = game_config
+                    found = True
+            if not found:
+                raise ValueError(
+                    f"No configuration for game type {self.game_type} found in the INSTALLED_GAMES "
+                    f"list. Something is wrong."
+                )
+        return self.inner_game_config
 
 
 class Team(models.Model):

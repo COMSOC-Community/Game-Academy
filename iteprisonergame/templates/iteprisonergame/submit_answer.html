@@ -14,7 +14,7 @@
 {% if request.user.is_authenticated %}
     {% if game.playable or admin_user %}
         {% if player or admin_user %}
-            <h1> {{ game.game_setting.long_name }} - Session {{ session.long_name }}</h1>
+            <h1> {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
 
             <div class="navigation">
                 <span class="navigation-button">
@@ -40,7 +40,7 @@
                     <p>Your answer has been submitted, thanks!</p>
 
                     <p>
-                        You will be redirected soon to the {{ game.game_setting.long_name }} page.
+                        You will be redirected soon to the {{ game.game_config.long_name }} page.
                         If not, <a href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">click here</a>!
                     </p>
 
@@ -54,7 +54,7 @@
                     {% if not current_answer %}
 
                         <p>
-                            Fill out the form below to submit your answer to the {{ game.game_setting.long_name }}. The "strategy"
+                            Fill out the form below to submit your answer to the {{ game.game_config.long_name }}. The "strategy"
                             field should describe the Moore machine defining your strategy. It should be a list of transitions, one
                             per line, where a transition follows the syntax:
                         </p>
@@ -127,7 +127,7 @@
             {% else %}
                 <p>
                     You need to be part of a team to play this game. You can join or create a team
-                    {% with 'core:team_'|add:game.game_setting.url_namespace as url_name %}
+                    {% with 'core:team_'|add:game.game_config.url_namespace as url_name %}
                         <a href="{% url url_name session.url_tag game.url_tag %}">here.</a>
                     {% endwith %}
                 </p>
