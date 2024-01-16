@@ -52,19 +52,19 @@ def submit_answer(request, session_url_tag, game_url_tag):
             player = player.first()
             try:
                 current_answer = Answer.objects.get(
-                    game=game, player=request.user.player
+                    game=game, player=player
                 )
             except Answer.DoesNotExist:
                 current_answer = None
             if current_answer is None:
                 if request.method == "POST":
                     submit_answer_form = SubmitAnswerForm(
-                        request.POST, game=game, player=request.user.player
+                        request.POST, game=game, player=player
                     )
                     if submit_answer_form.is_valid():
                         new_answer = Answer.objects.create(
                             game=game,
-                            player=request.user.player,
+                            player=player,
                             answer=submit_answer_form.cleaned_data["answer"],
                             motivation=submit_answer_form.cleaned_data["motivation"],
                         )
@@ -80,7 +80,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
                             new_answer.delete()
                 else:
                     submit_answer_form = SubmitAnswerForm(
-                        game=game, player=request.user.player
+                        game=game, player=player
                     )
         else:
             player = None

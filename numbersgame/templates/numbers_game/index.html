@@ -16,3 +16,11 @@
         {% endif %}
     </section>
 {% endblock %}
+
+{% block game_navigation %}
+    <div class="side-by-side-centered-wrapper">
+        {% include 'include/game_navigation_team.html' %}
+        {% include 'include/game_navigation_submit_answer.html' %}
+        {% include 'include/game_navigation_results.html' %}
+    </div>
+{% endblock %}

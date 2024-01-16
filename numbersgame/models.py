@@ -14,9 +14,13 @@ class Setting(models.Model):
     )
     factor_display = models.CharField(
         default="2/3",
-        help_text="The strict used to display the multiplicative constant (useful when there are "
+        help_text="The strict used to display the multiplicative factor (useful when there are "
         "infinitely many digits).",
         max_length=30,
+    )
+    histogram_bin_size = models.FloatField(
+        default=3,
+        help_text="The size of the bins used in the histogram presenting the answers.",
     )
 
 
@@ -60,7 +64,6 @@ class Result(models.Model):
         Game, on_delete=models.CASCADE, related_name="result_ng"
     )
     histo_js_data = models.TextField(null=True, blank=True)
-    histo_bin_size = models.PositiveIntegerField()
     average = models.FloatField(null=True, blank=True)
     corrected_average = models.FloatField(null=True, blank=True)
 

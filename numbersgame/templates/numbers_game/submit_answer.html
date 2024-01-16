@@ -1,7 +1,6 @@
 {% extends 'core/base_game.html' %}
 
 {% block game_content %}
-
     {% if admin_user and not player %}
         <section class="warning-section">
             <p>
@@ -43,7 +42,7 @@
                     </section>
                 {% endif %}
 
-                <form action="{{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                <form action="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}" method="post">
                     {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
                 </form>
             {% else %}
@@ -54,4 +53,11 @@
             {% endif %}
         {% endif %}
     </section>
+{% endblock %}
+
+{% block game_navigation %}
+    <div class="side-by-side-centered-wrapper">
+        {% include 'include/game_navigation_home.html' %}
+        {% include 'include/game_navigation_team.html' %}
+    </div>
 {% endblock %}

@@ -6,7 +6,15 @@ from numbersgame.models import Answer, Setting
 class SettingForm(forms.ModelForm):
     class Meta:
         model = Setting
-        fields = ["factor", "factor_display"]
+        exclude = ["game"]
+
+    def clean_histogram_bin_size(self):
+        bin_size = self.cleaned_data.get('histogram_bin_size')
+        if bin_size <= 0:
+            raise forms.ValidationError("The histogram bin size cannot be 0 or less.")
+        if bin_size > 100:
+            raise forms.ValidationError("The histogram bin size cannot be more than 100.")
+        return bin_size
 
 
 class SubmitAnswerForm(forms.Form):

@@ -17,11 +17,12 @@ class NumbersGameConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
+            management_commands="ng_results"
         )
 
-    def extra_ready(self):
+    def ready(self):
+        super(NumbersGameConfig, self).ready()
+
         from numbersgame.models import Setting
         from numbersgame.forms import SettingForm
-
-        self.setting_cls = Setting
-        self.setting_form = SettingForm
+        self.register_setting_objects(Setting, SettingForm)

@@ -10,7 +10,7 @@
 
 {% block game_content %}
     <section>
-        <h1 class="collapsible">Sample answers</h1>
+        <h2 class="collapsible">Sample answers</h2>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
@@ -35,7 +35,7 @@
     </section>
 
     <section>
-        <h1 class="collapsible">Distribution of the answers</h1>
+        <h2 class="collapsible">Distribution of the answers</h2>
 
         <div class="collapse_content" style="display: none;">
             <div id="histogram" class="graph_wrap">
@@ -59,18 +59,18 @@
     </section>
 
     <section>
-        <h1 class="collapsible">Details</h1>
+        <h2 class="collapsible">Details</h2>
 
         <div class="collapse_content" style="display: none;">
 
             <table class="lined-table center-margin">
                 <tr>
                     <th>Average answer</th>
-                    <td>{{ game.result.average }}</td>
+                    <td>{{ game.result_ng.average }}</td>
                 </tr>
                 <tr>
-                    <th>2/3 of the average</th>
-                    <td>{{ game.result.corrected_average }}</td>
+                    <th>{{ game.numbers_setting.factor_display }} of the average</th>
+                    <td>{{ game.result_ng.corrected_average }}</td>
                 </tr>
                 <tr>
                     <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
@@ -87,7 +87,7 @@
     </section>
 
     <section>
-        <h1 class="collapsible">All answers anonymised</h1>
+        <h2 class="collapsible">All answers anonymised</h2>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
@@ -109,7 +109,7 @@
 
     {% if admin_user %}
         <section class="warning-section">
-            <h1 class="collapsible">All answers with names</h1>
+            <h2 class="collapsible">All answers with names</h2>
 
             <div class="collapse_content" style="display: none;">
                 <table class="lined-table center-margin">
@@ -159,4 +159,10 @@
             }
         }
     </script>
+{% endblock %}
+
+{% block game_navigation %}
+    <div class="side-by-side-centered-wrapper">
+        {% include 'include/game_navigation_home.html' %}
+    </div>
 {% endblock %}

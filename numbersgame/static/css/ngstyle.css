@@ -4,12 +4,5 @@
 }
 
 .lined-table .winning {
-	background: var(--color-green-verylight);
-}
-
-h2.collapsible {
-	background: var(--color-gray-verylight);
-	text-align: center;
-	padding: 5px;
-	border: var(--color-gray) solid 1px;
+	background: var(--color-success);
 }

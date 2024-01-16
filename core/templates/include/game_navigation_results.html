@@ -1,0 +1,7 @@
+{% block game_navigation_results %}
+    {% if game.results_visible %}
+        {% with game.game_config.url_namespace|add:":results" as url_name %}
+            <a class="button" href="{% url url_name session.url_tag game.url_tag %}">See the results</a>
+        {% endwith %}
+    {% endif %}
+{% endblock %}

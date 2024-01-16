@@ -360,7 +360,7 @@ def session_portal(request, session_url_tag):
         context["registration_form"] = PlayerRegistrationForm(
             session=session, passwords_display=not authenticated_user
         )
-    if not session.need_registration and "guest_from" not in context:
+    if not session.need_registration and "guest_form" not in context:
         context["guest_form"] = SessionGuestRegistration(session=session)
     if authenticated_user:
         player_profile = Player.objects.filter(session=session, user=request.user)
@@ -459,6 +459,10 @@ def session_admin_games(request, session_url_tag):
             create_game_form = CreateGameForm(session=session)
             context["new_game"] = new_game
 
+            game_config = new_game.game_config()
+            if game_config.setting_model is not None:
+                game_config.setting_model.objects.create(game=new_game)
+
     # Delete game form
     if request.method == "POST" and "delete_game_form" in request.POST:
         deleted_game_id = request.POST["remove_game_id"]
@@ -471,34 +475,52 @@ def session_admin_games(request, session_url_tag):
     # Modify game form
     modify_game_forms = []
     for game in games:
-        if (
-            request.method == "POST"
-            and "modify_game_form_" + str(game.url_tag) in request.POST
-        ):
-            modify_game_form = CreateGameForm(
-                request.POST, session=session, game=game, prefix=game.url_tag
+        modify_game_form = CreateGameForm(
+            session=session, game=game, prefix=game.url_tag
+        )
+        modify_game_setting_form = None
+        if game.game_config().setting_form is not None:
+            setting_model = game.game_config().setting_model
+            game_setting_obj = getattr(
+                game, setting_model._meta.get_field("game").related_query_name()
             )
-            if modify_game_form.is_valid():
-                game.name = modify_game_form.cleaned_data["name"]
-                game.url_tag = modify_game_form.cleaned_data["url_tag"]
-                game.playable = modify_game_form.cleaned_data["playable"]
-                game.visible = modify_game_form.cleaned_data["visible"]
-                game.results_visible = modify_game_form.cleaned_data["results_visible"]
-                game.need_teams = modify_game_form.cleaned_data["need_teams"]
-                game.description = modify_game_form.cleaned_data["description"]
-                game.save()
-
+            modify_game_setting_form = game.game_config().setting_form(
+                instance=game_setting_obj
+            )
+        if request.method == "POST":
+            if "modify_game_form_" + str(game.url_tag) in request.POST:
                 modify_game_form = CreateGameForm(
-                    session=session, game=game, prefix=game.url_tag
+                    request.POST, session=session, game=game, prefix=game.url_tag
                 )
-                context["modified_game"] = game
-        else:
-            modify_game_form = CreateGameForm(
-                session=session, game=game, prefix=game.url_tag
-            )
-            modify_game_setting_form = None
-            if game.game_config().setting_form is not None:
-                modify_game_setting_form = game.game_config().setting_form()
+                if modify_game_form.is_valid():
+                    game.name = modify_game_form.cleaned_data["name"]
+                    game.url_tag = modify_game_form.cleaned_data["url_tag"]
+                    game.playable = modify_game_form.cleaned_data["playable"]
+                    game.visible = modify_game_form.cleaned_data["visible"]
+                    game.results_visible = modify_game_form.cleaned_data[
+                        "results_visible"
+                    ]
+                    game.need_teams = modify_game_form.cleaned_data["need_teams"]
+                    game.description = modify_game_form.cleaned_data["description"]
+                    game.save()
+
+                    modify_game_form = CreateGameForm(
+                        session=session, game=game, prefix=game.url_tag
+                    )
+                    context["modified_game"] = game
+            elif "modify_game_setting_form_" + str(game.url_tag) in request.POST:
+                setting_model = game.game_config().setting_model
+                game_setting_obj = getattr(
+                    game, setting_model._meta.get_field("game").related_query_name()
+                )
+                modify_game_setting_form = game.game_config().setting_form(
+                    request.POST, instance=game_setting_obj
+                )
+                if modify_game_setting_form.is_valid():
+                    modify_game_setting_form.save()
+                modify_game_setting_form = game.game_config().setting_form(
+                    instance=game_setting_obj
+                )
         modify_game_forms.append((modify_game_form, modify_game_setting_form))
 
     context["create_game_form"] = create_game_form
@@ -670,7 +692,7 @@ def quick_game_admin_render(request, session, game, info_message):
         request.session["_message_view_next_url"] = request.GET["next"]
     else:
         request.session["_message_view_next_url"] = reverse(
-            game.game_config.url_namespace + ":index",
+            game.game_config().url_namespace + ":index",
             kwargs={"session_url_tag": session.url_tag, "game_url_tag": game.url_tag},
         )
     return redirect("core:message")
@@ -713,9 +735,14 @@ def game_run_management_cmds(request, session_url_tag, game_url_tag, game_type):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=game_type
     )
-    management.call_command(
-        "ng_updateresults", session=session.url_tag, game=game.url_tag
-    )
+    if game.game_config().management_commands is not None:
+        for cmd_name in game.game_config().management_commands:
+            management.call_command(
+                cmd_name, session=session.url_tag, game=game.url_tag
+            )
+        return quick_game_admin_render(
+            request, session, game, "The management commands have been run."
+        )
     return quick_game_admin_render(
-        request, session, game, "The management commands have been run."
+        request, session, game, "There are no management commands for this game."
     )

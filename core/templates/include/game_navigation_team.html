@@ -1,0 +1,7 @@
+{% block game_navigation_team %}
+    {% if game.need_teams and not player_has_team %}
+        {% with game.game_config.url_namespace|add:":submit_answer" as url_name %}
+            <a class="button" href="{% url url_name session.url_tag game.url_tag %}">Submit your answer</a>
+        {% endwith %}
+    {% endif %}
+{% endblock %}

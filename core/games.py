@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from django.apps import AppConfig
 
 
@@ -10,8 +12,9 @@ class GameConfig(AppConfig):
         package_name,
         url_tag,
         url_namespace,
-        setting_cls=None,
+        setting_model=None,
         setting_form=None,
+        management_commands=None
     ):
         super().__init__(app_name, app_module)
         self.is_game = True
@@ -21,16 +24,21 @@ class GameConfig(AppConfig):
         self.package_name = package_name
         self.url_tag = url_tag
         self.url_namespace = url_namespace
-        self.setting_cls = setting_cls
+        self.setting_model = setting_model
         self.setting_form = setting_form
+        if management_commands is not None and type(management_commands) == str:
+            management_commands = [management_commands]
+        elif isinstance(management_commands, Iterable):
+            management_commands = list(management_commands)
+        self.management_commands = management_commands
 
     def ready(self):
         INSTALLED_GAMES.append(self)
         INSTALLED_GAMES_CHOICES.append((self.name, self.long_name))
-        self.extra_ready()
 
-    def extra_ready(self):
-        pass
+    def register_setting_objects(self, model, form):
+        self.setting_model = model
+        self.setting_form = form
 
 
 INSTALLED_GAMES = []

@@ -86,11 +86,13 @@
                                 {% endwith %}
                             </form>
 
-                            <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ modify_game_form.game.id }}" method="post">
-                                {% with 'modify_game_setting_form_'|add:modify_game_form.game.url_tag as form_type %}
-                                    {% include "include/form_table_template.html" with form=modify_game_setting_form form_type=form_type submit_button_label='Modify Game Setting' %}
-                                {% endwith %}
-                            </form>
+                            {% if modify_game_setting_form %}
+                                <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ modify_game_form.game.id }}" method="post">
+                                    {% with 'modify_game_setting_form_'|add:modify_game_form.game.url_tag as form_type %}
+                                        {% include "include/form_table_template.html" with form=modify_game_setting_form form_type=form_type submit_button_label='Modify Game Setting' %}
+                                    {% endwith %}
+                                </form>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
