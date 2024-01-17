@@ -70,7 +70,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
                         )
                         try:
                             management.call_command(
-                                "ng_updateresults",
+                                "ng_results",
                                 session=session.url_tag,
                                 game=game.url_tag,
                             )

@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Avg
 
 from core.models import Session, Game
+from core.utils import float_formatter
 
 from numbersgame.apps import NAME
 from numbersgame.models import Answer, Result
@@ -70,11 +71,10 @@ class Command(BaseCommand):
             best_answers = []
             smallest_gap = 100
             for answer in answers:
-                category = (
-                    int(int(answer.answer) / game.numbers_setting.histogram_bin_size)
-                    * game.numbers_setting.histogram_bin_size
-                )
-                categories[category] += 1
+                current_value = 0
+                while current_value < answer.answer and current_value < 100 - game.numbers_setting.histogram_bin_size:
+                    current_value += game.numbers_setting.histogram_bin_size
+                categories[current_value] += 1
 
                 gap = abs(answer.answer - corrected_average)
                 if gap < smallest_gap:
@@ -94,7 +94,9 @@ class Command(BaseCommand):
             game.result_ng.histo_js_data = "\n".join(
                 [
                     "['{}-{}', {}],".format(
-                        key, min(key + game.numbers_setting.histogram_bin_size - 1, 100), val
+                        float_formatter(key, num_digits=3),
+                        float_formatter(min(key + game.numbers_setting.histogram_bin_size, 100), num_digits=3),
+                        val
                     )
                     for key, val in categories.items()
                 ]

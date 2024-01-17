@@ -26,34 +26,30 @@
 
     <div class="side-by-side-centered-wrapper">
         {% with "core:"|add:game.game_config.url_tag|add:"_play_toggle" as url_name %}
-            {% if game.playable %}
-                <a class="button" href="{% url url_name session.url_tag game.url_tag %}">
-                    Close the game
-                    <span class="info-span" title="Players can currently submit their answers, closing the game will prevent them to do so.">&#9432;</span>
-                </a>
-            {% else %}
-                <a class="button" href="{% url url_name session.url_tag game.url_tag %}">
-                    Open the game
-                    <span class="info-span" title="Players cannot submit their answers at the moment, opening the game will allow them to do so.">&#9432;</span>
-                </a>
-            {% endif %}
+            <a class="button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
+                {% if game.playable %}
+                        Close the game
+                        <span class="info-span" title="Players can currently submit their answers, closing the game will prevent them to do so.">&#9432;</span>
+                {% else %}
+                        Open the game
+                        <span class="info-span" title="Players cannot submit their answers at the moment, opening the game will allow them to do so.">&#9432;</span>
+                {% endif %}
+            </a>
         {% endwith %}
         {% with "core:"|add:game.game_config.url_tag|add:"_result_toggle" as url_name %}
-            {% if game.results_visible %}
-                <a class="button" href="{% url url_name session.url_tag game.url_tag %}">
-                    Hide the results
-                    <span class="info-span" title="Players can access the result page, hiding it will prevent them from seeing the results of the game.">&#9432;</span>
-                </a>
-            {% else %}
-                <a class="button" href="{% url url_name session.url_tag game.url_tag %}">
-                    Reveal the results
-                    <span class="info-span" title="Players cannot access the result page, revealing it will allow them to see the results of the game.">&#9432;</span>
-                </a>
-            {% endif %}
+            <a class="button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
+                {% if game.results_visible %}
+                        Hide the results
+                        <span class="info-span" title="Players can access the result page, hiding it will prevent them from seeing the results of the game.">&#9432;</span>
+                {% else %}
+                        Reveal the results
+                        <span class="info-span" title="Players cannot access the result page, revealing it will allow them to see the results of the game.">&#9432;</span>
+                {% endif %}
+            </a>
         {% endwith %}
         {% if game.game_config.management_commands %}
             {% with "core:"|add:game.game_config.url_tag|add:"_run_management" as url_name %}
-                <a class="button" href="{% url url_name session.url_tag game.url_tag %}">
+                <a class="button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
                     Run management commands
                     <span class="info-span" title="Management commands usually perform computations once all the answers have been submitted (determining the winner, preparing the graphs, etc...).">&#9432;</span>
                 </a>
