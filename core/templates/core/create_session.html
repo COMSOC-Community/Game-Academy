@@ -7,16 +7,16 @@
 {% endblock %}
 
 {% block content %}
-    <section>
-        {% if session_created %}
-            <div class="form-success-message">
-                <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
+    {% if session_created %}
+        <section class="form-success-message">
+            <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
 
-                <p>You can access the main page of the session
-                    <a href="{% url 'core:session_portal' session_obj.url_tag %}">here</a>.
-                </p>
-            </div>
-        {% else %}
+            <p>You can access the main page of the session
+                <a href="{% url 'core:session_portal' session_obj.url_tag %}">here</a>.
+            </p>
+        </section>
+    {% else %}
+        <section>
             <p>
                 Sessions are the main components of this website. Once created, you will be able to add games and
                 players to a session. If you are using this website for a course, a session will typically represent one
@@ -30,6 +30,6 @@
             <form action="{% url 'core:create_session' %}" method="post">
                 {% include "include/form_table_template.html" with form=create_session_form form_type='create_session_form' submit_button_label='Create Session' %}
             </form>
-        {% endif %}
-    </section>
+        </section>
+    {% endif %}
 {% endblock %}

@@ -77,7 +77,10 @@ class UserRegistrationForm(forms.Form):
         if self.user:
             self.fields.pop("email")
             self.fields["username"].disabled = True
-            self.fields["username"].initial = self.user.username
+            if self.user.is_player:
+                self.fields["username"].initial = self.user.players.first().name
+            else:
+                self.fields["username"].initial = self.user.username
 
     def clean_username(self):
         username = self.cleaned_data["username"]

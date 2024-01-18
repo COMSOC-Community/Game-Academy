@@ -20,15 +20,15 @@
             <div class="side-panel-content">
                 <h4>Navigation</h4>
                 {% if request.user.is_player %}
-                    {% with request.user.players.first.session as session %}
-                        <ul>
-                            <li><a href="{% url 'core:session_portal' session.url_tag %}">Session portal</a></li>
+                    <ul>
+                        <li><a href="{% url 'core:change_password' %}">Change your Password</a></li>
+                        {% with request.user.players.first.session as session %}
                             <li><a href="{% url 'core:session_home' session.url_tag %}">Session home</a></li>
                             {% if request.user.administrated_sessions.all %}
                                 <li><a href="{% url "core:session_admin" session.url_tag %}">Admin page</a></li>
                             {% endif %}
-                        </ul>
-                    {% endwith %}
+                        {% endwith %}
+                    </ul>
                 {% else %}
                     <ul>
                         <li><a href="{% url 'core:index' %}">Main page</a></li>

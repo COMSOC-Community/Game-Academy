@@ -199,6 +199,8 @@ def change_password(request):
             request.session[
                 "_message_view_message"
             ] = f"Your password has been changed."
+            if request.user.is_player:
+                return redirect("core:session_home", session_url_tag=request.user.players.first().session.url_tag)
             return redirect("core:message")
     return render(
         request,

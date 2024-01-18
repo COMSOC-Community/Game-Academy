@@ -19,7 +19,7 @@ OPEN_VIEWS = [
 ]
 
 # Views outside of session that can be accessed by players
-PLAYER_OPEN_VIEWS = ["core:logout", "core:force_player_logout"]
+PLAYER_OPEN_VIEWS = ["core:logout", "core:force_player_logout", "core:change_password"]
 
 # Views within a session that can be accessed by anyone (i.e., non-players)
 SESSION_OPEN_VIEWS = [

@@ -42,9 +42,11 @@
                     </section>
                 {% endif %}
 
-                <form action="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}" method="post">
-                    {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
-                </form>
+                {% if submit_answer_form %}
+                    <form action="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                        {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
+                    </form>
+                {% endif %}
             {% else %}
                 <p>
                     You have already submitted the answer {{ current_answer.formatted_answer }}.
