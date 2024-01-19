@@ -89,7 +89,7 @@
     </div>
 
     {% for auction_id in "12345" %}
-        <h2 class="collapsible">Auction {{ auction_id }} {% if current_answer.auction_id|slugify == auction_id %}(yours){% endif %}</h2>
+        <h2 class="collapsible-div">Auction {{ auction_id }} {% if current_answer.auction_id|slugify == auction_id %}(yours){% endif %}</h2>
         <div class="collapsible-content" style="display: none;">
             {% if game.result_auct %}
                 {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
@@ -148,12 +148,12 @@
     {% endfor %}
 
     {% if admin_user %}
-        <h2 class="collapsible">Global winner{{ global_winning_answers|pluralize }}</h2>
+        <h2 class="collapsible-div">Global winner{{ global_winning_answers|pluralize }}</h2>
         <div class="collapsible-content" style="display: none;">
             <p class="center-align">{{ global_winners_formatted }}</p>
         </div>
 
-        <h2 class="collapsible">All answers with names</h2>
+        <h2 class="collapsible-div">All answers with names</h2>
 
         <div class="collapsible-content" style="display: none;">
             <table class="lined-table center-margin">
@@ -180,7 +180,7 @@
     {% endif %}
 
     <script>
-        var coll = document.getElementsByClassName("collapsible");
+        var coll = document.getElementsByClassName("collapsible-div");
         var i;
         for (i = 0; i < coll.length; i++) {
             coll[i].addEventListener("click", function() {

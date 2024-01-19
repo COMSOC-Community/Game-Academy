@@ -13,7 +13,7 @@
 	gap: 10px;
 }
 
-h2.collapsible {
+h2.collapsible-div {
 	background: var(--color-gray-verylight);
 	text-align: center;
 	padding: 5px;

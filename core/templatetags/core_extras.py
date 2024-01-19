@@ -1,11 +1,7 @@
 from django import template
+import core.utils
 
 register = template.Library()
-
-
-# @register.filter
-# def addstr(x, y):
-#     return str(x) + str(y)
 
 
 @register.filter
@@ -16,3 +12,8 @@ def get_key_dict(d, key):
 @register.filter
 def get_attr(obj, attr):
     return getattr(obj, attr)
+
+
+@register.filter
+def float_formatter(x, num_digits):
+    return core.utils.float_formatter(x, num_digits=num_digits)

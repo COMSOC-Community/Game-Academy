@@ -88,7 +88,7 @@
         {% endif %}
     </div>
 
-    <h2 class="collapsible">Distribution of the Strategies Submitted</h2>
+    <h2 class="collapsible-div">Distribution of the Strategies Submitted</h2>
 
     <div class="collapse_content" style="display: none">
         <div id="histogram_strat" class="graph_wrap"></div>
@@ -117,7 +117,7 @@
         histo_strat_chart.draw();
     </script>
 
-    <h2 class="collapsible">Distribution of Scores per Answer</h2>
+    <h2 class="collapsible-div">Distribution of Scores per Answer</h2>
 
     <div class="collapsible_content" style="display:none;">
         <div id="score_heatmap" class="graph_wrap"></div>
@@ -141,7 +141,7 @@
         score_heatmap_chart.draw();
     </script>
 
-    <h2 class="collapsible">All Answers Anonymised</h2>
+    <h2 class="collapsible-div">All Answers Anonymised</h2>
 
     <div class="collapse_content" style="display: none;">
         <table class="lined-table center-margin">
@@ -167,7 +167,7 @@
     </div>
 
     {% if admin_user %}
-        <h2 class="collapsible">All Answers with Names</h2>
+        <h2 class="collapsible-div">All Answers with Names</h2>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
@@ -196,7 +196,7 @@
     {% endif %}
 
     <script>
-        var coll = document.getElementsByClassName("collapsible");
+        var coll = document.getElementsByClassName("collapsible-div");
         var i;
         for (i = 0; i < coll.length; i++) {
             coll[i].addEventListener("click", function() {

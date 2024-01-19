@@ -1,5 +1,5 @@
 
 def float_formatter(value, num_digits=2):
-    if int(value) == value:
-        return str(int(value))
-    return "{:.{}f}".format(value, num_digits)
+    value = float(value)
+    formatted_value = "{:.{}f}".format(value, num_digits)
+    return formatted_value.rstrip('0').rstrip('.') if '.' in formatted_value else formatted_value

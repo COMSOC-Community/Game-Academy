@@ -1,4 +1,5 @@
 {% extends 'core/base_game.html' %}
+{% load core_extras %}
 
 {% load static %}
 
@@ -10,7 +11,7 @@
 
 {% block game_content %}
     <section>
-        <h2 class="collapsible">Sample answers</h2>
+        <h2 class="collapsible-div">Sample answers</h2>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
@@ -35,7 +36,7 @@
     </section>
 
     <section>
-        <h2 class="collapsible">Distribution of the answers</h2>
+        <h2 class="collapsible-div">Distribution of the answers</h2>
 
         <div class="collapse_content" style="display: none;">
             <div id="histogram" class="graph_wrap">
@@ -59,22 +60,22 @@
     </section>
 
     <section>
-        <h2 class="collapsible">Details</h2>
+        <h2 class="collapsible-div">Details</h2>
 
         <div class="collapse_content" style="display: none;">
 
             <table class="lined-table center-margin">
                 <tr>
                     <th>Average answer</th>
-                    <td>{{ game.result_ng.average }}</td>
+                    <td>{{ game.result_ng.average|floatformat:5 }}</td>
                 </tr>
                 <tr>
                     <th>{{ game.numbers_setting.factor_display }} of the average</th>
-                    <td>{{ game.result_ng.corrected_average }}</td>
+                    <td>{{ game.result_ng.corrected_average|floatformat:5 }}</td>
                 </tr>
                 <tr>
                     <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
-                    <td>{{ winning_answers_formatted }}</td>
+                    <td>{{ winning_answers_formatted|float_formatter:5 }}</td>
                 </tr>
                 {% if admin_user %}
                     <tr>
@@ -87,7 +88,7 @@
     </section>
 
     <section>
-        <h2 class="collapsible">All answers anonymised</h2>
+        <h2 class="collapsible-div">All answers anonymised</h2>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
@@ -99,7 +100,7 @@
                 {% for answer in answers %}
                     <tr>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
+                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
                     </tr>
                 {% endfor %}
@@ -109,7 +110,7 @@
 
     {% if admin_user %}
         <section class="warning-section">
-            <h2 class="collapsible">All answers with names</h2>
+            <h2 class="collapsible-div">All answers with names</h2>
 
             <div class="collapse_content" style="display: none;">
                 <table class="lined-table center-margin">
@@ -123,7 +124,7 @@
                         <tr>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
-                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|floatformat:5 }}</td>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
                         </tr>
                     {% endfor %}
@@ -136,7 +137,7 @@
 
 {% block extra_scripts %}
     <script>
-        var coll = document.getElementsByClassName("collapsible");
+        var coll = document.getElementsByClassName("collapsible-div");
         var i;
         for (i = 0; i < coll.length; i++) {
             coll[i].addEventListener("click", function() {

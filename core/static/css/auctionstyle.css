@@ -7,7 +7,7 @@
 	background: var(--color-green-verylight);
 }
 
-h2.collapsible, h3.collapsible {
+h2.collapsible-div, h3.collapsible-div {
 	background: var(--color-gray-verylight);
 	text-align: center;
 	padding: 5px;

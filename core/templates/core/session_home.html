@@ -41,7 +41,7 @@
                         {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
                             <p class="center-align">
                                 <span class="green-button">
-                                    <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
+                                    <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
                                 </span>
                             </p>
                         {% endwith %}

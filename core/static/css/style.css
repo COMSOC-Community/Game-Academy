@@ -13,6 +13,8 @@
 	--color-error-light: #f59e9e;
 	--color-error: #ff7474;
 	--color-error-dark: #b93030;
+	--color-navigation-button: #333;
+	--color-process-button: #325181;
 }
 
 /*Mobile Devices (Portrait)*/
@@ -324,6 +326,10 @@ Typical layouts
 	border: 0 none;
 }
 
+.collapsible-div:after {
+	content: '\00A0\25BE';
+}
+
 /* =======
 Side panel
 ======= */
@@ -450,7 +456,7 @@ Forms
 	color: white;
 	border: none;
 	padding: 5px 20px;
-	border-radius: 5px;
+	border-radius: 25px;
 	cursor: pointer;
 	font-size: 0.8em;
 	text-decoration: none;
@@ -459,6 +465,29 @@ Forms
 .button a {
 	text-decoration: none;
 	color: inherit;
+}
+
+.navigation-button {
+	background-color: var(--color-navigation-button);
+}
+
+.navigation-button:after {
+	content: '\00A0\276F\276F';
+	font-weight: bold;
+	position: relative;
+	bottom: -0.05em;
+}
+
+.process-button {
+	background-color: var(--color-process-button);
+}
+
+.process-button:before {
+	content:'\2699\00A0';
+	font-size: large;
+	font-weight: bold;
+	position: relative;
+	bottom: 0.1em;
 }
 
 /* =======

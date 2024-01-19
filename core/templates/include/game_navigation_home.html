@@ -1,5 +1,5 @@
 {% block game_navigation_home %}
     {% with game.game_config.url_namespace|add:":index" as url_name %}
-        <a class="button" href="{% url url_name session.url_tag game.url_tag %}">Game home page</a>
+        <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">Game home page</a>
     {% endwith %}
 {% endblock %}
