@@ -1,27 +1,23 @@
 <section class="warning-section">
     <p>
         You are logged in as an admin. You can access the
-        <a href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">admin page</a>
+        <a class="button navigation-button" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">admin page</a>
         of the game.
     </p>
     {% if not game.playable or not game.results_visible %}
-        <p>Hidden pages:</p>
-        <ul>
+        <p>
+            Pages that are not visible to users:
             {% if not game.playable %}
-                <li>
-                    {% with game.game_config.url_namespace|add:":submit_answer" as url_name %}
-                        <a href="{% url url_name session.url_tag game.url_tag %}">Answer page</a>
-                    {% endwith %}
-                </li>
+                {% with game.game_config.url_namespace|add:":submit_answer" as url_name %}
+                    <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">Answer page</a>
+                {% endwith %}
             {% endif %}
             {% if not game.results_visible %}
-                <li>
-                    {% with game.game_config.url_namespace|add:":results" as url_name %}
-                        <a href="{% url url_name session.url_tag game.url_tag %}">Results page</a>
-                    {% endwith %}
-                </li>
+                {% with game.game_config.url_namespace|add:":results" as url_name %}
+                    <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">Results page</a>
+                {% endwith %}
             {% endif %}
-        </ul>
+        </p>
     {% endif %}
 
     <div class="side-by-side-centered-wrapper">

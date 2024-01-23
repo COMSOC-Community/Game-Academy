@@ -19,7 +19,9 @@
 
     <section>
         <h2>Get Started</h2>
+
         <p>Ready to play? Find your session!</p>
+
         <form action="{% url 'core:index' %}" method="post">
             {% include "include/form_top_template.html" with form=session_finder_form form_type='session_finder' submit_button_label='Go to session' %}
 
@@ -37,20 +39,23 @@
         </form>
     </section>
 
-    {% if not request.user.is_authenticated %}
+    {% if not user_is_authenticated %}
         <section>
             <h2>Register or Login</h2>
 
             <div class="side-by-side-centered-wrapper">
                 <div>
+                    {% if general_login_error %}
+                        <div class="form-error-message">Something went wrong with the login, contact the administrator.</div>
+                    {% endif %}
                     <form action="{% url 'core:index' %}" method="post">
                         {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Login' %}
                     </form>
                 </div>
 
                 <div>
-                    {% if user_created %}
-                        <p>User <em>{{ user.username }}</em> has been created. You can now log in.</p>
+                    {% if created_user %}
+                        <div class="form-success-message">User <em>{{ created_user.username }}</em> has been created. You can now log in.</div>
                     {% else %}
                         <form action="{% url 'core:index' %}" method="post">
                             {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register' %}

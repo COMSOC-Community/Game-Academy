@@ -7,12 +7,12 @@
 {% endblock %}
 
 {% block content %}
-    {% if session_created %}
+    {% if created_session %}
         <section class="form-success-message">
-            <p>The session {{ session_obj.long_name }} has been created! Congrats.</p>
+            <p>The session {{ created_session.long_name }} has been created! Congrats.</p>
 
-            <p>You can access the main page of the session
-                <a href="{% url 'core:session_portal' session_obj.url_tag %}">here</a>.
+            <p>You can access the portal of the session
+                <a href="{% url 'core:session_portal' created_session.url_tag %}">here</a>.
             </p>
         </section>
     {% else %}

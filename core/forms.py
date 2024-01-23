@@ -84,13 +84,19 @@ class UserRegistrationForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data["username"]
-
         if not self.user and CustomUser.objects.filter(username=username).exists():
             raise forms.ValidationError(
                 "A user with this username already exists. Please choose a different one."
             )
-
         return username
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if not self.user and CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError(
+                "A user with this email address already exists. You can try logging-in."
+            )
+        return email
 
     def clean_password1(self):
         password1 = self.cleaned_data["password1"]

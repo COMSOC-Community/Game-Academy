@@ -14,15 +14,13 @@ handler500 = error_500_view
 
 urlpatterns = [
     path("", include("core.urls")),
-    re_path(r"^admin/", admin.site.urls),
+    path("admin/", admin.site.urls),
 ]
 
 for game_config in INSTALLED_GAMES:
     urlpatterns.append(
-        re_path(
-            r"^s/(?P<session_url_tag>[\w-]+)/"
-            + re.escape(str(game_config.url_tag))
-            + r"/(?P<game_url_tag>[\w-]+)/",
+        path(
+            f"s/<slug:session_url_tag>/{game_config.url_tag}/<slug:game_url_tag>/",
             include(
                 str(game_config.package_name) + ".urls",
                 namespace=game_config.url_namespace,

@@ -1,49 +1,50 @@
 import re
 
-from django.urls import re_path, include
+from django.urls import path
 
 from core.games import INSTALLED_GAMES
 from . import views
 
 app_name = "core"
 urlpatterns = [
-    re_path(r"^$", views.index, name="index"),
-    re_path(r"^logout/?$", views.logout_user, name="logout"),
-    re_path(r"^password/?$", views.change_password, name="change_password"),
-    re_path(r"^createsession/?", views.create_session, name="create_session"),
-    re_path(r"^message", views.message, name="message"),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)[/]?$",
+    path("", views.index, name="index"),
+    path("createsession/", views.create_session, name="create_session"),
+    path("message/", views.message, name="message"),
+    path("logout/", views.logout_user, name="logout"),
+    path("u/<slug:user_id>/", views.user_profile, name="user_profile"),
+    path("u/<slug:user_id>/password/", views.change_password, name="change_password"),
+    path(
+        "s/<slug:session_url_tag>/",
         views.session_portal,
         name="session_portal",
     ),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)/forcedlogout[/]$",
+    path(
+        "s/<slug:session_url_tag>/forcedlogout/",
         views.force_player_logout,
         name="force_player_logout",
     ),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)/home[/]?$",
+    path(
+        "s/<slug:session_url_tag>/home/",
         views.session_home,
         name="session_home",
     ),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)/admin[/]?$",
+    path(
+        "s/<slug:session_url_tag>/admin/",
         views.session_admin,
         name="session_admin",
     ),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)/admin/games[/]?$",
+    path(
+        "s/<slug:session_url_tag>/admin/games/",
         views.session_admin_games,
         name="session_admin_games",
     ),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)/admin/players[/]?$",
+    path(
+        "s/<slug:session_url_tag>/admin/players/",
         views.session_admin_players,
         name="session_admin_players",
     ),
-    re_path(
-        r"^s/(?P<session_url_tag>[\w-]+)/admin/player/(?P<player_name>[\w-]+)/password[/]?$",
+    path(
+        "s/<slug:session_url_tag>/admin/player/<slug:player_name>/password/",
         views.session_admin_player_password,
         name="session_admin_player_password",
     ),
@@ -51,33 +52,33 @@ urlpatterns = [
 
 for game_config in INSTALLED_GAMES:
     urlpatterns += [
-        re_path(
-            r"^s/(?P<session_url_tag>[\w-]+)/"
+        path(
+            "s/<slug:session_url_tag>/"
             + re.escape(str(game_config.url_tag))
-            + r"/(?P<game_url_tag>[\w-]+)/team",
+            + r"/<slug:game_url_tag>/team",
             views.team,
             name=game_config.url_tag + "_team",
         ),
-        re_path(
-            r"^s/(?P<session_url_tag>[\w-]+)/"
+        path(
+            "s/<slug:session_url_tag>/"
             + re.escape(str(game_config.url_tag))
-            + r"/(?P<game_url_tag>[\w-]+)/admin/play_toggle",
+            + r"/<slug:game_url_tag>/admin/play_toggle",
             views.game_play_toggle,
             name=game_config.url_tag + "_play_toggle",
             kwargs={"game_type": game_config.name},
         ),
-        re_path(
-            r"^s/(?P<session_url_tag>[\w-]+)/"
+        path(
+            "s/<slug:session_url_tag>/"
             + re.escape(str(game_config.url_tag))
-            + r"/(?P<game_url_tag>[\w-]+)/admin/result_toggle",
+            + r"/<slug:game_url_tag>/admin/result_toggle",
             views.game_result_toggle,
             name=game_config.url_tag + "_result_toggle",
             kwargs={"game_type": game_config.name},
         ),
-        re_path(
-            r"^s/(?P<session_url_tag>[\w-]+)/"
+        path(
+            "s/<slug:session_url_tag>/"
             + re.escape(str(game_config.url_tag))
-            + r"/(?P<game_url_tag>[\w-]+)/admin/run_management",
+            + r"/<slug:game_url_tag>/admin/run_management",
             views.game_run_management_cmds,
             name=game_config.url_tag + "_run_management",
             kwargs={"game_type": game_config.name},

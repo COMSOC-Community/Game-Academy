@@ -1,0 +1,5 @@
+<h4>Session {{ session.name }}</h4>
+<p><a class="button navigation-button" href="{% url 'core:session_home' session.url_tag %}">Session home</a></p>
+{% if user_is_session_admin %}
+    <p><a class="button navigation-button color-error-dark" href="{% url "core:session_admin" session.url_tag %}">Admin page</a></p>
+{% endif %}
