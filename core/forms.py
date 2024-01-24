@@ -2,8 +2,8 @@ from django import forms
 from django.contrib.auth import authenticate
 
 from core.games import INSTALLED_GAMES_CHOICES
-from .models import Session, Player, Game, Team, CustomUser
-from .constants import player_username, guest_username
+from core.models import Session, Player, Game, Team, CustomUser
+from core.constants import player_username, guest_username, FORBIDDEN_SESSION_URL_TAGS
 
 
 class SessionFinderForm(forms.Form):
@@ -195,6 +195,10 @@ class CreateSessionForm(forms.Form):
 
     def clean_name(self):
         name = self.cleaned_data["name"]
+        if name in FORBIDDEN_SESSION_URL_TAGS:
+            raise forms.ValidationError(
+                "This name cannot be used for a session. Choose another one."
+            )
         new_name = not self.session or name != self.session.name
         if new_name and Session.objects.filter(name=name).exists():
             raise forms.ValidationError(

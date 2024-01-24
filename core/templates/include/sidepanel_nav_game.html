@@ -1,1 +1,15 @@
 <h4>Game {{ game.name }}</h4>
+
+<p>{% include 'include/game_navigation_home.html' %}</p>
+{% if game.need_teams %}
+    <p>{% include 'include/game_navigation_team.html' %}</p>
+{% endif %}
+{% if game.playable or user_is_session_admin%}
+    <p>{% include 'include/game_navigation_submit_answer.html' %}</p>
+{% endif %}
+{% if game.results_visible or user_is_session_admin %}
+    <p>{% include 'include/game_navigation_results.html' %}</p>
+{% endif %}
+{% if user_is_session_admin %}
+    <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Admin</a>
+{% endif %}

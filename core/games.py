@@ -2,6 +2,8 @@ from collections.abc import Iterable
 
 from django.apps import AppConfig
 
+from core.constants import FORBIDDEN_APP_URL_TAGS
+
 
 class GameConfig(AppConfig):
     def __init__(
@@ -22,6 +24,9 @@ class GameConfig(AppConfig):
         self.name = app_name
         self.long_name = long_name
         self.package_name = package_name
+        if url_tag in FORBIDDEN_APP_URL_TAGS:
+            raise ValueError(f"The game app {package_name} has url_tag `{url_tag}` which is "
+                             f"forbidden. Choose another url tag for the app.")
         self.url_tag = url_tag
         self.url_namespace = url_namespace
         self.setting_model = setting_model

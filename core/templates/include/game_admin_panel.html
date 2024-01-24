@@ -1,25 +1,5 @@
 <section class="warning-section">
-    <p>
-        You are logged in as an admin. You can access the
-        <a class="button navigation-button" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">admin page</a>
-        of the game.
-    </p>
-    {% if not game.playable or not game.results_visible %}
-        <p>
-            Pages that are not visible to users:
-            {% if not game.playable %}
-                {% with game.game_config.url_namespace|add:":submit_answer" as url_name %}
-                    <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">Answer page</a>
-                {% endwith %}
-            {% endif %}
-            {% if not game.results_visible %}
-                {% with game.game_config.url_namespace|add:":results" as url_name %}
-                    <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">Results page</a>
-                {% endwith %}
-            {% endif %}
-        </p>
-    {% endif %}
-
+    <h2>Admin Shortcuts</h2>
     <div class="side-by-side-centered-wrapper">
         {% with "core:"|add:game.game_config.url_tag|add:"_play_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">

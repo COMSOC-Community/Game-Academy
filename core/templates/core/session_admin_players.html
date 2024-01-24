@@ -66,7 +66,7 @@
                                 </span>
                             </div>
                             <div>
-                                {% if is_user_super_admin and super_admin != request.user %}
+                                {% if user_is_session_super_admin and super_admin != user %}
                                     <td>
                                         <form action="{% url 'core:session_admin_players' session.url_tag %}#admins" method="post">
                                             {% csrf_token %}
@@ -89,7 +89,7 @@
                                 </span>
                             </div>
                             <div>
-                                {% if is_user_super_admin %}
+                                {% if user_is_session_super_admin %}
                                     <td>
                                         <form action="{% url 'core:session_admin_players' session.url_tag %}#admins" method="post">
                                             {% csrf_token %}
@@ -157,7 +157,7 @@
                                 </div>
                                 <div>
                                     <span class="button" style="margin-right: 20px">
-                                        <a href="{% url "core:session_admin_player_password" session.url_tag player.name %}">Change Password</a>
+                                        <a href="{% url "core:session_admin_player_password" session.url_tag player.user.id %}">Change Password</a>
                                     </span>
                                     <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
                                         {% csrf_token %}

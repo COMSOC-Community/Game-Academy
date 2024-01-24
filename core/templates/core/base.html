@@ -25,10 +25,10 @@
             <div class="side-panel-content">
 
                 {% if not user_is_only_guest %}
-                    <p><a class="button process-button" href="{% url 'core:change_password' request.user.id %}">Change your Password</a></p>
+                    <p><a class="button process-button" href="{% url 'core:change_password' user.id %}">Change your Password</a></p>
                 {% endif %}
                 {% if not user_is_only_player %}
-                    <p><a class="button process-button" href="{% url 'core:user_profile' request.user.id %}">View/Edit your profile</a></p>
+                    <p><a class="button process-button" href="{% url 'core:user_profile' user.id %}">View/Edit your profile</a></p>
                 {% endif %}
 
                 {% block side_panel_extra_nav %}

@@ -6,7 +6,8 @@ from django.shortcuts import render, get_object_or_404
 from django.core import management
 
 from core.models import Session, Game, Player
-from core.views import is_session_admin
+from core.views import is_session_admin, base_context_initialiser, session_context_initialiser, \
+    game_context_initialiser
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
@@ -18,11 +19,11 @@ def index(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    context = {
-        "session": session,
-        "game": game,
-        "admin_user": is_session_admin(session, request.user),
-    }
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, context)
+
     try:
         player = Player.objects.get(session=session, user=request.user)
         context["player"] = player

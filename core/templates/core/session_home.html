@@ -56,8 +56,12 @@
             <p>No games are currently available.</p>
         {% endif %}
 
-        {% if admin_user and invisible_games %}
+        {% if invisible_games %}
             <div class="warning-section">
+                <p>
+                    These games are not visible to the players. You can see them since you are
+                    logged in as an admin.
+                </p>
                 {% for game in invisible_games %}
                     <h2>{{ game.game_config.long_name }} - {{ game.name }}</h2>
 

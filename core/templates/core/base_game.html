@@ -9,8 +9,13 @@
     <p>{{ session.long_name|title }}</p>
 {% endblock %}
 
+{% block side_panel_extra_nav %}
+    {% include 'include/sidepanel_nav_game.html' %}
+    {% include 'include/sidepanel_nav_session.html' %}
+{% endblock %}
+
 {% block content %}
-    {% if admin_user %}
+    {% if user_is_session_admin %}
         {% include 'include/game_admin_panel.html' %}
     {% endif %}
 
@@ -25,9 +30,13 @@
     {% block game_navigation %}
         <div class="side-by-side-centered-wrapper">
             {% include 'include/game_navigation_home.html' %}
-            {% include 'include/game_navigation_team.html' %}
+            {% if game.need_teams %}
+                {% include 'include/game_navigation_team.html' %}
+            {% endif %}
             {% include 'include/game_navigation_submit_answer.html' %}
-            {% include 'include/game_navigation_results.html' %}
+            {% if game.results_visible %}
+                {% include 'include/game_navigation_results.html' %}
+            {% endif %}
         </div>
     {% endblock %}
 {% endblock %}

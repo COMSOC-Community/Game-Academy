@@ -20,7 +20,7 @@ urlpatterns = [
 for game_config in INSTALLED_GAMES:
     urlpatterns.append(
         path(
-            f"s/<slug:session_url_tag>/{game_config.url_tag}/<slug:game_url_tag>/",
+            f"<slug:session_url_tag>/{game_config.url_tag}/<slug:game_url_tag>/",
             include(
                 str(game_config.package_name) + ".urls",
                 namespace=game_config.url_namespace,

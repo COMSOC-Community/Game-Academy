@@ -141,6 +141,7 @@ def session_context_initialiser(request, session, context=None):
     context["session"] = session
     if request.user.is_authenticated:
         context["user_is_session_admin"] = is_session_admin(session, request.user)
+        context["user_is_session_super_admin"] = is_session_super_admin(session, request.user)
     return context
 
 
@@ -411,17 +412,15 @@ def session_portal(request, session_url_tag):
 def session_home(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     games = Game.objects.filter(session=session, visible=True)
-    admin_user = is_session_admin(session, request.user)
 
-    context = {"session": session, "games": games, "admin_user": admin_user}
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    context["games"] = games
 
-    if admin_user:
+    if is_session_admin(session, request.user):
         context["invisible_games"] = Game.objects.filter(session=session, visible=False)
 
-    if request.user.is_player:
-        context["player_profile"] = request.user.players.first()
-
-    return render(request, "core/session_home.html", locals())
+    return render(request, "core/session_home.html", context)
 
 
 # =========================
@@ -433,7 +432,8 @@ def session_home(request, session_url_tag):
 def session_admin(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
-    context = {}
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
 
     # Modify session form
     modify_session_form = CreateSessionForm(session=session)
@@ -465,7 +465,6 @@ def session_admin(request, session_url_tag):
         else:
             raise Http404("POST request but form type unknown.")
 
-    context["session"] = session
     context["modify_session_form"] = modify_session_form
     context["delete_session_form"] = delete_session_form
     return render(request, "core/session_admin.html", context)
@@ -474,7 +473,9 @@ def session_admin(request, session_url_tag):
 @session_admin_decorator
 def session_admin_games(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
-    context = {"session": session}
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
 
     # Create game form
     create_game_form = CreateGameForm(session=session)
@@ -503,8 +504,8 @@ def session_admin_games(request, session_url_tag):
     if request.method == "POST" and "delete_game_form" in request.POST:
         deleted_game_id = request.POST["remove_game_id"]
         deleted_game = Game.objects.get(id=deleted_game_id)
-        deleted_game.delete()
         context["deleted_game_name"] = deleted_game.name
+        deleted_game.delete()
 
     games = Game.objects.filter(session=session)
 
@@ -567,8 +568,9 @@ def session_admin_games(request, session_url_tag):
 @session_admin_decorator
 def session_admin_players(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
-    is_user_super_admin = is_session_super_admin(session, request.user)
-    context = {"session": session, "is_user_super_admin": is_user_super_admin}
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
 
     # Add player form
     add_player_form = PlayerRegistrationForm(session=session)
@@ -611,8 +613,8 @@ def session_admin_players(request, session_url_tag):
         player.user.delete()
         player.delete()
 
-    # Make admin form
-    if is_user_super_admin:
+    if is_session_super_admin(session, request.user):
+        # Make admin form
         make_admin_form = MakeAdminForm(session=session)
         if request.method == "POST" and "make_admin_form" in request.POST:
             make_admin_form = MakeAdminForm(request.POST, session=session)
@@ -625,8 +627,7 @@ def session_admin_players(request, session_url_tag):
                 context["new_admin"] = user
         context["make_admin_form"] = make_admin_form
 
-    # Remove admin form
-    if is_user_super_admin:
+        # Remove admin form
         if request.method == "POST" and "remove_admin_form" in request.POST:
             admin_id = request.POST["remove_admin_id"]
             admin = CustomUser.objects.get(id=admin_id)
@@ -635,20 +636,22 @@ def session_admin_players(request, session_url_tag):
             context["removed_admin"] = admin
 
     super_admins = session.super_admins.all()
-    admins = session.admins.exclude(id__in=super_admins)
     context["super_admins"] = super_admins
-    context["admins"] = admins
-
+    context["admins"] = session.admins.exclude(id__in=super_admins)
     context["players"] = players
     context["guests"] = guests
+
     return render(request, "core/session_admin_players.html", context)
 
 
 @session_admin_decorator
-def session_admin_player_password(request, session_url_tag, player_name):
+def session_admin_player_password(request, session_url_tag, player_user_id):
     session = get_object_or_404(Session, url_tag=session_url_tag)
-    player = get_object_or_404(Player, session=session, name=player_name.title())
-    context = {"session": session, "player": player}
+    player = get_object_or_404(Player, session=session, user__id=player_user_id)
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    context["player"] = player
 
     update_password_form = PlayerRegistrationForm(session=session, player=player)
     if request.method == "POST" and "update_password_form" in request.POST:
@@ -660,6 +663,7 @@ def session_admin_player_password(request, session_url_tag, player_name):
             player.user.save()
             update_session_auth_hash(request, player.user)
     context["update_password_form"] = update_password_form
+
     return render(request, "core/session_admin_player_password.html", context)
 
 
