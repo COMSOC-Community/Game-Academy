@@ -1,0 +1,3 @@
+{% with game.game_config.url_namespace|add:":"|add:url_name as qualified_url_name %}
+    {% url qualified_url_name session.url_tag game.url_tag %}
+{% endwith %}

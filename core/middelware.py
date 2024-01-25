@@ -4,6 +4,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, resolve
 
 import core.authorisations
+from core.constants import FORBIDDEN_SESSION_URL_TAGS
 from core.models import Session, Game
 from core.games import INSTALLED_GAMES
 
@@ -34,10 +35,9 @@ try:
 except AssertionError:
     raise ValueError("SESSION_OPEN_VIEWS is not a subset of OPEN_VIEWS")
 
-SESSION_ROOT_PATH = "/s/"
-SESSION_URL_TAG_POSITION = 2
-GAME_TYPE_URL_TAG_POSITION = 3
-GAME_URL_TAG_POSITION = 4
+SESSION_URL_TAG_POSITION = 1
+GAME_TYPE_URL_TAG_POSITION = 2
+GAME_URL_TAG_POSITION = 3
 
 
 class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
@@ -53,7 +53,7 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
 
         accessed_session_url_tag = None
         # Test for login
-        if path.startswith(SESSION_ROOT_PATH):
+        if not any(path.startswith("/" + x) for x in FORBIDDEN_SESSION_URL_TAGS):
             split_path = path.split("/")
             accessed_session_url_tag = split_path[SESSION_URL_TAG_POSITION]
             session = get_object_or_404(Session, url_tag=accessed_session_url_tag)
@@ -64,8 +64,8 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                     return
                 # We know user is authenticated (assert above, and first test)
                 if (
-                    not request.user.is_player
-                    and request.user.players.first().session == session
+                        not request.user.is_player
+                        and request.user.players.first().session == session
                 ):
                     raise Http404(
                         "Middleware block: this session view is not accessible to this user "
@@ -99,8 +99,8 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                 return
             session = request.user.players.first().session
             if (
-                not accessed_session_url_tag
-                or accessed_session_url_tag != session.url_tag
+                    not accessed_session_url_tag
+                    or accessed_session_url_tag != session.url_tag
             ):
                 response = redirect("core:force_player_logout", session.url_tag)
                 response[

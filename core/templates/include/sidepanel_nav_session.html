@@ -1,8 +1,13 @@
-<h4>Session {{ session.name }}</h4>
-{% if user_is_session_admin %}
-    <p><a class="button navigation-button" href="{% url 'core:session_portal' session.url_tag %}">Portal</a></p>
-{% endif %}
-<p><a class="button navigation-button" href="{% url 'core:session_home' session.url_tag %}">Home</a></p>
-{% if user_is_session_admin %}
-    <p><a class="button navigation-button color-warning-dark" href="{% url "core:session_admin" session.url_tag %}">Admin pages</a></p>
-{% endif %}
+<h4>Session {{ session.name }} <span class="toggle-arrow">&#9662;</span></h4>
+
+<div class="nav-content">
+    <ul>
+        {% if user_is_session_admin %}
+            <li><a class="button navigation-button" href="{% url 'core:session_portal' session.url_tag %}">Portal</a></li>
+        {% endif %}
+        <li><a class="button navigation-button" href="{% url 'core:session_home' session.url_tag %}">Home</a></li>
+        {% if user_is_session_admin %}
+            <li><a class="button navigation-button color-warning-dark" href="{% url "core:session_admin" session.url_tag %}">Admin pages</a></li>
+        {% endif %}
+    </ul>
+</div>

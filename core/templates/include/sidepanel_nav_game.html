@@ -1,15 +1,19 @@
-<h4>Game {{ game.name }}</h4>
+<h4>Game {{ game.name }} <span class="toggle-arrow">&#9662;</span></h4>
 
-<p>{% include 'include/game_navigation_home.html' %}</p>
-{% if game.need_teams %}
-    <p>{% include 'include/game_navigation_team.html' %}</p>
-{% endif %}
-{% if game.playable or user_is_session_admin%}
-    <p>{% include 'include/game_navigation_submit_answer.html' %}</p>
-{% endif %}
-{% if game.results_visible or user_is_session_admin %}
-    <p>{% include 'include/game_navigation_results.html' %}</p>
-{% endif %}
-{% if user_is_session_admin %}
-    <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Admin</a>
-{% endif %}
+<div class="nav-content">
+    <ul>
+        <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a></li>
+        {% if game.need_teams %}
+            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='team' %}">Team</a></li>
+        {% endif %}
+        {% if game.playable or user_is_session_admin%}
+            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Answer</a></li>
+        {% endif %}
+        {% if game.results_visible or user_is_session_admin %}
+            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='results' %}">Result</a></li>
+        {% endif %}
+        {% if user_is_session_admin %}
+            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Admin</a></li>
+        {% endif %}
+    </ul>
+</div>

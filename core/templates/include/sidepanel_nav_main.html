@@ -1,5 +1,8 @@
-{% if not user_is_only_player %}
-    <h4>Navigation</h4>
-    <p><a class="button navigation-button" href="{% url 'core:index' %}">Main page</a></p>
-    <p><a class="button navigation-button" href="{% url 'core:create_session' %}">Create a session</a></p>
-{% endif %}
+<h4>Main <span class="toggle-arrow">&#9662;</span></h4>
+
+<div class="nav-content">
+    <ul>
+        <li><a class="button navigation-button" href="{% url 'core:index' %}">Main page</a></li>
+        <li><a class="button navigation-button" href="{% url 'core:create_session' %}">Create a session</a></li>
+    </ul>
+</div>

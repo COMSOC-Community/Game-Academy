@@ -1,5 +1,5 @@
 GUEST_PASSWORD_PREFIX = "GuestPass_"
-FORBIDDEN_SESSION_URL_TAGS = ("user", "logout", "message", "createsession")
+FORBIDDEN_SESSION_URL_TAGS = ("", "user", "logout", "message", "createsession")
 FORBIDDEN_APP_URL_TAGS = ("forcedlogout", "home", "admin")
 
 

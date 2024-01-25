@@ -1,16 +1,22 @@
-{% if not user_is_only_player %}
-    {% if user_administrated_sessions %}
-        <h4>Administrated Sessions</h4>
+{% if user_administrated_sessions %}
+    <h4>Administrated Sessions <span class="toggle-arrow">&#9662;</span></h4>
+
+    <div class="nav-content">
+        <ul>
             {% for session in user_administrated_sessions %}
-                <p><a class="button navigation-button" href="{% url "core:session_portal" session.url_tag %}">{{ session.name }}</a></p>
+                <li><a class="button navigation-button" href="{% url "core:session_portal" session.url_tag %}">{{ session.name }}</a></li>
             {% endfor %}
-    {% endif %}
-    {% if user_player_sessions %}
-        <h4>Playable Sessions</h4>
+        </ul>
+    </div>
+{% endif %}
+{% if user_player_sessions %}
+    <h4>Playable Sessions <span class="toggle-arrow">&#9662;</span></h4>
+
+    <div class="nav-content">
+    <ul>
         {% for session in user_player_sessions %}
-            <p>
-                <p><a class="button navigation-button" href="{% url "core:session_portal" session.url_tag %}">{{ session.name }}</a></p>
-            </p>
+            <li><p><a class="button navigation-button" href="{% url "core:session_portal" session.url_tag %}">{{ session.name }}</a></li>
         {% endfor %}
-    {% endif %}
+        </ul>
+    </div>
 {% endif %}

@@ -27,3 +27,7 @@ for game_config in INSTALLED_GAMES:
             ),
         )
     )
+
+urlpatterns.append(
+    path("__debug__/", include("debug_toolbar.urls"))
+)

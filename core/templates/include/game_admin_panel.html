@@ -1,5 +1,4 @@
 <section class="warning-section">
-    <h2>Admin Shortcuts</h2>
     <div class="side-by-side-centered-wrapper">
         {% with "core:"|add:game.game_config.url_tag|add:"_play_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">

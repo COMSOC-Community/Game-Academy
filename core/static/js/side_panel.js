@@ -18,3 +18,20 @@ document.addEventListener("DOMContentLoaded", function() {
 window.addEventListener("scroll", function() {
     adjustSidePanel();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const nav_headers = document.querySelectorAll('.side-panel h4');
+
+    nav_headers.forEach(function(header, index) {
+        if (index !== 0) {
+            toggleContent(header.nextElementSibling);
+        }
+        header.addEventListener('click', function() {
+            toggleContent(header.nextElementSibling);
+        });
+    });
+});
+
+function toggleContent(contentElement) {
+    contentElement.style.display = (contentElement.style.display === "none") ? "block" : "none";
+}
