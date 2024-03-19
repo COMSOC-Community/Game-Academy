@@ -145,10 +145,23 @@ def session_context_initialiser(request, session, context=None):
     return context
 
 
-def game_context_initialiser(request, session, game, context=None):
+def game_context_initialiser(request, session, game, answer_model, context=None):
     if context is None:
         context = {}
     context["game"] = game
+    context["game_nav_display_home"] = True
+    context["game_nav_display_team"] = game.need_teams
+    context["game_nav_display_answer"] = game.playable
+    context["game_nav_display_result"] = game.results_visible
+    player = None
+    answer = None
+    try:
+        player = Player.objects.get(session=session, user=request.user)
+        answer = answer_model.objects.get(game=game, player=player)
+    except (Player.DoesNotExist, answer_model.DoesNotExist):
+        pass
+    context["player"] = player
+    context["answer"] = answer
     return context
 
 

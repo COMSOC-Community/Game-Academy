@@ -29,12 +29,16 @@
 
     {% block game_navigation %}
         <div class="side-by-side-centered-wrapper">
-            <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a>
-            {% if game.need_teams %}
+            {% if game_nav_display_home %}
+                <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a>
+            {% endif %}
+            {% if game_nav_display_team %}
                 <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='team' %}">Team</a>
             {% endif %}
-            <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Answer</a>
-            {% if game.results_visible %}
+            {% if game_nav_display_answer %}
+                <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Answer</a>
+            {% endif %}
+            {% if game_nav_display_result %}
                 <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='results' %}">Result</a>
             {% endif %}
         </div>

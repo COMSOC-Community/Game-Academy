@@ -125,6 +125,7 @@ main {
 	min-height: 70vh;
 	flex: 1 0 auto;
 	box-sizing: border-box;
+	transition: 0.5s margin-left ease;
 }
 
 main section:first-child {
@@ -334,7 +335,7 @@ Typical layouts
 Side panel
 ======= */
 
-.side-panel {
+#side-panel {
     background-color: white;
 	border-right: 1px solid var(--color-frame);
 	border-top: 1px solid var(--color-frame);
@@ -351,6 +352,12 @@ Side panel
     padding: 0;
 }
 
+#side-panel.hidden {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0.5s, opacity 0.25s linear;
+}
+
 .side-panel-content {
 	padding: 20px 0;
 }
@@ -363,26 +370,26 @@ Side panel
 	margin-bottom: 0;
 }
 
-.side-panel .nav-content {
+#side-panel .nav-content {
 	margin-left: 20px;
 }
 
-.side-panel .nav-content .nav-content {
+#side-panel .nav-content .nav-content {
 	border-left: 3px solid var(--color-frame);
 	padding: 20px;
 }
 
-.side-panel .nav-content .nav-content ul {
+#side-panel .nav-content .nav-content ul {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
 }
 
-.side-panel .nav-content .nav-content li:not(:last-child) {
+#side-panel .nav-content .nav-content li:not(:last-child) {
 	padding-bottom: 20px;
 }
 
-.side-panel h3 {
+#side-panel h3 {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -393,21 +400,21 @@ Side panel
 	padding: 10px;
 }
 
-.side-panel h3 .logout-button {
+#side-panel h3 .logout-button {
 	margin-left: auto;
 }
 
-.side-panel h3 .button{
+#side-panel h3 .button{
 	background: var(--color-frame);
 	border: 1px solid var(--color-background-dark);
 }
 
-.side-panel h3 .button:hover {
+#side-panel h3 .button:hover {
 	background: var(--color-background-dark);
 	color: var(--color-frame);
 }
 
-.side-panel h4 {
+#side-panel h4 {
     display: flex;
 	background-color: var(--color-background-dark);
 	border-top: 1px solid var(--color-frame);
@@ -417,7 +424,7 @@ Side panel
 	margin: 0;
 }
 
-.side-panel h4 .toggle-arrow {
+#side-panel h4 .toggle-arrow {
 	margin-left: auto;
 }
 

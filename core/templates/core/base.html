@@ -12,12 +12,13 @@
 </head>
 
 <body>
-    <header>
+    <header id="main-header">
         {% block header %}{% endblock %}
     </header>
 
     {% if user_is_authenticated %}
-        <div class="side-panel">
+        <div id="side-panel-toggle"><<</div>
+        <div id="side-panel" class="side-panel">
             <h3>
                 {{ user.display_name|title }}
                 <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
@@ -50,15 +51,15 @@
             </div>
         </div>
 
-        <main class="truncated-main">
+        <main id="main-panel" class="truncated-main">
     {% else %}
-        <main class="full-main">
+        <main id="main-panel" class="full-main">
     {% endif %}
 
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
+    <footer id="main-footer">
         <p>&copy; 2023 Simon Rey</p>
     </footer>
 

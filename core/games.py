@@ -31,10 +31,13 @@ class GameConfig(AppConfig):
         self.url_namespace = url_namespace
         self.setting_model = setting_model
         self.setting_form = setting_form
-        if management_commands is not None and type(management_commands) == str:
+        if type(management_commands) == str:
             management_commands = [management_commands]
         elif isinstance(management_commands, Iterable):
             management_commands = list(management_commands)
+        elif management_commands is not None:
+            raise TypeError("The management_commands parameter of a GameConfig needs to be either "
+                            "a string or a collection of string.")
         self.management_commands = management_commands
 
     def ready(self):

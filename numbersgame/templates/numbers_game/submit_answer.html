@@ -10,12 +10,12 @@
     {% endif %}
 
     <section>
-        {% if answer_submitted %}
+        {% if submitted_answer %}
             <p>Your answer has been submitted, thanks!</p>
 
             <p>
                 You will be redirected soon to the {{ game.game_config.long_name }} page.
-                If not, <a href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">click here</a>!
+                If not, <a class="button navigation-button" href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">click here</a>!
             </p>
 
             <script>
@@ -25,7 +25,10 @@
                 setTimeout(redirect, 3000);
             </script>
         {% else %}
-            {% if not current_answer %}
+            {% if answer %}
+                <p>You have already submitted the answer <em>{{ answer.formatted_answer }}</em>.</p>
+                <p>You cannot submit more than one answer for this game.</p>
+            {% else %}
                 <p>
                     Fill out the form below to submit your answer to the {{ game.game_config.long_name }}.
                     The "answer" field should be a rational number with a dot separator (with the
@@ -47,19 +50,7 @@
                         {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
                     </form>
                 {% endif %}
-            {% else %}
-                <p>
-                    You have already submitted the answer {{ current_answer.formatted_answer }}.
-                    You cannot submit more than one answer for this game.
-                </p>
             {% endif %}
         {% endif %}
     </section>
-{% endblock %}
-
-{% block game_navigation %}
-    <div class="side-by-side-centered-wrapper">
-        {% include 'include/game_navigation_home.html' %}
-        {% include 'include/game_navigation_team.html' %}
-    </div>
 {% endblock %}

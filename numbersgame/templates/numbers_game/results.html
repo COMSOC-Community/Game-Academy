@@ -10,119 +10,96 @@
 {% endblock %}
 
 {% block game_content %}
-    <section>
-        <h2 class="collapsible-div">Sample answers</h2>
-
-        <div class="collapse_content" style="display: none;">
-            <table class="lined-table center-margin">
-                <tr>
-                    <th>Answer</th>
-                    <th>Justification</th>
-                </tr>
-                {% for answer in shuffled_answers %}
-                    <tr class="show-one-by-one" style="display: none">
-                        <td>{{ answer.answer }}</td>
-                        <td>{{ answer.motivation }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-
-            <p class="center-align">
-                <button type="button" onclick="appearOneByOne();" class="green-button">
-                    Display another answer
-                </button>
-            </p>
-        </div>
-    </section>
-
-    <section>
-        <h2 class="collapsible-div">Distribution of the answers</h2>
-
-        <div class="collapse_content" style="display: none;">
-            <div id="histogram" class="graph_wrap">
-            </div>
-            <script>
-                var histoData = [
-                        {{ game.result_ng.histo_js_data|safe }}
-                    ];
-                var histoChart = anychart.column();
-                histoChart.title('Distribution of the answers received');
-                histoChart.yAxis().title('Answer');
-                histoChart.xAxis().title('Answer range');
-                var histoSerie = histoChart.column(histoData);
-                histoSerie.name('Number of answers')
-                histoSerie.stroke({color:'#ffffff'})
-                histoSerie.fill('#FF8000')
-                histoChart.container('histogram');
-                histoChart.draw();
-            </script>
-        </div>
-    </section>
-
-    <section>
-        <h2 class="collapsible-div">Details</h2>
-
-        <div class="collapse_content" style="display: none;">
-
-            <table class="lined-table center-margin">
-                <tr>
-                    <th>Average answer</th>
-                    <td>{{ game.result_ng.average|floatformat:5 }}</td>
-                </tr>
-                <tr>
-                    <th>{{ game.numbers_setting.factor_display }} of the average</th>
-                    <td>{{ game.result_ng.corrected_average|floatformat:5 }}</td>
-                </tr>
-                <tr>
-                    <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
-                    <td>{{ winning_answers_formatted|float_formatter:5 }}</td>
-                </tr>
-                {% if admin_user %}
-                    <tr>
-                        <th>Winner{{ winners|length|pluralize:',s' }}</th>
-                        <td>{{ winners_formatted }}</td>
-                    </tr>
-                {% endif %}
-            </table>
-        </div>
-    </section>
-
-    <section>
-        <h2 class="collapsible-div">All answers anonymised</h2>
-
-        <div class="collapse_content" style="display: none;">
-            <table class="lined-table center-margin">
-                <tr>
-                    <th>Answer</th>
-                    <th>Gap</th>
-                    <th>Justification</th>
-                </tr>
-                {% for answer in answers %}
-                    <tr>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </section>
-
-    {% if admin_user %}
-        <section class="warning-section">
-            <h2 class="collapsible-div">All answers with names</h2>
+    {% if answers %}
+        <section>
+            <h2 class="collapsible-div">Sample answers</h2>
 
             <div class="collapse_content" style="display: none;">
                 <table class="lined-table center-margin">
                     <tr>
-                        <th>Player</th>
+                        <th>Answer</th>
+                        <th>Justification</th>
+                    </tr>
+                    {% for answer in shuffled_answers %}
+                        <tr class="show-one-by-one" style="display: none">
+                            <td>{{ answer.answer }}</td>
+                            <td>{{ answer.motivation }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <p class="center-align">
+                    <button type="button" onclick="appearOneByOne();" class="green-button">
+                        Display another answer
+                    </button>
+                </p>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="collapsible-div">Distribution of the answers</h2>
+
+            <div class="collapse_content" style="display: none;">
+                <div id="histogram" class="graph_wrap">
+                </div>
+                <script>
+                    var histoData = [
+                            {{ game.result_ng.histo_js_data|safe }}
+                        ];
+                    var histoChart = anychart.column();
+                    histoChart.title('Distribution of the answers received');
+                    histoChart.yAxis().title('Answer');
+                    histoChart.xAxis().title('Answer range');
+                    var histoSerie = histoChart.column(histoData);
+                    histoSerie.name('Number of answers')
+                    histoSerie.stroke({color:'#ffffff'})
+                    histoSerie.fill('#FF8000')
+                    histoChart.container('histogram');
+                    histoChart.draw();
+                </script>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="collapsible-div">Details</h2>
+
+            <div class="collapse_content" style="display: none;">
+
+                <table class="lined-table center-margin">
+                    <tr>
+                        <th>Average answer</th>
+                        <td>{{ game.result_ng.average|floatformat:5 }}</td>
+                    </tr>
+                    <tr>
+                        <th>{{ game.numbers_setting.factor_display }} of the average</th>
+                        <td>{{ game.result_ng.corrected_average|floatformat:5 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
+                        <td>{{ winning_answers_formatted|float_formatter:5 }}</td>
+                    </tr>
+                    {% if admin_user %}
+                        <tr>
+                            <th>Winner{{ winners|length|pluralize:',s' }}</th>
+                            <td>{{ winners_formatted }}</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="collapsible-div">All answers anonymised</h2>
+
+            <div class="collapse_content" style="display: none;">
+                <table class="lined-table center-margin">
+                    <tr>
                         <th>Answer</th>
                         <th>Gap</th>
                         <th>Justification</th>
                     </tr>
                     {% for answer in answers %}
                         <tr>
-                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
@@ -130,6 +107,35 @@
                     {% endfor %}
                 </table>
             </div>
+        </section>
+
+        {% if user_is_session_admin %}
+            <section class="warning-section">
+                <h2 class="collapsible-div">All answers with names</h2>
+
+                <div class="collapse_content" style="display: none;">
+                    <table class="lined-table center-margin">
+                        <tr>
+                            <th>Player</th>
+                            <th>Answer</th>
+                            <th>Gap</th>
+                            <th>Justification</th>
+                        </tr>
+                        {% for answer in answers %}
+                            <tr>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </section>
+        {% endif %}
+    {% else %}
+        <section>
+            <p>No answer has been submitted yet.</p>
         </section>
     {% endif %}
 {% endblock %}
@@ -160,10 +166,4 @@
             }
         }
     </script>
-{% endblock %}
-
-{% block game_navigation %}
-    <div class="side-by-side-centered-wrapper">
-        {% include 'include/game_navigation_home.html' %}
-    </div>
 {% endblock %}

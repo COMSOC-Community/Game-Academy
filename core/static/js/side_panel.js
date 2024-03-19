@@ -1,7 +1,4 @@
-function adjustSidePanel() {
-    const header = document.querySelector('header');
-    const footer = document.querySelector('footer');
-    const sidePanel = document.querySelector('.side-panel');
+function adjustSidePanel(header, footer, sidePanel) {
     const windowHeight = window.innerHeight || document.documentElement.clientHeight;
     const visibleFooterHeight = Math.max(0, windowHeight - footer.getBoundingClientRect().top);
     const visibleHeaderHeight = Math.max(0, header.getBoundingClientRect().bottom);
@@ -12,14 +9,22 @@ function adjustSidePanel() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    adjustSidePanel();
-});
+    const header = document.getElementById('main-header');
+    const footer = document.getElementById('main-footer');
+    const sidePanel = document.getElementById('side-panel');
+    const mainPanel = document.getElementById('main-panel')
+    adjustSidePanel(header, footer, sidePanel);
+    window.addEventListener("scroll", function() {
+        adjustSidePanel();
+    });
 
-window.addEventListener("scroll", function() {
-    adjustSidePanel();
-});
+    const sidePanelToggle = document.getElementById('side-panel-toggle');
+    sidePanelToggle.addEventListener("click", function () {
+        mainPanel.classList.toggle('truncated-main');
+        mainPanel.classList.toggle('full-main');
+        sidePanel.classList.toggle('hidden');
+    });
 
-document.addEventListener('DOMContentLoaded', function() {
     const nav_headers = document.querySelectorAll('.side-panel h4');
 
     nav_headers.forEach(function(header, index) {

@@ -22,15 +22,7 @@ def index(request, session_url_tag, game_url_tag):
 
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
-    game_context_initialiser(request, session, game, context)
-
-    try:
-        player = Player.objects.get(session=session, user=request.user)
-        context["player"] = player
-        answer = Answer.objects.get(game=game, player=player)
-        context["answer"] = answer
-    except (Player.DoesNotExist, Answer.DoesNotExist):
-        pass
+    game_context_initialiser(request, session, game, Answer, context)
 
     return render(request, os.path.join("numbers_game", "index.html"), context)
 
@@ -40,52 +32,45 @@ def submit_answer(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
 
-    if request.user.is_authenticated:
-        player = Player.objects.filter(session=session, user=request.user)
-        if player.exists():
-            player = player.first()
-            try:
-                current_answer = Answer.objects.get(
-                    game=game, player=player
+    if not game.playable and not context["user_is_session_admin"]:
+        raise Http404("The game is not playable and the user is not an admin.")
+
+    player = context["player"]
+    answer = context["answer"]
+
+    if player and not answer:
+        if request.method == "POST":
+            submit_answer_form = SubmitAnswerForm(
+                request.POST, game=game, player=player
+            )
+            if submit_answer_form.is_valid():
+                submitted_answer = Answer.objects.create(
+                    game=game,
+                    player=player,
+                    answer=submit_answer_form.cleaned_data["answer"],
+                    motivation=submit_answer_form.cleaned_data["motivation"],
                 )
-            except Answer.DoesNotExist:
-                current_answer = None
-            if current_answer is None:
-                if request.method == "POST":
-                    submit_answer_form = SubmitAnswerForm(
-                        request.POST, game=game, player=player
+                try:
+                    management.call_command(
+                        "ng_results",
+                        session=session.url_tag,
+                        game=game.url_tag,
                     )
-                    if submit_answer_form.is_valid():
-                        new_answer = Answer.objects.create(
-                            game=game,
-                            player=player,
-                            answer=submit_answer_form.cleaned_data["answer"],
-                            motivation=submit_answer_form.cleaned_data["motivation"],
-                        )
-                        try:
-                            management.call_command(
-                                "ng_results",
-                                session=session.url_tag,
-                                game=game.url_tag,
-                            )
-                            answer_submitted = True
-                        except Exception as e:
-                            submission_error = repr(e)
-                            new_answer.delete()
-                else:
-                    submit_answer_form = SubmitAnswerForm(
-                        game=game, player=player
-                    )
+                    context["submitted_answer"] = submitted_answer
+                except Exception as e:
+                    submitted_answer.delete()
+                    context["submission_error"] = repr(e)
         else:
-            player = None
-    return render(request, os.path.join("numbers_game", "submit_answer.html"), locals())
+            submit_answer_form = SubmitAnswerForm(
+                game=game, player=player
+            )
+        context["submit_answer_form"] = submit_answer_form
+    return render(request, os.path.join("numbers_game", "submit_answer.html"), context)
 
 
 def results(request, session_url_tag, game_url_tag):
@@ -93,31 +78,20 @@ def results(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
 
-    if admin_user:
-        if request.method == "POST":
-            if "form_type" in request.POST:
-                if request.POST["form_type"] == "game_playable":
-                    game.playable = not game.playable
-                    game.save()
-                elif request.POST["form_type"] == "results_visible":
-                    game.results_visible = not game.results_visible
-                    game.save()
-                elif request.POST["form_type"] == "run_management":
-                    management.call_command(
-                        "ng_updateresults", session=session.url_tag, game=game.url_tag
-                    )
+    if not game.results_visible and not context["user_is_session_admin"]:
+        raise Http404("The results are not visible and the user is not an admin.")
 
     answers = Answer.objects.filter(game=game, answer__isnull=False).order_by("answer")
     if answers:
+        context["answers"] = answers
         shuffled_answers = list(answers)
         random.shuffle(shuffled_answers)
+        context["shuffled_answers"] = shuffled_answers
         winning_answers = answers.filter(winner=True)
         if winning_answers:
             winning_answers_formatted = sorted(
@@ -129,10 +103,12 @@ def results(request, session_url_tag, game_url_tag):
                 )
             else:
                 winning_answers_formatted = "{}".format(winning_answers_formatted[0])
+            context["winning_answers_formatted"] = winning_answers_formatted
             winners_formatted = sorted(
                 list(answer.player.name for answer in winning_answers)
             )
             if len(winners_formatted) > 1:
                 winners_formatted[-1] = "and " + winners_formatted[-1]
             winners_formatted = ", ".join(winners_formatted)
-    return render(request, os.path.join("numbers_game", "results.html"), locals())
+            context["winners_formatted"] = winners_formatted
+    return render(request, os.path.join("numbers_game", "results.html"), context)

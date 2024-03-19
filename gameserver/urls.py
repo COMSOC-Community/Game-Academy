@@ -13,8 +13,8 @@ handler404 = error_404_view
 handler500 = error_500_view
 
 urlpatterns = [
-    path("", include("core.urls")),
     path("admin/", admin.site.urls),
+    path("", include("core.urls")),
 ]
 
 for game_config in INSTALLED_GAMES:
@@ -27,7 +27,3 @@ for game_config in INSTALLED_GAMES:
             ),
         )
     )
-
-urlpatterns.append(
-    path("__debug__/", include("debug_toolbar.urls"))
-)

@@ -3,11 +3,11 @@
         {% with "core:"|add:game.game_config.url_tag|add:"_play_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
                 {% if game.playable %}
-                        Close the game
-                        <span class="info-span" title="Players can currently submit their answers, closing the game will prevent them to do so.">&#9432;</span>
+                    Close the game
+                    <span class="info-span" title="Players can currently submit their answers, closing the game will prevent them to do so.">&#9432;</span>
                 {% else %}
-                        Open the game
-                        <span class="info-span" title="Players cannot submit their answers at the moment, opening the game will allow them to do so.">&#9432;</span>
+                    Open the game
+                    <span class="info-span" title="Players cannot submit their answers at the moment, opening the game will allow them to do so.">&#9432;</span>
                 {% endif %}
             </a>
         {% endwith %}
