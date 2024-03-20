@@ -121,26 +121,29 @@ header h1 {
 }
 
 main {
-	padding: 0;
 	min-height: 70vh;
+}
+
+#main-panel {
+	padding: 0;
 	flex: 1 0 auto;
 	box-sizing: border-box;
 	transition: 0.5s margin-left ease;
 }
 
-main section:first-child {
+#main-panel section:first-child {
 	margin-top: 0;
 }
 
-main section:last-child {
+#main-panel section:last-child {
 	margin-bottom: 0;
 }
 
-.full-main {
+#main-panel.full-main {
 	margin: 40px;
 }
 
-.truncated-main {
+#main-panel.truncated-main {
 	margin: 40px 40px 40px 20%;
 	padding-left: 40px;
 }
@@ -341,7 +344,6 @@ Side panel
 	border-top: 1px solid var(--color-frame);
 	border-bottom: 1px solid var(--color-frame);
 	border-bottom-right-radius: 5px;
-	border-top-right-radius: 5px;
     width: 20%;
 	max-height: 100%;
 	box-sizing: border-box;
@@ -350,12 +352,13 @@ Side panel
     overflow-y: auto;
     z-index: 1;
     padding: 0;
+	opacity: 1;
+	transition: visibility 0.5s, opacity 0.25s linear;
 }
 
 #side-panel.hidden {
 	visibility: hidden;
 	opacity: 0;
-	transition: visibility 0.5s, opacity 0.25s linear;
 }
 
 .side-panel-content {
@@ -427,6 +430,64 @@ Side panel
 #side-panel h4 .toggle-arrow {
 	margin-left: auto;
 }
+
+#side-panel-toggle-in {
+	left: 20%;
+}
+
+#side-panel-toggle-in.hidden {
+	display: none;
+}
+
+#side-panel-toggle-out {
+	display: none;
+	left: 0;
+}
+
+#side-panel-toggle-out.visible {
+	display: block;
+}
+
+.side-panel-toggle {
+	box-sizing: border-box;
+	position: fixed;
+	z-index: 1;
+
+	background-color: var(--color-frame);
+	color: white;
+	padding: 5px 10px 10px;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+
+
+
+@media (max-width: 1400px) {
+    main {
+		display: flex;
+		flex-direction: column;
+    }
+
+	#main-panel.truncated-main {
+		margin: 40px 20px;
+		padding-left: 0;
+	}
+
+	#side-panel {
+		position: static;
+		width: 100%;
+		border: none;
+	}
+
+	#side-panel-toggle-in {
+		display: none;
+	}
+
+	#side-panel-toggle-out {
+		display: none;
+	}
+}
+
 
 /* ==
 Forms

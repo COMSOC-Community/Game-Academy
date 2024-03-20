@@ -16,47 +16,54 @@
         {% block header %}{% endblock %}
     </header>
 
-    {% if user_is_authenticated %}
-        <div id="side-panel-toggle"><<</div>
-        <div id="side-panel" class="side-panel">
-            <h3>
-                {{ user.display_name|title }}
-                <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
-            </h3>
 
-        {% if not user_is_only_guest %}
-            <div class="side-panel-content">
-                {% if not user_is_only_guest %}
-                    <p class="center-align"><a class="button process-button" href="{% url 'core:change_password' user.id %}">Change your Password</a></p>
-                {% endif %}
-                {% if not user_is_only_player %}
-                    <p class="center-align"><a class="button process-button" href="{% url 'core:user_profile' user.id %}">View/Edit your profile</a></p>
-                {% endif %}
-            </div>
+    <main>
+        {% if show_side_panel %}
+            <div id="main-panel" class="truncated-main">
+        {% else %}
+            <div id="main-panel" class="full-main">
         {% endif %}
-
-                <nav>
-                    <h3>Navigation</h3>
-
-                    <div class="nav-content">
-                        {% block side_panel_extra_nav %}
-                        {% endblock %}
-
-                        {% if not user_is_only_player %}
-                            {% include 'include/sidepanel_nav_main.html' %}
-                            {% include 'include/sidepanel_nav_other_sessions.html' %}
-                        {% endif %}
-                    </div>
-                </nav>
-            </div>
+            {% block content %}{% endblock %}
         </div>
 
-        <main id="main-panel" class="truncated-main">
-    {% else %}
-        <main id="main-panel" class="full-main">
-    {% endif %}
+        {% if show_side_panel %}
 
-        {% block content %}{% endblock %}
+            <div id="side-panel-toggle-in" class="side-panel-toggle"><span>&#9664;</span></div>
+            <div id="side-panel-toggle-out" class="side-panel-toggle">&#9654;</div>
+            <div id="side-panel" class="side-panel">
+
+                <h3>
+                    {{ user.display_name|title }}
+                    <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
+                </h3>
+
+            {% if not user_is_only_guest %}
+                <div class="side-panel-content">
+                    {% if not user_is_only_guest %}
+                        <p class="center-align"><a class="button process-button" href="{% url 'core:change_password' user.id %}">Change your Password</a></p>
+                    {% endif %}
+                    {% if not user_is_only_player %}
+                        <p class="center-align"><a class="button process-button" href="{% url 'core:user_profile' user.id %}">View/Edit your profile</a></p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+                    <nav>
+                        <h3>Navigation</h3>
+
+                        <div class="nav-content">
+                            {% block side_panel_extra_nav %}
+                            {% endblock %}
+
+                            {% if not user_is_only_player %}
+                                {% include 'include/sidepanel_nav_main.html' %}
+                                {% include 'include/sidepanel_nav_other_sessions.html' %}
+                            {% endif %}
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        {% endif %}
     </main>
 
     <footer id="main-footer">

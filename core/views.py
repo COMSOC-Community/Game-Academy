@@ -121,6 +121,7 @@ def base_context_initialiser(request, context=None):
     if context is None:
         context = {}
     context["user_is_authenticated"] = request.user.is_authenticated
+    context["show_side_panel"] = context["user_is_authenticated"]
     if context["user_is_authenticated"]:
         user = request.user
         context["user"] = user
