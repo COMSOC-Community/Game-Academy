@@ -39,6 +39,36 @@
         {% endif %}
     </section>
 
+    <section id="import_players">
+        <h2>Import Players</h2>
+
+        <p>
+            You can import a csv file describing a set of players. This is typically useful if you
+            want to setup the session before the beginning of course for instance. The following
+            columns are used:
+        </p>
+        <ul>
+            <li><strong>username</strong>, <em>required</em>: the username to use for the player</li>
+            <li><strong>password</strong>, <em>optional</em>: the password associated with the player. If no value is given, a default password is used</li>
+            <li><strong>email</strong>, <em>optional</em>: the email address of the player. This field is purely optional.</li>
+        </ul>
+
+        {% if import_player_csv_error %}
+            <div class="form-error-message">
+                <p>An error occurred while running the management command: {{ import_player_csv_error }}.</p>
+            </div>
+        {% endif %}
+        {% if import_player_csv_log %}
+            <div class="form-success-message">
+                <p style="margin-bottom: 20px;">File successfully imported. Here is the log.</p>
+                {{ import_player_csv_log|linebreaks }}
+            </div>
+        {% endif %}
+        <form action="{% url 'core:session_admin_players' session.url_tag %}#import_players" method="post" enctype="multipart/form-data">
+            {% include 'include/form_table_template.html' with form=import_player_csv_form form_type='import_player_csv_form' submit_button_label='Import CSV' %}
+        </form>
+    </section>
+
     <section id="admins">
         <h2>Admins</h2>
 
@@ -181,7 +211,7 @@
         {% if session.need_registration %}
             <p>
                 This session does not allow for guests to play. If you want to enable this, you can change the settings
-                on <a href="{% url 'core:session_admin' session.url_tag %}">this page</a>.
+                on <a class="button navigation-button" href="{% url 'core:session_admin' session.url_tag %}">this page</a>.
             </p>
         {% else %}
             {% if deleted_guest_name %}

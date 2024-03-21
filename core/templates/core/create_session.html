@@ -11,8 +11,8 @@
         <section class="form-success-message">
             <p>The session {{ created_session.long_name }} has been created! Congrats.</p>
 
-            <p>You can access the portal of the session
-                <a href="{% url 'core:session_portal' created_session.url_tag %}">here</a>.
+            <p>
+                <a class="button navigation-button" href="{% url 'core:session_portal' created_session.url_tag %}">Access the session</a>
             </p>
         </section>
     {% else %}

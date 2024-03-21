@@ -1,8 +1,12 @@
 import logging
+import os
+import tempfile
+from io import StringIO
 
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.storage import FileSystemStorage
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -26,7 +30,7 @@ from .forms import (
     CreateGameForm,
     CreateTeamForm,
     DeleteSessionForm,
-    MakeAdminForm,
+    MakeAdminForm, ImportCSVFileForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 
@@ -633,6 +637,29 @@ def session_admin_players(request, session_url_tag):
                 logger.exception("An exception occurred while creating a player", e)
                 context["player_creation_error"] = True
     context["add_player_form"] = add_player_form
+
+    # Import player CSV form
+    import_player_csv_form = ImportCSVFileForm()
+    if request.method == "POST" and "import_player_csv_form" in request.POST:
+        import_player_csv_form = ImportCSVFileForm(request.POST, request.FILES)
+        if import_player_csv_form.is_valid():
+            uploaded_file = request.FILES['csv_file']
+            file_name = FileSystemStorage(location=tempfile.gettempdir()).save(uploaded_file.name,
+                                                                               uploaded_file)
+            try:
+                out = StringIO()
+                params = {'stdout': out}
+                management.call_command(
+                    'import_players_csv',
+                    os.path.join(tempfile.gettempdir(), file_name),
+                    session.url_tag,
+                    **params
+                )
+                context["import_player_csv_log"] = out.getvalue()
+            except Exception as e:
+                context["import_player_csv_error"] = e.__repr__()
+                raise e
+    context["import_player_csv_form"] = import_player_csv_form
 
     players = Player.objects.filter(session=session, is_guest=False)
     guests = Player.objects.filter(session=session, is_guest=True)

@@ -1,3 +1,7 @@
+import csv
+from copy import deepcopy
+from io import TextIOWrapper
+
 from django import forms
 from django.contrib.auth import authenticate
 
@@ -343,7 +347,7 @@ class PlayerRegistrationForm(forms.Form):
             username = player_username(self.session, player_name)
             if CustomUser.objects.filter(
                 username=username
-            ).exists() or Player.objects.filter(session=self.session, name=player_name):
+            ).exists() or Player.objects.filter(session=self.session, name=player_name).exists():
                 raise forms.ValidationError(
                     "This player name is already used by someone in this session. Choose another "
                     "one."
@@ -484,6 +488,40 @@ class CreateGameForm(forms.Form):
             )
         else:
             return url_tag
+
+
+def validate_csv_file(value):
+    value = deepcopy(value)
+    if not value.name.endswith('.csv'):
+        raise forms.ValidationError("Only CSV files are allowed (extension must be '.csv').")
+    try:
+        csv_reader = csv.reader(TextIOWrapper(value))
+        header = next(csv_reader, None)
+        if header is None:
+            raise forms.ValidationError('CSV file must have a header row.')
+        num_columns = len(header)
+        for row in csv_reader:
+            if row:
+                if len(row) != num_columns:
+                    raise forms.ValidationError('All rows must have the same number of columns as'
+                                                ' the header.')
+
+    except csv.Error as e:
+        raise forms.ValidationError(f'Error reading CSV file: {e}')
+
+
+class ImportCSVFileForm(forms.Form):
+    csv_file = forms.FileField(
+        label='Upload CSV File',
+        validators=[validate_csv_file],
+        widget=forms.ClearableFileInput(attrs={'accept': '.csv'}),
+    )
+
+    def clean_csv_file(self):
+        uploaded_file = self.cleaned_data['csv_file']
+        if not uploaded_file.name.endswith('.csv'):
+            raise forms.ValidationError("Only CSV files are allowed (extension must be '.csv').")
+        return uploaded_file
 
 
 class MakeAdminForm(forms.Form):
