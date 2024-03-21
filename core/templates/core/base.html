@@ -28,13 +28,13 @@
 
         {% if show_side_panel %}
 
-            <div id="side-panel-toggle-in" class="side-panel-toggle"><span>&#9664;</span></div>
             <div id="side-panel-toggle-out" class="side-panel-toggle">&#9654;</div>
             <div id="side-panel" class="side-panel">
 
                 <h3>
                     {{ user.display_name|title }}
                     <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
+                    <div id="side-panel-toggle-in" class="side-panel-toggle"><span>&#9664;</span></div>
                 </h3>
 
             {% if not user_is_only_guest %}

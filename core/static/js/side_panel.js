@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const nav_headers = document.querySelectorAll('.side-panel h4');
 
     nav_headers.forEach(function(header, index) {
-        if (index !== 0) {
+        if (index > 1) {
             toggleContent(header.nextElementSibling);
         }
         header.addEventListener('click', function() {

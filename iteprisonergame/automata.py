@@ -1,3 +1,6 @@
+import re
+
+
 class MooreMachine:
     def __init__(self):
         self.current_state = ""
@@ -14,6 +17,35 @@ class MooreMachine:
 
     def add_outcome(self, state, symbol):
         self.outcome[state] = symbol
+
+    def parse(self, lines):
+        pattern = re.compile(
+            "^[^\S\n]*([0-9]+):[^\S\n\t]*([CD]),[^\S\n\t]*([0-9]+),[^\S\n\t]*([0-9]+)$"
+        )
+        errors = []
+        for line_index in range(len(lines)):
+            match = pattern.search(lines[line_index].strip())
+            if match:
+                state = match.group(1)
+                action = match.group(2)
+                next_state_coop = match.group(3)
+                next_state_def = match.group(4)
+                if (
+                        state in self.transitions
+                        and "C" in self.transitions[state]
+                        and "D" in self.transitions[state]
+                ):
+                    errors.append(
+                        "Line {} redefines state {}.".format(line_index + 1, state)
+                    )
+                self.add_transition(state, "C", next_state_coop)
+                self.add_transition(state, "D", next_state_def)
+                self.add_outcome(state, action)
+            else:
+                errors.append(
+                    "Line {} is not formatted correctly".format(line_index + 1)
+                )
+        return errors
 
     def test_validity(self, input_alphabet):
         errors = []

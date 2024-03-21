@@ -1,91 +1,14 @@
+{% extends 'core/base_game.html' %}
+
 {% load static %}
-{% load core_extras %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Iterated Prisoner's Dilemma | Results</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/ipdstyle.css' %}"/>
+{% block extra_head %}
+    <script src="{% static 'js/collapsible_next.js' %}"></script>
 	<script src="https://d3js.org/d3.v3.min.js"></script>
-</head>
+{% endblock %}
 
-<body>
-
-{% if game.results_visible or admin_user %}
-
-    <h1>Results {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-        </span>
-        <br>
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-
-    {% if admin_user %}
-        <div class="adminDiv">
-            <div class="warning-section">
-                <p>Here are so admin shortcuts if you want to use them.</p>
-
-                {% if game.playable %}
-                    <p>Players can currently submit their answers.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="game_playable"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Close the Game"/>
-                        </p>
-                    </form>
-                {% else %}
-                    <p>The game is closed, player can no longer submit their answers.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="game_playable"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Open the Game"/>
-                        </p>
-                    </form>
-                {% endif %}
-
-                {% if game.results_visible %}
-                    <p>The results are visible by all players.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="results_visible"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Hide the Results"/>
-                        </p>
-                    </form>
-                {% else %}
-                    <p>Players cannot currently see the results.</p>
-                    <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="form_type" value="results_visible"/>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Show the Results"/>
-                        </p>
-                    </form>
-                {% endif %}
-                <p>
-                    To manually run the management commands, click the following button. This is normally unnecessary,
-                    unless you changed the entries of the database directly, or performed some other manual actions.
-                </p>
-                <form method="post" action="{% url 'itepris_game:results' session.url_tag game.url_tag %}">
-                    {% csrf_token %}
-                        <input type="hidden" name="form_type" value="run_management"/>
-                    <p class="center-align">
-                        <input class="green-button" type="submit" value="Run Management Commands"/>
-                    </p>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-
+{% block game_content %}
+    <section>
     {% if answers %}
 
         <h2>General Results</h2>
@@ -93,7 +16,7 @@
         <table class="center-margin lined-table">
             <thead>
                 <tr>
-                    {% if admin_user %}
+                    {% if user_is_session_admin %}
                         <th>Team</th>
                     {% endif %}
                     <th>Strategy</th>
@@ -103,9 +26,9 @@
             <tbody>
                 {% for answer in answers %}
                     <tr>
-                        {% if admin_user %}
+                        {% if user_is_session_admin %}
                             <td {% if answer.winner %}class="winning"{% endif %}>
-                                <a href="#{{ answer.team.name }}">{{ answer.team.name }}</a>
+                                <a href="#{{ answer.player.display_name }}">{{ answer.player.display_name }}</a>
                             </td>
                         {% endif %}
                         <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
@@ -114,27 +37,29 @@
                 {% endfor %}
             </tbody>
         </table>
+    </section>
 
-        {% for answer in answers %}
+    {% for answer in answers %}
+        <section>
 
-            <hr class="hr-separator">
+            <h2 {% if user_is_session_admin %}id="{{ answer.player.display_name }}"{% endif %}>{% if user_is_session_admin %}{{ answer.player.display_name }}: {% endif %}{{ answer.name }}</h2>
 
-            <h2 {% if admin_user %}id="{{ answer.team.name }}"{% endif %}>{% if admin_user %}Team {{ answer.team.name }}: {% endif %}{{ answer.name }}</h2>
+            {% if user_is_session_admin %}
+                {% if answer.player.is_team_player %}
+                    <p>
+                        <a class="next-collapsible">Display the member{{ answer.player.represented_team.players.all|length|pluralize:',s' }} of the team:</a>
 
-            {% if admin_user %}
-                <p>
-                    <a class="collapsible">Display the member{{ answer.team.players.all|length|pluralize:',s' }} of the team:</a>
-
-                    <span class="collapsible-content" style="display: none">
-                        {% for p in answer.team.players.all %}
-                            {% if forloop.last %}
-                                {{ p.name }}.
-                            {% else %}
-                                {{ p.name }},
-                            {% endif %}
-                        {% endfor %}
-                    </span>
-                </p>
+                        <span class="collapsed-content hidden">
+                            {% for p in answer.player.represented_team.players.all %}
+                                {% if forloop.last %}
+                                    {{ p.name }}.
+                                {% else %}
+                                    {{ p.name }},
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                    </p>
+                {% endif %}
             {% endif %}
 
             {% if answer.number_states < 100 %}
@@ -368,9 +293,9 @@
             {% endif %}
 
             <p class="center-align">
-                {% if admin_user %}
-                    <a class="collapsible">Display the score:</a>
-                    <span class="collapsible-content" style="display: none">
+                {% if user_is_session_admin %}
+                    <a class="next-collapsible">Display the score:</a>
+                    <span class="collapsed-content hidden">
                         {{ answer.formatted_avg_score|floatformat:5 }}
                     </span>
                 {% else %}
@@ -378,13 +303,11 @@
                 {% endif %}
             </p>
 
-            <p class="center-align">
-                {{ answer.motivation }}
-            </p>
+            <p>{{ answer.motivation }}</p>
 
-            <p class="collapsible"><a>See the detail of the scores.</a></p>
+            <p class="next-collapsible"><a>See the detail of the scores.</a></p>
 
-            <div class="collapse_content" style="display:none;">
+            <div class="collapsed-content hidden">
                 <table class="lined-table center-margin">
                     <thead>
                         <tr>
@@ -406,36 +329,7 @@
                     </tbody>
                 </table>
             </div>
-        {% endfor %}
-
-        <script>
-            var coll = document.getElementsByClassName("collapsible-div");
-            var i;
-            for (i = 0; i < coll.length; i++) {
-                coll[i].addEventListener("click", function() {
-                    var content = this.nextElementSibling;
-                    if (content.style.display === "none"){
-                        content.style.display = "inline";
-                    } else {
-                        content.style.display = "none";
-                    }
-                });
-            }
-        </script>
-    {% endif %}
-
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-        </span>
-        <br>
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-{% else %}
-    <p>The results are not visible.</p>
+        </section>
+    {% endfor %}
 {% endif %}
-</body>
-</html>
+{% endblock %}

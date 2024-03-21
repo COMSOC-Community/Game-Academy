@@ -1,14 +1,6 @@
 {% extends 'core/base_game.html' %}
 
 {% block game_content %}
-    {% if admin_user and not player %}
-        <section class="warning-section">
-            <p>
-                Because you are not logged in as a player, you can only see (part of) this page, but not submit an answer.
-            </p>
-        </section>
-    {% endif %}
-
     <section>
         {% if submitted_answer %}
             <p>Your answer has been submitted, thanks!</p>

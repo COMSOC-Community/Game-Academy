@@ -40,18 +40,18 @@ def submit_answer(request, session_url_tag, game_url_tag):
     if not game.playable and not context["user_is_session_admin"]:
         raise Http404("The game is not playable and the user is not an admin.")
 
-    player = context["player"]
+    submitting_player = context["submitting_player"]
     answer = context["answer"]
 
-    if player and not answer:
+    if submitting_player and not answer:
         if request.method == "POST":
             submit_answer_form = SubmitAnswerForm(
-                request.POST, game=game, player=player
+                request.POST, game=game, player=submitting_player
             )
             if submit_answer_form.is_valid():
                 submitted_answer = Answer.objects.create(
                     game=game,
-                    player=player,
+                    player=submitting_player,
                     answer=submit_answer_form.cleaned_data["answer"],
                     motivation=submit_answer_form.cleaned_data["motivation"],
                 )
@@ -67,7 +67,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
                     context["submission_error"] = repr(e)
         else:
             submit_answer_form = SubmitAnswerForm(
-                game=game, player=player
+                game=game, player=submitting_player
             )
         context["submit_answer_form"] = submit_answer_form
     return render(request, os.path.join("numbers_game", "submit_answer.html"), context)

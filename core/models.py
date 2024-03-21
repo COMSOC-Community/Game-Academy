@@ -5,8 +5,8 @@ from core.games import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES
 
 
 class CustomUser(AbstractUser):
-    is_player = models.BooleanField(blank=True, null=True, default=False)
-    is_guest_player = models.BooleanField(blank=True, null=True, default=False)
+    is_player = models.BooleanField(default=False)
+    is_guest_player = models.BooleanField(default=False)
 
     def display_name(self):
         if self.is_player:
@@ -49,6 +49,12 @@ class Player(models.Model):
         related_name="players",
     )
     is_guest = models.BooleanField(default=False)
+    is_team_player = models.BooleanField(default=False)
+
+    def display_name(self):
+        if self.is_team_player:
+            return self.represented_team.name
+        return self.name
 
     class Meta:
         ordering = ["session", "name"]
@@ -70,7 +76,7 @@ class Game(models.Model):
     playable = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
     results_visible = models.BooleanField(default=False)
-    need_teams = models.BooleanField(default=False)
+    needs_teams = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
 
     def __init__(self, *args, **kwargs):
@@ -104,7 +110,8 @@ class Team(models.Model):
     name = models.CharField(max_length=100)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     players = models.ManyToManyField(Player, related_name="teams")
-    creator = models.ForeignKey(Player, on_delete=models.CASCADE)
+    creator = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="created_teams")
+    team_player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name="represented_team")
 
     class Meta:
         ordering = ["name"]

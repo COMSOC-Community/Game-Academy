@@ -5,6 +5,7 @@
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
+    <script src="{% static 'js/collapsible_next.js' %}"></script>
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-cartesian.min.js"></script>
 {% endblock %}
@@ -12,9 +13,9 @@
 {% block game_content %}
     {% if answers %}
         <section>
-            <h2 class="collapsible-div">Sample answers</h2>
+            <h2 class="next-collapsible">Sample answers</h2>
 
-            <div class="collapse_content" style="display: none;">
+            <div class="collapsed-content hidden">
                 <table class="lined-table center-margin">
                     <tr>
                         <th>Answer</th>
@@ -37,9 +38,9 @@
         </section>
 
         <section>
-            <h2 class="collapsible-div">Distribution of the answers</h2>
+            <h2 class="next-collapsible">Distribution of the answers</h2>
 
-            <div class="collapse_content" style="display: none;">
+            <div class="collapsed-content hidden">
                 <div id="histogram" class="graph_wrap">
                 </div>
                 <script>
@@ -61,9 +62,9 @@
         </section>
 
         <section>
-            <h2 class="collapsible-div">Details</h2>
+            <h2 class="next-collapsible">Details</h2>
 
-            <div class="collapse_content" style="display: none;">
+            <div class="collapsed-content hidden">
 
                 <table class="lined-table center-margin">
                     <tr>
@@ -89,9 +90,9 @@
         </section>
 
         <section>
-            <h2 class="collapsible-div">All answers anonymised</h2>
+            <h2 class="next-collapsible">All answers anonymised</h2>
 
-            <div class="collapse_content" style="display: none;">
+            <div class="collapsed-content hidden">
                 <table class="lined-table center-margin">
                     <tr>
                         <th>Answer</th>
@@ -111,9 +112,9 @@
 
         {% if user_is_session_admin %}
             <section class="warning-section">
-                <h2 class="collapsible-div">All answers with names</h2>
+                <h2 class="next-collapsible">All answers with names</h2>
 
-                <div class="collapse_content" style="display: none;">
+                <div class="collapsed-content hidden">
                     <table class="lined-table center-margin">
                         <tr>
                             <th>Player</th>
@@ -123,7 +124,7 @@
                         </tr>
                         {% for answer in answers %}
                             <tr>
-                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.display_name }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
@@ -143,24 +144,9 @@
 
 {% block extra_scripts %}
     <script>
-        var coll = document.getElementsByClassName("collapsible-div");
-        var i;
-        for (i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function() {
-                var content = this.nextElementSibling;
-                if (content.style.display === "none"){
-                    content.style.display = "block";
-                } else {
-                    content.style.display = "none";
-                }
-            });
-        }
-    </script>
-
-    <script>
-        var count = 0;
+        let count = 0;
         function appearOneByOne() {
-            items = document.getElementsByClassName("show-one-by-one");
+            const items = document.getElementsByClassName("show-one-by-one");
             if(count < items.length) {
                 items[count++].style.display = "table-row";
             }

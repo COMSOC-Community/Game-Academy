@@ -1,41 +1,13 @@
-{% load static %}
-{% load core_extras %}
+{% extends 'core/base_game.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create Team</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
-</head>
-
-<body>
-
-<h1>Teams for {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
-
-{% if request.user.is_authenticated %}
-    {% if admin_user or player_user %}
-        <div class="navigation">
-            <span class="navigation-button">
-                {% with game.game_config.url_namespace|add:':index' as url_name %}
-                    <a href="{% url url_name session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-                {% endwith %}
-            </span>
-        </div>
-
-        {% if admin_user and not player %}
-            <div class="warning-section">
-                <p>
-                    Because you are not logged in as a player, you can only see (part of) this page, but not create or join a team.
-                </p>
-            </div>
-        {% endif %}
-
-        {% if team_created %}
+{% block game_content %}
+    <section>
+        {% if created_team %}
             <p>
-                Your team {{ new_team.name }} has now been registered. You can start playing for the team.
+                Your team {{ created_team.name }} has now been registered. You can start playing for
+                the team.
                 {% with game.game_config.url_namespace|add:':index' as url_name %}
-                    Go to the <a href="{% url url_name session.url_tag game.url_tag %}">game page</a>.
+                    <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">To the game</a>
                 {% endwith %}
             </p>
         {% else %}
@@ -47,8 +19,8 @@
                     {% endwith %}
                 </p>
             {% else %}
-                {% if current_team %}
-                    <p> You are already a member the team <em>{{ current_team.name }}</em>, this page is not for you!</p>
+                {% if team %}
+                    <p> You are already a member the team <em>{{ team.name }}</em>, this page is not for you!</p>
                 {% else %}
                     <h2>Register a team</h2>
 
@@ -57,55 +29,11 @@
                         You will be automatically added to the team. Other players will then be able to join the team.
                     </p>
 
-                    {% with 'core:team_'|add:game.game_config.url_namespace as url_name %}
+                    {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
                         <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
+                            {% include "include/form_table_template.html" with form=create_team_form form_type='create_team_form' submit_button_label='Create Team' %}
+                        </form>
                     {% endwith %}
-                        {% csrf_token %}
-                        {% if create_team_form.non_field_errors %}
-                            <ul class="errorlist">
-                                {% for error in create_team_form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-
-                        {% for hidden_field in create_team_form.hidden_fields %}
-                            {% if hidden_field.errors %}
-                                <ul class="errorlist">
-                                {% for error in hidden_field.errors %}
-                                    <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
-                                {% endfor %}
-                                </ul>
-                            {% endif %}
-                            {{ hidden_field }}
-                        {% endfor %}
-
-                        <table class="center-margin form-table">
-                            {% for field in create_team_form.visible_fields %}
-                                <tr>
-                                    <td class="form-field-label">
-                                        {{ field.label_tag }}
-                                        {% if field.help_text %}
-                                            <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {{ field }}
-                                        {% if field.errors %}
-                                            {% for error in field.errors %}
-                                                <br><span class="form-error">{{ error }}</span>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-
-                        <input type='hidden' name='form_type' value='create_team_form'>
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Create Team">
-                        </p>
-                    </form>
 
                     <h2>Join a team</h2>
 
@@ -115,7 +43,7 @@
                             it here. Please do not join a team before having discussed it with its creator.
                         </p>
 
-                        {% with 'core:team_'|add:game.game_config.url_namespace as url_name %}
+                        {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
                             <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
                         {% endwith %}
                             {% csrf_token %}
@@ -135,26 +63,5 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-        <div class="navigation">
-            <span class="navigation-button">
-                {% with game.game_config.url_namespace|add:':index' as url_name %}
-                    <a href="{% url url_name session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-                {% endwith %}
-            </span>
-        </div>
-    {% else %}
-        <p>
-            You are logged in to an account that does not have access to this session.
-            Go back to the <a href="{% url 'core:session_portal' session.url_tag %}">session index</a> to login to a
-            different account.
-        </p>
-    {% endif %}
-{% else %}
-    <p>
-        Only logged-in users with adequate permissions can view this page. You can log in on the
-        <a href="{% url 'core:session_portal' session.url_tag %}">session index page</a>.
-    </p>
-{% endif %}
-
-</body>
-</html>
+    </section>
+{% endblock %}

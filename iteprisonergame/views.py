@@ -1,14 +1,15 @@
 import os
 
 from django.shortcuts import render, get_object_or_404
-from django.core import management
 from django.http import Http404
 
-from core.models import Session, Game, Player, Team
-from core.views import is_session_admin
+from core.models import Session, Game
+from core.views import base_context_initialiser, session_context_initialiser, \
+    game_context_initialiser
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
+from .management.commands.ipd_generategraphdata import itepris_graph_data
 from .models import Answer
 
 
@@ -17,30 +18,12 @@ def index(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
 
-    if request.user.is_authenticated:
-        try:
-            current_player = Player.objects.get(session=session, user=request.user)
-        except Player.DoesNotExist:
-            current_player = None
-        if current_player is not None:
-            try:
-                current_team = current_player.teams.get(game=game)
-            except Team.DoesNotExist:
-                current_team = None
-            if current_team is not None:
-                try:
-                    current_answer = Answer.objects.get(game=game, team=current_team)
-                except Answer.DoesNotExist:
-                    current_answer = None
-
-    return render(request, os.path.join("iteprisonergame", "index.html"), locals())
+    return render(request, os.path.join("iteprisonergame", "index.html"), context)
 
 
 def submit_answer(request, session_url_tag, game_url_tag):
@@ -48,53 +31,41 @@ def submit_answer(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
 
-    if request.user.is_authenticated:
-        player = Player.objects.filter(session=session, user=request.user)
-        if player.exists():
-            player = player.first()
+    if not game.playable and not context["user_is_session_admin"]:
+        raise Http404("The game is not playable and the user is not an admin.")
 
-            team = player.teams.filter(game=game)
-            if team.exists():
-                team = team.first()
-                try:
-                    current_answer = Answer.objects.get(game=game, team=team)
-                except Answer.DoesNotExist:
-                    current_answer = None
-                if current_answer is None:
-                    if request.method == "POST":
-                        submit_answer_form = SubmitAnswerForm(
-                            request.POST, game=game, team=team
-                        )
-                        if submit_answer_form.is_valid():
-                            new_answer = Answer.objects.create(
-                                game=game,
-                                team=team,
-                                initial_state=submit_answer_form.cleaned_data[
-                                    "initial_state"
-                                ],
-                                automata=submit_answer_form.cleaned_data["automata"],
-                                motivation=submit_answer_form.cleaned_data[
-                                    "motivation"
-                                ],
-                                name=submit_answer_form.cleaned_data["name"],
-                            )
-                            answer_submitted = True
-                    else:
-                        submit_answer_form = SubmitAnswerForm(game=game, team=team)
-            else:
-                team = None
-        else:
-            player = None
-    return render(
-        request, os.path.join("iteprisonergame", "submit_answer.html"), locals()
-    )
+    submitting_player = context["submitting_player"]
+    answer = context["answer"]
+
+    if submitting_player and not answer:
+        submit_answer_form = SubmitAnswerForm(game=game, player=submitting_player)
+        if request.method == "POST":
+            submit_answer_form = SubmitAnswerForm(
+                request.POST, game=game, player=submitting_player
+            )
+            if submit_answer_form.is_valid():
+                new_answer = Answer.objects.create(
+                    game=game,
+                    player=submitting_player,
+                    initial_state=submit_answer_form.cleaned_data[
+                        "initial_state"
+                    ],
+                    automata=submit_answer_form.cleaned_data["automata"],
+                    motivation=submit_answer_form.cleaned_data[
+                        "motivation"
+                    ],
+                    name=submit_answer_form.cleaned_data["name"],
+                )
+                new_answer.graph_json_data = itepris_graph_data(new_answer)
+                new_answer.save()
+                context["submitted_answer"] = new_answer
+        context["submit_answer_form"] = submit_answer_form
+    return render(request, os.path.join("iteprisonergame", "submit_answer.html"), context)
 
 
 def results(request, session_url_tag, game_url_tag):
@@ -102,33 +73,10 @@ def results(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
 
-    if admin_user:
-        if request.method == "POST":
-            if "form_type" in request.POST:
-                if request.POST["form_type"] == "game_playable":
-                    game.playable = not game.playable
-                    game.save()
-                elif request.POST["form_type"] == "results_visible":
-                    game.results_visible = not game.results_visible
-                    game.save()
-                elif request.POST["form_type"] == "run_management":
-                    management.call_command(
-                        "ipd_computeresults",
-                        session=session.url_tag,
-                        game=game.url_tag,
-                    )
-                    management.call_command(
-                        "ipd_generategraphdata",
-                        session=session.url_tag,
-                        game=game.url_tag,
-                    )
-
-    answers = Answer.objects.filter(game=game).order_by("-avg_score")
-    return render(request, os.path.join("iteprisonergame", "results.html"), locals())
+    context["answers"] = Answer.objects.filter(game=game).order_by("-avg_score")
+    return render(request, os.path.join("iteprisonergame", "results.html"), context)

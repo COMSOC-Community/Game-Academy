@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from core.models import Session, Game
-from iteprisonergame.apps import IPD_ROUNDS, IPD_PAYOFFS, NAME
+from iteprisonergame.apps import NAME
 from iteprisonergame.automata import MooreMachine, fight
 from iteprisonergame.models import Answer, Score
 
@@ -57,19 +57,28 @@ class Command(BaseCommand):
                 automata.add_outcome(state, action.strip())
             ans_automatas.append((answer, automata))
 
+        ipd_rounds = game.itepris_setting.num_repetitions
+        ipd_rounds = [int(r) for r in ipd_rounds.split(",") if r]
+        payoffs = {
+            ("C", "C"): (game.itepris_setting.payoff_medium, game.itepris_setting.payoff_medium),
+            ("C", "D"): (game.itepris_setting.payoff_low, game.itepris_setting.payoff_high),
+            ("D", "C"): (game.itepris_setting.payoff_high, game.itepris_setting.payoff_low),
+            ("D", "D"): (game.itepris_setting.payoff_tiny, game.itepris_setting.payoff_tiny),
+        }
+
         total_scores = {answer: 0 for answer, _ in ans_automatas}
         for i in range(len(ans_automatas)):
             answer, ans_automata = ans_automatas[i]
             for j in range(i + 1, len(ans_automatas)):
                 opponent, opp_automata = ans_automatas[j]
-                for round_number in IPD_ROUNDS:
+                for round_number in ipd_rounds:
                     outcomes_ans, outcomes_opp = fight(
                         ans_automata, opp_automata, round_number
                     )
                     score1 = 0
                     score2 = 0
                     for round_index in range(round_number):
-                        s1, s2 = IPD_PAYOFFS[
+                        s1, s2 = payoffs[
                             (outcomes_ans[round_index], outcomes_opp[round_index])
                         ]
                         score1 += s1
@@ -97,7 +106,7 @@ class Command(BaseCommand):
         best_answer = None
         best_score = None
         for answer, score in total_scores.items():
-            answer.avg_score = score / (sum(IPD_ROUNDS) * (len(ans_automatas) - 1))
+            answer.avg_score = score / (sum(ipd_rounds) * (max(1, len(ans_automatas) - 1)))
             answer.winner = False
             answer.save()
             if best_score is None or score > best_score:

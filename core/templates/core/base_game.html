@@ -33,7 +33,9 @@
                 <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a>
             {% endif %}
             {% if game_nav_display_team %}
-                <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='team' %}">Team</a>
+                {% with "core:"|add:game.game_config.url_tag|add:'_team' as qualified_url_name %}
+                    <a class="button navigation-button" href="{% url qualified_url_name session.url_tag game.url_tag %}">Team</a>
+                {% endwith %}
             {% endif %}
             {% if game_nav_display_answer %}
                 <a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Answer</a>

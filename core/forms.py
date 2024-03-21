@@ -427,7 +427,7 @@ class CreateGameForm(forms.Form):
         help_text="When set to True, the players will be able to access the result "
         "page of the game.",
     )
-    need_teams = forms.BooleanField(
+    needs_teams = forms.BooleanField(
         label="Played in teams",
         label_suffix="",
         required=False,
@@ -455,7 +455,7 @@ class CreateGameForm(forms.Form):
                     "playable": self.game.playable,
                     "visible": self.game.visible,
                     "results_visible": self.game.results_visible,
-                    "need_teams": self.game.need_teams,
+                    "needs_teams": self.game.needs_teams,
                     "description": self.game.description,
                 }
             )

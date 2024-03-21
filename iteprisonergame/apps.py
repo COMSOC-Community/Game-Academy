@@ -5,14 +5,6 @@ LONGNAME = "Iterative Prisoners' Dilemma Game"
 URL_TAG = "itepris"
 URL_NAMESPACE = "itepris_game"
 
-IPD_ROUNDS = [168, 359, 306, 622, 319]
-IPD_PAYOFFS = {
-    ("C", "C"): (-10, -10),
-    ("C", "D"): (-25, 0),
-    ("D", "C"): (0, -25),
-    ("D", "D"): (-20, -20),
-}
-
 
 class ItePrisonerGameConfig(GameConfig):
     name = NAME
@@ -25,4 +17,12 @@ class ItePrisonerGameConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
+            management_commands=["ipd_computeresults", "ipd_generategraphdata"]
         )
+
+    def ready(self):
+        super(ItePrisonerGameConfig, self).ready()
+
+        from iteprisonergame.models import Setting, Answer
+        from iteprisonergame.forms import SettingForm
+        self.register_extra_members(Setting, SettingForm, Answer)

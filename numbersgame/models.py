@@ -8,7 +8,7 @@ class Setting(models.Model):
         Game, on_delete=models.CASCADE, related_name="numbers_setting"
     )
     factor = models.FloatField(
-        default=2 / 3,
+        default=2/3,
         help_text="The winning number is the closest one to the average submitted number times the "
         "factor.",
     )

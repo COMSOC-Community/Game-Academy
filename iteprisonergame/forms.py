@@ -3,7 +3,21 @@ import re
 from django import forms
 
 from iteprisonergame.automata import MooreMachine
-from iteprisonergame.models import Answer
+from iteprisonergame.models import Answer, Setting
+
+
+class SettingForm(forms.ModelForm):
+    class Meta:
+        model = Setting
+        exclude = ["game"]
+
+    def clean_histogram_bin_size(self):
+        bin_size = self.cleaned_data.get('histogram_bin_size')
+        if bin_size <= 0:
+            raise forms.ValidationError("The histogram bin size cannot be 0 or less.")
+        if bin_size > 100:
+            raise forms.ValidationError("The histogram bin size cannot be more than 100.")
+        return bin_size
 
 
 class SubmitAnswerForm(forms.Form):
@@ -22,38 +36,13 @@ class SubmitAnswerForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.game = kwargs.pop("game", None)
-        self.team = kwargs.pop("team", None)
+        self.player = kwargs.pop("player", None)
         super(SubmitAnswerForm, self).__init__(*args, **kwargs)
 
     def clean_automata(self):
         automata = MooreMachine()
-        pattern = re.compile(
-            "^[^\S\n]*([0-9]+):[^\S\n\t]*([CD]),[^\S\n\t]*([0-9]+),[^\S\n\t]*([0-9]+)$"
-        )
-        errors = []
         lines = self.cleaned_data["automata"].strip().split("\n")
-        for line_index in range(len(lines)):
-            match = pattern.search(lines[line_index].strip())
-            if match:
-                state = match.group(1)
-                action = match.group(2)
-                next_state_coop = match.group(3)
-                next_state_def = match.group(3)
-                if (
-                    state in automata.transitions
-                    and "C" in automata.transitions[state]
-                    and "D" in automata.transitions[state]
-                ):
-                    errors.append(
-                        "Line {} redefines state {}.".format(line_index + 1, state)
-                    )
-                automata.add_transition(state, "C", next_state_coop)
-                automata.add_transition(state, "D", next_state_def)
-                automata.add_outcome(state, action)
-            else:
-                errors.append(
-                    "Line {} is not formatted correctly".format(line_index + 1)
-                )
+        errors = automata.parse(lines)
         if errors:
             raise forms.ValidationError(errors)
         else:
@@ -64,9 +53,9 @@ class SubmitAnswerForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(SubmitAnswerForm, self).clean()
-        if Answer.objects.filter(team=self.team, game=self.game).exists():
+        if Answer.objects.filter(player=self.player, game=self.game).exists():
             raise forms.ValidationError(
-                "This team already submitted an answer for this game!"
+                "This player already submitted an answer for this game!"
             )
         if "automata" in cleaned_data:
             found_initial_state = False

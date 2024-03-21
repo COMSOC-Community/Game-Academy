@@ -3,10 +3,12 @@
 <div class="nav-content">
     <ul>
         <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a></li>
-        {% if game.need_teams %}
-            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='team' %}">Team</a></li>
+        {% if game.needs_teams %}
+            {% with "core:"|add:game.game_config.url_tag|add:'_team' as qualified_url_name %}
+                <li><a class="button navigation-button" href="{% url qualified_url_name session.url_tag game.url_tag %}">Team</a></li>
+            {% endwith %}
         {% endif %}
-        {% if game.playable or user_is_session_admin%}
+        {% if game.playable or user_is_session_admin %}
             <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Answer</a></li>
         {% endif %}
         {% if game.results_visible or user_is_session_admin %}

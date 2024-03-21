@@ -2,6 +2,7 @@ import logging
 
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.core import management
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -12,7 +13,7 @@ from .authorisations import (
     is_session_admin,
     is_session_super_admin,
 )
-from .constants import guest_password
+from .constants import guest_password, TEAM_USER_USERNAME, team_player_name
 from .decorators import session_admin_decorator
 from .forms import (
     LoginForm,
@@ -151,18 +152,35 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
         context = {}
     context["game"] = game
     context["game_nav_display_home"] = True
-    context["game_nav_display_team"] = game.need_teams
+    context["game_nav_display_team"] = game.needs_teams
     context["game_nav_display_answer"] = game.playable
     context["game_nav_display_result"] = game.results_visible
     player = None
+    team = None
     answer = None
     try:
         player = Player.objects.get(session=session, user=request.user)
-        answer = answer_model.objects.get(game=game, player=player)
+    except Player.DoesNotExist:
+        pass
+    if player:
+        try:
+            team = player.teams.get(game=game)
+        except Team.DoesNotExist:
+            pass
+    try:
+        if team:
+            answer = answer_model.objects.get(game=game, player=team.team_player)
+        else:
+            answer = answer_model.objects.get(game=game, player=player)
     except (Player.DoesNotExist, answer_model.DoesNotExist):
         pass
     context["player"] = player
+    context["team"] = team
     context["answer"] = answer
+    if game.needs_teams:
+        context["submitting_player"] = team.team_player if team else None
+    else:
+        context["submitting_player"] = player
     return context
 
 
@@ -504,7 +522,7 @@ def session_admin_games(request, session_url_tag):
                 playable=create_game_form.cleaned_data["playable"],
                 visible=create_game_form.cleaned_data["visible"],
                 results_visible=create_game_form.cleaned_data["results_visible"],
-                need_teams=create_game_form.cleaned_data["need_teams"],
+                needs_teams=create_game_form.cleaned_data["needs_teams"],
                 description=create_game_form.cleaned_data["description"],
             )
             create_game_form = CreateGameForm(session=session)
@@ -532,12 +550,17 @@ def session_admin_games(request, session_url_tag):
         modify_game_setting_form = None
         if game.game_config().setting_form is not None:
             setting_model = game.game_config().setting_model
-            game_setting_obj = getattr(
-                game, setting_model._meta.get_field("game").related_query_name()
-            )
-            modify_game_setting_form = game.game_config().setting_form(
-                instance=game_setting_obj
-            )
+            game_setting_obj = None
+            try:
+                game_setting_obj = getattr(
+                    game, setting_model._meta.get_field("game").related_query_name()
+                )
+            except ObjectDoesNotExist:
+                pass
+            if game_setting_obj:
+                modify_game_setting_form = game.game_config().setting_form(
+                    instance=game_setting_obj
+                )
         if request.method == "POST":
             if "modify_game_form_" + str(game.url_tag) in request.POST:
                 modify_game_form = CreateGameForm(
@@ -551,7 +574,7 @@ def session_admin_games(request, session_url_tag):
                     game.results_visible = modify_game_form.cleaned_data[
                         "results_visible"
                     ]
-                    game.need_teams = modify_game_form.cleaned_data["need_teams"]
+                    game.needs_teams = modify_game_form.cleaned_data["needs_teams"]
                     game.description = modify_game_form.cleaned_data["description"]
                     game.save()
 
@@ -686,53 +709,54 @@ def session_admin_player_password(request, session_url_tag, player_user_id):
 # ================
 
 
-def team(request, session_url_tag, game_url_tag):
+def create_or_join_team(request, session_url_tag, game_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
-        Game, session=session, url_tag=game_url_tag, need_teams=True
+        Game, session=session, url_tag=game_url_tag, needs_teams=True
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if request.user.is_authenticated:
-        try:
-            player_user = Player.objects.get(session=session, user=request.user)
-        except Player.DoesNotExist:
-            player_user = None
+    if not game.need_teams:
+        raise Http404("This game does not require teams.")
 
-        teams = Team.objects.filter(game=game)
-        if player_user:
-            try:
-                current_team = player_user.teams.get(game=game)
-            except Team.DoesNotExist:
-                current_team = None
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, game.game_config().answer_model, context)
 
-            if current_team is None:
-                if request.method == "POST":
-                    form_type = request.POST["form_type"]
-                    if form_type == "create_team_form":
-                        create_team_form = CreateTeamForm(request.POST, game=game)
-                        if create_team_form.is_valid():
-                            new_team = Team.objects.create(
-                                name=create_team_form.cleaned_data["name"],
-                                game=game,
-                                creator=player_user,
-                            )
-                            new_team.players.add(player_user)
-                            new_team.save()
-                            team_created = True
-                    elif form_type == "join_team_form":
-                        joined_team = Team.objects.get(
-                            pk=request.POST["join_team_input"]
-                        )
-                        joined_team.players.add(player_user)
-                        joined_team.save()
-                        team_joined = True
-                else:
-                    create_team_form = CreateTeamForm(game=game)
-        else:
+    player = context["player"]
+    context["teams"] = Team.objects.filter(game=game)
+    if player:
+        if context["team"] is None:
             create_team_form = CreateTeamForm(game=game)
+            if request.method == "POST":
+                if "create_team_form" in request.POST:
+                    create_team_form = CreateTeamForm(request.POST, game=game)
+                    if create_team_form.is_valid():
+                        team_name = create_team_form.cleaned_data["name"]
+                        team_player_user = CustomUser.objects.get(username=TEAM_USER_USERNAME)
+                        team_player = Player.objects.create(
+                            user=team_player_user,
+                            name=team_player_name(team_name),
+                            session=session
+                        )
+                        new_team = Team.objects.create(
+                            name=create_team_form.cleaned_data["name"],
+                            game=game,
+                            creator=player,
+                            team_player=team_player
+                        )
+                        new_team.players.add(player)
+                        new_team.save()
+                        context["created_team"] = new_team
+                elif "join_team_form" in request.POST:
+                    joined_team = Team.objects.get(
+                        pk=request.POST["join_team_input"]
+                    )
+                    joined_team.players.add(player)
+                    joined_team.save()
+                    context["team_joined"] = True
+            context["create_team_form"] = create_team_form
 
-    return render(request, "core/team.html", locals())
+    return render(request, "core/team.html", context)
 
 
 # ======================

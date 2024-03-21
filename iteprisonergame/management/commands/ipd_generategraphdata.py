@@ -5,6 +5,86 @@ from iteprisonergame.apps import NAME
 from iteprisonergame.models import Answer
 
 
+def format_json(x):
+    try:
+        y = int(x)
+        if y == x:
+            return int(x)
+        return x
+    except ValueError:
+        return '"' + str(x).strip() + '"'
+
+
+def itepris_graph_data(answer):
+    if answer.number_states() < 100:
+        state_list = []
+        nodes = []
+        links = []
+        for line in answer.automata.strip().split("\n"):
+            state, transition = line.strip().split(":")
+            state = state.strip()
+            if state not in state_list:
+                state_list.append(state)
+            action, next_state_coop, next_state_def = transition.strip().split(
+                ","
+            )
+            action = action.strip()
+            next_state_coop = next_state_coop.strip()
+            next_state_def = next_state_def.strip()
+            if next_state_coop not in state_list:
+                state_list.append(next_state_coop)
+            if next_state_def not in state_list:
+                state_list.append(next_state_def)
+
+            nodes.append(
+                {
+                    "id": state_list.index(state),
+                    "name": action.strip(),
+                    "init": str(state == answer.initial_state.strip()),
+                }
+            )
+            if next_state_coop == next_state_def:
+                links.append(
+                    {
+                        "id": len(links),
+                        "source": state_list.index(state),
+                        "target": state_list.index(next_state_coop),
+                        "label": "CD",
+                    }
+                )
+            else:
+                links.append(
+                    {
+                        "id": len(links),
+                        "source": state_list.index(state),
+                        "target": state_list.index(next_state_coop),
+                        "label": "C",
+                    }
+                )
+                links.append(
+                    {
+                        "id": len(links),
+                        "source": state_list.index(state),
+                        "target": state_list.index(next_state_def),
+                        "label": "D",
+                    }
+                )
+        json_data = "{nodes: ["
+        for node in nodes:
+            json_data += "{"
+            for key in node:
+                json_data += "{}: {}, ".format(key, format_json(node[key]))
+            json_data = json_data[:-2] + "}, "
+        json_data = json_data[:-2] + "], edges: ["
+        for link in links:
+            json_data += "{"
+            for key in link:
+                json_data += "{}: {}, ".format(key, format_json(link[key]))
+            json_data = json_data[:-2] + "}, "
+        json_data = json_data[:-2] + "]}"
+        return json_data
+
+
 class Command(BaseCommand):
     help = "Computes the results of the IPD."
 
@@ -44,81 +124,7 @@ class Command(BaseCommand):
         game = game.first()
 
         for answer in Answer.objects.filter(game=game):
-            if answer.number_states() < 100:
-                state_list = []
-                nodes = []
-                links = []
-                for line in answer.automata.strip().split("\n"):
-                    state, transition = line.strip().split(":")
-                    state = state.strip()
-                    if state not in state_list:
-                        state_list.append(state)
-                    action, next_state_coop, next_state_def = transition.strip().split(
-                        ","
-                    )
-                    action = action.strip()
-                    next_state_coop = next_state_coop.strip()
-                    next_state_def = next_state_def.strip()
-                    if next_state_coop not in state_list:
-                        state_list.append(next_state_coop)
-                    if next_state_def not in state_list:
-                        state_list.append(next_state_def)
-
-                    nodes.append(
-                        {
-                            "id": state_list.index(state),
-                            "name": action.strip(),
-                            "init": str(state == answer.initial_state.strip()),
-                        }
-                    )
-                    if next_state_coop == next_state_def:
-                        links.append(
-                            {
-                                "id": len(links),
-                                "source": state_list.index(state),
-                                "target": state_list.index(next_state_coop),
-                                "label": "CD",
-                            }
-                        )
-                    else:
-                        links.append(
-                            {
-                                "id": len(links),
-                                "source": state_list.index(state),
-                                "target": state_list.index(next_state_coop),
-                                "label": "C",
-                            }
-                        )
-                        links.append(
-                            {
-                                "id": len(links),
-                                "source": state_list.index(state),
-                                "target": state_list.index(next_state_def),
-                                "label": "D",
-                            }
-                        )
-                json_data = "{nodes: ["
-                for node in nodes:
-                    json_data += "{"
-                    for key in node:
-                        json_data += "{}: {}, ".format(key, self.format_json(node[key]))
-                    json_data = json_data[:-2] + "}, "
-                json_data = json_data[:-2] + "], edges: ["
-                for link in links:
-                    json_data += "{"
-                    for key in link:
-                        json_data += "{}: {}, ".format(key, self.format_json(link[key]))
-                    json_data = json_data[:-2] + "}, "
-                json_data = json_data[:-2] + "]}"
+            json_data = itepris_graph_data(answer)
+            if json_data:
                 answer.graph_json_data = json_data
                 answer.save()
-
-    @staticmethod
-    def format_json(x):
-        try:
-            y = int(x)
-            if y == x:
-                return int(x)
-            return x
-        except ValueError:
-            return '"' + str(x).strip() + '"'

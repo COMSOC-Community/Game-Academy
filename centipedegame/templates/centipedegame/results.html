@@ -88,7 +88,7 @@
         {% endif %}
     </div>
 
-    <h2 class="collapsible-div">Distribution of the Strategies Submitted</h2>
+    <h2 class="next-collapsible">Distribution of the Strategies Submitted</h2>
 
     <div class="collapse_content" style="display: none">
         <div id="histogram_strat" class="graph_wrap"></div>
@@ -117,7 +117,7 @@
         histo_strat_chart.draw();
     </script>
 
-    <h2 class="collapsible-div">Distribution of Scores per Answer</h2>
+    <h2 class="next-collapsible">Distribution of Scores per Answer</h2>
 
     <div class="collapsible_content" style="display:none;">
         <div id="score_heatmap" class="graph_wrap"></div>
@@ -125,7 +125,7 @@
         {% if admin_user %}
             <p class="center-align" style="margin-top: 20px;">
                 <a class="collapsible">Display the winner{{ winning_answers|length|pluralize:',s' }}:</a>
-                <span class="collapsible-content" style="display: none"> {{ winners_formatted }}</span>
+                <span class="collapsed-content hidden"> {{ winners_formatted }}</span>
             </p>
         {% endif %}
     </div>
@@ -141,7 +141,7 @@
         score_heatmap_chart.draw();
     </script>
 
-    <h2 class="collapsible-div">All Answers Anonymised</h2>
+    <h2 class="next-collapsible">All Answers Anonymised</h2>
 
     <div class="collapse_content" style="display: none;">
         <table class="lined-table center-margin">
@@ -167,7 +167,7 @@
     </div>
 
     {% if admin_user %}
-        <h2 class="collapsible-div">All Answers with Names</h2>
+        <h2 class="next-collapsible">All Answers with Names</h2>
 
         <div class="collapse_content" style="display: none;">
             <table class="lined-table center-margin">
@@ -196,7 +196,7 @@
     {% endif %}
 
     <script>
-        var coll = document.getElementsByClassName("collapsible-div");
+        var coll = document.getElementsByClassName("next-collapsible");
         var i;
         for (i = 0; i < coll.length; i++) {
             coll[i].addEventListener("click", function() {

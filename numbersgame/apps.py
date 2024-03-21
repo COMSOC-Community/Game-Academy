@@ -23,6 +23,6 @@ class NumbersGameConfig(GameConfig):
     def ready(self):
         super(NumbersGameConfig, self).ready()
 
-        from numbersgame.models import Setting
+        from numbersgame.models import Setting, Answer
         from numbersgame.forms import SettingForm
-        self.register_setting_objects(Setting, SettingForm)
+        self.register_extra_members(Setting, SettingForm, Answer)
