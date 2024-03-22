@@ -525,6 +525,9 @@ Forms
 
 .form-table .form-field-row td:nth-child(2) {
     text-align: left;
+	background: var(--color-background-light);
+	border-bottom-right-radius: 5px;
+	border-top-right-radius: 5px;
 }
 
 .form-table .form-field-row td:nth-child(2) input {

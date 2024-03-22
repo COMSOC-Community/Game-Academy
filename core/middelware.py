@@ -81,7 +81,7 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
             # If session is visible, we only let it go through if we have a player for the
             # corresponding session
             if session.visible:
-                if view_name in SESSION_OPEN_VIEWS:
+                if view_name in SESSION_OPEN_VIEWS and not player_user:
                     return
                 # We know user is authenticated (assert above, and first test), session views are
                 # only available to players of the session. If player_user, we let go so that it's
@@ -105,7 +105,7 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
             if len(split_path) > GAME_URL_TAG_POSITION:
                 game_type = split_path[GAME_TYPE_URL_TAG_POSITION]
                 game_url_tag = split_path[GAME_URL_TAG_POSITION]
-                game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+                game = get_object_or_404(Game, session=session, url_tag=game_url_tag, game_type=game_type)
                 if not game.visible:
                     raise Http404(
                         "Middleware block: this game is not visible and the user "
