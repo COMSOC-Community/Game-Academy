@@ -52,9 +52,8 @@
                                 <label for="join_team_{{ team.id }}">{{ team.name }} - created by {{ team.creator.name }}</label><br>
                             {% endfor %}
 
-                            <input type='hidden' name='form_type' value='join_team_form'>
                             <p class="center-align">
-                                <input class="green-button" type="submit" value="Join Team">
+                                <input class="green-button" type="submit" name="join_team_form" value="Join Team">
                             </p>
                         </form>
                     {% else %}

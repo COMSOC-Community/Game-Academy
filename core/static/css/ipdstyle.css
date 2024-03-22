@@ -1,10 +1,30 @@
+:root {
+    --color-blue: #56a9d3;
+    --color-pink: #de59c0;
+    --color-yellow: #9bc55a;
+}
+
 .automata-display {
+}
+
+.automata-text-display {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 10px 20px;
+    border: var(--color-frame) 1px solid;
+	border-radius: 10px;
+    background-color: var(--color-background-dark);
+}
+
+.automata-text-display > p {
+    max-height: inherit;
+    margin: 0;
 }
 
 .automata-display svg {
     display: block;
     margin: auto;
-    border: var(--color-gray-dark) 1px solid;
+    border: var(--color-frame) 1px solid;
 	border-radius: 10px;
 }
 
@@ -39,23 +59,19 @@
 }
 
 .edge_CD {
-    stroke: var(--color-yellow-dark);
+    stroke: var(--color-yellow);
 }
 
 .edgelabel_CD {
-    fill: var(--color-yellow-dark);
+    fill: var(--color-yellow);
     font-size: 15px;
 }
 
 .node_shape_CD {
-    fill: var(--color-yellow-dark);
+    fill: var(--color-yellow);
 }
 
 .edgehead{
-    fill: var(--color-gray-dark);
-    stroke: var(--color-gray-dark);
-}
-
-.lined-table .winning {
-	background: var(--color-green-verylight);
+    fill: var(--color-yellow);
+    stroke: var(--color-yellow);
 }

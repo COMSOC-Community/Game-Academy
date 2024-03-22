@@ -20,7 +20,7 @@ class MooreMachine:
 
     def parse(self, lines):
         pattern = re.compile(
-            "^[^\S\n]*([0-9]+):[^\S\n\t]*([CD]),[^\S\n\t]*([0-9]+),[^\S\n\t]*([0-9]+)$"
+            "^[^\S\n]*([A-Za-z0-9]+):[^\S\n\t]*([CD]),[^\S\n\t]*([A-Za-z0-9]+),[^\S\n\t]*([A-Za-z0-9]+)$"
         )
         errors = []
         for line_index in range(len(lines)):
@@ -66,6 +66,22 @@ class MooreMachine:
                         )
                     )
         return errors
+
+    def test_connectivity(self, initial_state):
+        def aux(state):
+            if state not in visited_states:
+                visited_states.add(state)
+                for input_symbol, next_state in self.transitions[state].items():
+                    aux(next_state)
+        visited_states = set()
+        aux(initial_state)
+
+        if len(visited_states) != len(self.transitions):
+            unconnected_states = sorted(s for s in self.transitions if s not in visited_states)
+            if unconnected_states:
+                return f"The automata is composed of more than one connected components. From " \
+                       f"the initial state '{initial_state} ' the following states could " \
+                       f"not be reached: {' '.join(unconnected_states)}"
 
     def transition(self, input_symbol):
         self.current_state = self.transitions[self.current_state][input_symbol]

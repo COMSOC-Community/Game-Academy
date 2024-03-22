@@ -6,7 +6,7 @@
 
         <p>
             You will be redirected soon to the {{ game.game_config.long_name }} page.
-            If not, <a href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">click here</a>!
+            If not, <a class="button navigation-button" href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">click here</a>!
         </p>
 
         <script>

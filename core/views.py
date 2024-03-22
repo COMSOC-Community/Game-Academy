@@ -155,10 +155,6 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
     if context is None:
         context = {}
     context["game"] = game
-    context["game_nav_display_home"] = True
-    context["game_nav_display_team"] = game.needs_teams
-    context["game_nav_display_answer"] = game.playable
-    context["game_nav_display_result"] = game.results_visible
     player = None
     team = None
     answer = None
@@ -185,6 +181,12 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
         context["submitting_player"] = team.team_player if team else None
     else:
         context["submitting_player"] = player
+
+    context["game_nav_display_home"] = True
+    context["game_nav_display_team"] = game.needs_teams and not team
+    context["game_nav_display_answer"] = game.playable and not answer
+    context["game_nav_display_result"] = game.results_visible
+
     return context
 
 
@@ -742,12 +744,13 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
         Game, session=session, url_tag=game_url_tag, needs_teams=True
     )
 
-    if not game.need_teams:
+    if not game.needs_teams:
         raise Http404("This game does not require teams.")
 
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, game.game_config().answer_model, context)
+    context["game_nav_display_team"] = False
 
     player = context["player"]
     context["teams"] = Team.objects.filter(game=game)
@@ -763,7 +766,8 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
                         team_player = Player.objects.create(
                             user=team_player_user,
                             name=team_player_name(team_name),
-                            session=session
+                            session=session,
+                            is_team_player=True
                         )
                         new_team = Team.objects.create(
                             name=create_team_form.cleaned_data["name"],

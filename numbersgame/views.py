@@ -5,8 +5,8 @@ from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.core import management
 
-from core.models import Session, Game, Player
-from core.views import is_session_admin, base_context_initialiser, session_context_initialiser, \
+from core.models import Session, Game
+from core.views import base_context_initialiser, session_context_initialiser, \
     game_context_initialiser
 
 from .forms import SubmitAnswerForm
@@ -23,6 +23,7 @@ def index(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_home"] = False
 
     return render(request, os.path.join("numbers_game", "index.html"), context)
 
@@ -36,6 +37,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_answer"] = False
 
     if not game.playable and not context["user_is_session_admin"]:
         raise Http404("The game is not playable and the user is not an admin.")
@@ -82,6 +84,7 @@ def results(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_result"] = False
 
     if not game.results_visible and not context["user_is_session_admin"]:
         raise Http404("The results are not visible and the user is not an admin.")

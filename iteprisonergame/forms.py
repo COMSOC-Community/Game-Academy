@@ -37,6 +37,7 @@ class SubmitAnswerForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.game = kwargs.pop("game", None)
         self.player = kwargs.pop("player", None)
+        self.moore_machine = None
         super(SubmitAnswerForm, self).__init__(*args, **kwargs)
 
     def clean_automata(self):
@@ -49,10 +50,15 @@ class SubmitAnswerForm(forms.Form):
             validity_errors = automata.test_validity(["C", "D"])
             if validity_errors:
                 raise forms.ValidationError(validity_errors)
+            self.moore_machine = automata
             return self.cleaned_data["automata"]
 
     def clean(self):
         cleaned_data = super(SubmitAnswerForm, self).clean()
+        if self.moore_machine and "initial_state" in cleaned_data:
+            connectivity_error = self.moore_machine.test_connectivity(cleaned_data["initial_state"])
+            if connectivity_error:
+                raise forms.ValidationError(connectivity_error)
         if Answer.objects.filter(player=self.player, game=self.game).exists():
             raise forms.ValidationError(
                 "This player already submitted an answer for this game!"

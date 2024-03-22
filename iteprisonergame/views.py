@@ -22,6 +22,7 @@ def index(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_home"] = False
 
     return render(request, os.path.join("iteprisonergame", "index.html"), context)
 
@@ -35,6 +36,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_answer"] = False
 
     if not game.playable and not context["user_is_session_admin"]:
         raise Http404("The game is not playable and the user is not an admin.")
@@ -77,6 +79,7 @@ def results(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_result"] = False
 
     context["answers"] = Answer.objects.filter(game=game).order_by("-avg_score")
     return render(request, os.path.join("iteprisonergame", "results.html"), context)

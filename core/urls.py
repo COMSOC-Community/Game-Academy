@@ -28,7 +28,7 @@ for game_config in INSTALLED_GAMES:
         path(
             "<slug:session_url_tag>/"
             + re.escape(str(game_config.url_tag))
-            + r"/<slug:game_url_tag>/create_or_join_team",
+            + r"/<slug:game_url_tag>/team",
             views.create_or_join_team,
             name=game_config.url_tag + "_team",
         ),

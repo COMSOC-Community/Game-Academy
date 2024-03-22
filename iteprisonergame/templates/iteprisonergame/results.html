@@ -5,6 +5,7 @@
 {% block extra_head %}
     <script src="{% static 'js/collapsible_next.js' %}"></script>
 	<script src="https://d3js.org/d3.v3.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/ipdstyle.css' %}">
 {% endblock %}
 
 {% block game_content %}
@@ -62,235 +63,244 @@
                 {% endif %}
             {% endif %}
 
-            {% if answer.number_states < 100 %}
-                <div id="display_automata_{{ answer.id }}" class="automata-display">
-                </div>
-                <script>
-                    var w = 400;
-                    var h = 250;
-                    //distance between nodes
-                    var linkDistance = 100;
+            <div class="side-by-side-centered-wrapper">
+                <div>
+                    {% if answer.number_states < 100 %}
+                        <div id="display_automata_{{ answer.id }}" class="automata-display">
+                        </div>
+                        <script>
+                            var w = 400;
+                            var h = 250;
+                            //distance between nodes
+                            var linkDistance = 100;
 
-                    var colors = d3.scale.category10();
+                            var colors = d3.scale.category10();
 
-                    var dataset_{{ answer.id }} = {{ answer.graph_json_data|safe }};
+                            var dataset_{{ answer.id }} = {{ answer.graph_json_data|safe }};
 
-                    var svg_{{ answer.id }} = d3
-                        .select("#display_automata_{{ answer.id }}")
-                        .append("svg")
-                        .attr({
-                            "width": w,
-                            "height": h
-                        })
-                        .call(d3.behavior.zoom().on("zoom", function () {
-                            svg_{{ answer.id }}.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
-                        }))
-                        .append("g");
+                            var svg_{{ answer.id }} = d3
+                                .select("#display_automata_{{ answer.id }}")
+                                .append("svg")
+                                .attr({
+                                    "height": h,
+                                    "width": w,
+                                })
+                                .call(d3.behavior.zoom().on("zoom", function () {
+                                    svg_{{ answer.id }}.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")")
+                                }))
+                                .append("g");
 
-                    var force_{{ answer.id }} = d3.layout.force()
-                      .nodes(dataset_{{ answer.id }}.nodes)
-                      .links(dataset_{{ answer.id }}.edges)
-                      .size([w, h])
-                      .linkDistance([linkDistance])
-                      .charge([-500])
-                      .theta(0.1)
-                      .gravity(0.05)
-                      .start();
-
-
-                    var edges_{{ answer.id }} = svg_{{ answer.id }}.selectAll("path")
-                      .data(dataset_{{ answer.id }}.edges)
-                      .enter()
-                      .append("path")
-                      .style("fill","none")
-                      .attr("id", function(d, i) {
-                        return 'edge_{{ answer.id }}_' + d.id
-                      })
-                      .attr("class", function(d, i) {
-                        return 'edge_' + d.label
-                      })
-                      .attr('marker-end', function(d) {
-                        return d.source == d.target ? '' : 'url(#arrowhead)'
-                      })
-                      .style("pointer-events", "none");
-
-                    var nodes_{{ answer.id }} = svg_{{ answer.id }}.selectAll("node_{{ answer.id }}")
-                        .data(dataset_{{ answer.id }}.nodes)
-                        .enter()
-                        .append("g")
-                        .attr("id", function(d, i) {return 'node_{{ answer.id }}_' + d.id})
-                        .attr("class", function(d, i) {
-                            return 'node_shape_' + d.name + (d.init == "True" ? ' square_node' : ' circle_node')
-                        })
-
-                    svg_{{ answer.id }}.selectAll('.circle_node')
-                        .append("rect")
-                        .attr("xlink:href", function(d, i) {
-                            return '#node_{{ answer.id }}_' + d.id;
-                        })
-                        .attr("rx", 9)
-                        .attr("ry", 9)
-                        .attr("width", 18)
-                        .attr("height", 18)
-                        .attr("class", function(d, i) {return 'circle_{{ answer.id }} node_shape_' + d.name})
-                        .call(force_{{ answer.id }}.drag)
-
-                    svg_{{ answer.id }}.selectAll('.square_node')
-                        .append("rect")
-                        .attr("xlink:href", function(d, i) {
-                            return '#node_{{ answer.id }}_' + d.id;
-                        })
-                        .attr("width", 18)
-                        .attr("height", 18)
-                        .attr("class", function(d, i) {return 'square_{{ answer.id }} node_shape_' + d.name})
-                        .call(force_{{ answer.id }}.drag)
-
-                    var nodelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".nodelabel_{{ answer.id }}")
-                        .data(dataset_{{ answer.id }}.nodes)
-                        .enter()
-                        .append("text")
-                        .attr({
-                        "x": function(d) {
-                            return d.x;
-                        },
-                        "y": function(d) {
-                            return d.y;
-                        },
-                        "class": "nodelabel_{{ answer.id }} nodelabel",
-                        "stroke": "black"
-                        })
-                        .text(function(d) {
-                            return d.name;
-                        });
-
-                    var edgelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".edgelabel_{{ answer.id }}")
-                        .data(dataset_{{ answer.id }}.edges)
-                        .enter()
-                        .append('text')
-                        .style("pointer-events", "none")
-                        .attr("id", function(d, i) {return 'edgelabel_{{ answer.id }}_' + d.id})
-                        .attr("class", function(d, i) {return 'edgelabel_{{ answer.id }} edgelabel_' + d.label})
-
-                    edgelabels_{{ answer.id }}.append("textPath")
-                      .attr("xlink:href", function(d, i) {
-                        return '#edge_{{ answer.id }}_' + d.id;
-                      })
-                      .style("pointer-events", "none")
-                      .text(function(d, i) {
-                        return dataset_{{ answer.id }}.edges[i].label
-                      });
+                            var force_{{ answer.id }} = d3.layout.force()
+                              .nodes(dataset_{{ answer.id }}.nodes)
+                              .links(dataset_{{ answer.id }}.edges)
+                              .size([w, h])
+                              .linkDistance([linkDistance])
+                              .charge([-500])
+                              .theta(0.1)
+                              .gravity(0.05)
+                              .start();
 
 
-                    svg_{{ answer.id }}.append('defs').append('marker')
-                      .attr({
-                        'id': 'arrowhead',
-                        'viewBox': '-0 -5 10 10',
-                        'refX': 20,
-                        'refY': 0,
-                        'orient': 'auto',
-                        'markerWidth': 10,
-                        'markerHeight': 10,
-                        'xoverflow': 'visible'
-                      })
-                      .append('svg:path')
-                      .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-                      .attr("class", 'edgehead')
+                            var edges_{{ answer.id }} = svg_{{ answer.id }}.selectAll("path")
+                              .data(dataset_{{ answer.id }}.edges)
+                              .enter()
+                              .append("path")
+                              .style("fill","none")
+                              .attr("id", function(d, i) {
+                                return 'edge_{{ answer.id }}_' + d.id
+                              })
+                              .attr("class", function(d, i) {
+                                return 'edge_' + d.label
+                              })
+                              .attr('marker-end', function(d) {
+                                return d.source == d.target ? '' : 'url(#arrowhead)'
+                              })
+                              .style("pointer-events", "none");
 
+                            var nodes_{{ answer.id }} = svg_{{ answer.id }}.selectAll("node_{{ answer.id }}")
+                                .data(dataset_{{ answer.id }}.nodes)
+                                .enter()
+                                .append("g")
+                                .attr("id", function(d, i) {return 'node_{{ answer.id }}_' + d.id})
+                                .attr("class", function(d, i) {
+                                    return 'node_shape_' + d.name + (d.init == "True" ? ' square_node' : ' circle_node')
+                                })
 
-                    force_{{ answer.id }}.on("tick", function() {
+                            svg_{{ answer.id }}.selectAll('.circle_node')
+                                .append("rect")
+                                .attr("xlink:href", function(d, i) {
+                                    return '#node_{{ answer.id }}_' + d.id;
+                                })
+                                .attr("rx", 9)
+                                .attr("ry", 9)
+                                .attr("width", 18)
+                                .attr("height", 18)
+                                .attr("class", function(d, i) {return 'circle_{{ answer.id }} node_shape_' + d.name})
+                                .call(force_{{ answer.id }}.drag)
 
-                        edges_{{ answer.id }}.attr("d", function(d) {
-                            var x1 = d.source.x,
-                                y1 = d.source.y,
-                                x2 = d.target.x,
-                                y2 = d.target.y,
-                                dx = x2 - x1,
-                                dy = y2 - y1,
-                                dr = Math.sqrt(dx * dx + dy * dy),
+                            svg_{{ answer.id }}.selectAll('.square_node')
+                                .append("rect")
+                                .attr("xlink:href", function(d, i) {
+                                    return '#node_{{ answer.id }}_' + d.id;
+                                })
+                                .attr("width", 18)
+                                .attr("height", 18)
+                                .attr("class", function(d, i) {return 'square_{{ answer.id }} node_shape_' + d.name})
+                                .call(force_{{ answer.id }}.drag)
 
-                                // Defaults for normal edge.
-                                drx = dr,
-                                dry = dr,
-                                xRotation = 0, // degrees
-                                largeArc = 0, // 1 or 0
-                                sweep = 1; // 1 or 0
+                            var nodelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".nodelabel_{{ answer.id }}")
+                                .data(dataset_{{ answer.id }}.nodes)
+                                .enter()
+                                .append("text")
+                                .attr({
+                                "x": function(d) {
+                                    return d.x;
+                                },
+                                "y": function(d) {
+                                    return d.y;
+                                },
+                                "class": "nodelabel_{{ answer.id }} nodelabel",
+                                "stroke": "black"
+                                })
+                                .text(function(d) {
+                                    return d.name;
+                                });
 
-                            // Self edge.
-                            if (x1 === x2 && y1 === y2) {
-                                // Fiddle with this angle to get loop oriented.
-                                xRotation = -45;
+                            var edgelabels_{{ answer.id }} = svg_{{ answer.id }}.selectAll(".edgelabel_{{ answer.id }}")
+                                .data(dataset_{{ answer.id }}.edges)
+                                .enter()
+                                .append('text')
+                                .style("pointer-events", "none")
+                                .attr("id", function(d, i) {return 'edgelabel_{{ answer.id }}_' + d.id})
+                                .attr("class", function(d, i) {return 'edgelabel_{{ answer.id }} edgelabel_' + d.label})
 
-                                // Needs to be 1.
-                                largeArc = 1;
-
-                                // Change sweep to change orientation of loop.
-                                //sweep = 0;
-
-                                // Make drx and dry different to get an ellipse
-                                // instead of a circle.
-                                drx = 15;
-                                dry = 10;
-
-                                // For whatever reason the arc collapses to a point if the beginning
-                                // and ending points of the arc are the same, so kludge it.
-                                x2 = x2 + 1;
-                                y2 = y2 + 1;
-                            }
-
-                            return "M" + x1 + "," + y1 + "A" + drx + "," + dry + " " + xRotation + "," + largeArc + "," + sweep + " " + x2 + "," + y2;
-                        });
-
-                        nodes_{{ answer.id }}.attr({
-                            "x": function(d) {
-                                return d.x;
-                            },
-                            "y": function(d) {
-                                return d.y;
-                            }
-                        });
-
-                        nodes_{{ answer.id }}.selectAll(".square_{{ answer.id }}").attr({
-                            "x": function(d) {
-                                return d.x - 9;
-                            },
-                            "y": function(d) {
-                                return d.y - 9;
-                            }
-                        });
-
-                        nodes_{{ answer.id }}.selectAll(".circle_{{ answer.id }}").attr({
-                            "x": function(d) {
-                                return d.x - 9;
-                            },
-                            "y": function(d) {
-                                return d.y - 9;
-                            }
-                        });
-
-                        edgelabels_{{ answer.id }}.selectAll("textPath")
-                            .attr("xlink:href", function(d, i) {
+                            edgelabels_{{ answer.id }}.append("textPath")
+                              .attr("xlink:href", function(d, i) {
                                 return '#edge_{{ answer.id }}_' + d.id;
-                            })
-                            .attr("startOffset", function(d, i) {
-                                var arcLength = d3.select("#edge_{{ answer.id }}_" + d.id).node().getTotalLength();
-                                var textLength = d3.select("#edgelabel_{{ answer.id }}_" + d.id).node().getComputedTextLength();
-                                var offset = (arcLength - textLength) / 2;
-                                return offset;
-                          });
+                              })
+                              .style("pointer-events", "none")
+                              .text(function(d, i) {
+                                return dataset_{{ answer.id }}.edges[i].label
+                              });
 
-                        nodelabels_{{ answer.id }}.attr({
-                            "x": function(d) {
-                                return d.x - this.getComputedTextLength() / 2;
-                            },
-                            "y": function(d) {
-                                return d.y + this.getComputedTextLength() / 2;
-                            }
-                        });
-                    });
-                </script>
-            {% else %}
-                <p>This answer has {{ answer.number_states }} states. It will not be displayed.</p>
-            {% endif %}
+
+                            svg_{{ answer.id }}.append('defs').append('marker')
+                              .attr({
+                                'id': 'arrowhead',
+                                'viewBox': '-0 -5 10 10',
+                                'refX': 20,
+                                'refY': 0,
+                                'orient': 'auto',
+                                'markerWidth': 10,
+                                'markerHeight': 10,
+                                'xoverflow': 'visible'
+                              })
+                              .append('svg:path')
+                              .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+                              .attr("class", 'edgehead')
+
+
+                            force_{{ answer.id }}.on("tick", function() {
+
+                                edges_{{ answer.id }}.attr("d", function(d) {
+                                    var x1 = d.source.x,
+                                        y1 = d.source.y,
+                                        x2 = d.target.x,
+                                        y2 = d.target.y,
+                                        dx = x2 - x1,
+                                        dy = y2 - y1,
+                                        dr = Math.sqrt(dx * dx + dy * dy),
+
+                                        // Defaults for normal edge.
+                                        drx = dr,
+                                        dry = dr,
+                                        xRotation = 0, // degrees
+                                        largeArc = 0, // 1 or 0
+                                        sweep = 1; // 1 or 0
+
+                                    // Self edge.
+                                    if (x1 === x2 && y1 === y2) {
+                                        // Fiddle with this angle to get loop oriented.
+                                        xRotation = -45;
+
+                                        // Needs to be 1.
+                                        largeArc = 1;
+
+                                        // Change sweep to change orientation of loop.
+                                        //sweep = 0;
+
+                                        // Make drx and dry different to get an ellipse
+                                        // instead of a circle.
+                                        drx = 15;
+                                        dry = 10;
+
+                                        // For whatever reason the arc collapses to a point if the beginning
+                                        // and ending points of the arc are the same, so kludge it.
+                                        x2 = x2 + 1;
+                                        y2 = y2 + 1;
+                                    }
+
+                                    return "M" + x1 + "," + y1 + "A" + drx + "," + dry + " " + xRotation + "," + largeArc + "," + sweep + " " + x2 + "," + y2;
+                                });
+
+                                nodes_{{ answer.id }}.attr({
+                                    "x": function(d) {
+                                        return d.x;
+                                    },
+                                    "y": function(d) {
+                                        return d.y;
+                                    }
+                                });
+
+                                nodes_{{ answer.id }}.selectAll(".square_{{ answer.id }}").attr({
+                                    "x": function(d) {
+                                        return d.x - 9;
+                                    },
+                                    "y": function(d) {
+                                        return d.y - 9;
+                                    }
+                                });
+
+                                nodes_{{ answer.id }}.selectAll(".circle_{{ answer.id }}").attr({
+                                    "x": function(d) {
+                                        return d.x - 9;
+                                    },
+                                    "y": function(d) {
+                                        return d.y - 9;
+                                    }
+                                });
+
+                                edgelabels_{{ answer.id }}.selectAll("textPath")
+                                    .attr("xlink:href", function(d, i) {
+                                        return '#edge_{{ answer.id }}_' + d.id;
+                                    })
+                                    .attr("startOffset", function(d, i) {
+                                        var arcLength = d3.select("#edge_{{ answer.id }}_" + d.id).node().getTotalLength();
+                                        var textLength = d3.select("#edgelabel_{{ answer.id }}_" + d.id).node().getComputedTextLength();
+                                        var offset = (arcLength - textLength) / 2;
+                                        return offset;
+                                  });
+
+                                nodelabels_{{ answer.id }}.attr({
+                                    "x": function(d) {
+                                        return d.x - this.getComputedTextLength() / 2;
+                                    },
+                                    "y": function(d) {
+                                        return d.y + this.getComputedTextLength() / 2;
+                                    }
+                                });
+                            });
+                        </script>
+                    {% else %}
+                        <p>This answer has {{ answer.number_states }} states. It will not be displayed.</p>
+                    {% endif %}
+                </div>
+                <div class="automata-text-display">
+                    <p>
+                        {{ answer.automata|linebreaksbr }}
+                    </p>
+                </div>
+            </div>
 
             <p class="center-align">
                 {% if user_is_session_admin %}
