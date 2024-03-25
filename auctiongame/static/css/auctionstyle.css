@@ -1,0 +1,8 @@
+
+.graph_wrap {
+	height: 300px;
+}
+
+.lined-table .winning {
+	background: var(--color-success);
+}

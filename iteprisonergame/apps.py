@@ -17,7 +17,8 @@ class ItePrisonerGameConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
-            management_commands=["ipd_computeresults", "ipd_generategraphdata"]
+            management_commands=["ipd_computeresults", "ipd_generategraphdata"],
+            answer_model_fields=("name", "avg_score")
         )
 
     def ready(self):
@@ -25,4 +26,4 @@ class ItePrisonerGameConfig(GameConfig):
 
         from iteprisonergame.models import Setting, Answer
         from iteprisonergame.forms import SettingForm
-        self.register_extra_members(Setting, SettingForm, Answer)
+        self.register_models(Setting, SettingForm, Answer)

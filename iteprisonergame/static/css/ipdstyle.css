@@ -2,6 +2,47 @@
     --color-blue: #56a9d3;
     --color-pink: #de59c0;
     --color-yellow: #9bc55a;
+	--color-player1: #A30000;
+	--color-player2: #008C8C;
+}
+
+.lined-table .winning {
+	background: var(--color-success);
+}
+
+.payoff-matrix {
+	border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.payoff-matrix tr:first-of-type {
+    border-top: 2px solid var(--color-frame);
+}
+
+.payoff-matrix tr:last-of-type {
+    border-bottom: 2px solid var(--color-frame);
+}
+
+.payoff-matrix td {
+    text-align: center;
+	padding: 5px 10px;
+}
+
+.payoff-matrix tr td:first-child {
+    text-align: right;
+}
+
+.payoff-player-header {
+    font-weight: bold;
+}
+
+.payoff-player-1 {
+    color: var(--color-player1);
+}
+
+.payoff-player-2 {
+    color: var(--color-player2);
 }
 
 .automata-display {

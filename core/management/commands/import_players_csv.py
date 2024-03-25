@@ -1,6 +1,8 @@
 import csv
 
+from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand
+from django.core.validators import validate_slug
 
 from core.constants import player_username
 from core.models import Session, Player, CustomUser
@@ -29,12 +31,21 @@ class Command(BaseCommand):
         num_created = 0
         num_fail = 0
         with open(csv_file_path, 'r', encoding="utf-8") as file:
-            reader = csv.DictReader(file)
+            reader = csv.DictReader(file, delimiter=";")
             if reader:
                 for row in reader:
                     if "username" not in row:
                         raise ValueError("The csv needs to have a column with 'username'.")
                     player_name = row["username"].strip()
+                    try:
+                        validate_slug(player_name)
+                    except ValidationError:
+                        self.stdout.write(
+                            self.style.ERROR(f"FAIL: username '{player_name}' is not a valid slug, "
+                                             f"line has been skipped.")
+                        )
+                        num_fail += 1
+                        continue
                     username = player_username(session, player_name)
                     password = row.get("password", None)
                     if password:

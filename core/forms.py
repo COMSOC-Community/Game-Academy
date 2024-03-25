@@ -124,7 +124,7 @@ class CreateSessionForm(forms.Form):
         label_suffix="",
         max_length=Session._meta.get_field("url_tag").max_length,
         help_text="The URL tag is the part of the URL path dedicated to the session. It will "
-        "look like /session/SESSION_URL_TAG/. It has to be a 'slug', i.e., it can "
+        "look like /SESSION_URL_TAG/. It has to be a 'slug', i.e., it can "
         "only contains letters, numbers, underscores or hyphens.",
         widget=forms.TextInput(attrs={"placeholder": "url_of_session"}),
     )
@@ -195,14 +195,14 @@ class CreateSessionForm(forms.Form):
             raise forms.ValidationError(
                 "A session with this URL tag already exists. It has to be unique."
             )
+        if url_tag in FORBIDDEN_SESSION_URL_TAGS:
+            raise forms.ValidationError(
+                "This url_tag cannot be used for a session. Choose another one."
+            )
         return url_tag
 
     def clean_name(self):
         name = self.cleaned_data["name"]
-        if name in FORBIDDEN_SESSION_URL_TAGS:
-            raise forms.ValidationError(
-                "This name cannot be used for a session. Choose another one."
-            )
         new_name = not self.session or name != self.session.name
         if new_name and Session.objects.filter(name=name).exists():
             raise forms.ValidationError(
@@ -245,6 +245,7 @@ class PlayerLoginForm(forms.Form):
         label="Player name",
         label_suffix="",
         max_length=Player._meta.get_field("name").max_length,
+        help_text="This is NOT case sensitive."
     )
     password = forms.CharField(
         label="Password", label_suffix="", widget=forms.PasswordInput()
@@ -254,8 +255,8 @@ class PlayerLoginForm(forms.Form):
         label_suffix="",
         initial=False,
         required=False,
-        help_text="If selected, the player name provided is considered to be a username (for a user) instead of the "
-        "name of a player for this session.",
+        help_text="If selected, the player name provided is considered to be a username (for a "
+                  "user) instead of the name of a player for this session.",
     )
 
     def __init__(self, *args, **kwargs):
@@ -264,41 +265,41 @@ class PlayerLoginForm(forms.Form):
 
     def clean(self):
         super().clean()
-        player_name = self.cleaned_data["player_name"]
-        user = None
-        if self.cleaned_data["search_user"]:
-            user = CustomUser.objects.filter(username=player_name)
-            if user.exists():
-                user = user.first()
-                self.cleaned_data["user"] = user
-                player = Player.objects.filter(user=user, session=self.session)
+        if "player_name" in self.cleaned_data:
+            player_name = self.cleaned_data["player_name"]
+            user = None
+            if self.cleaned_data["search_user"]:
+                user = CustomUser.objects.filter(username=player_name)
+                if user.exists():
+                    user = user.first()
+                    self.cleaned_data["user"] = user
+                    player = Player.objects.filter(user=user, session=self.session)
+                    if player.exists():
+                        self.cleaned_data["player"] = player.first()
+                else:
+                    raise forms.ValidationError("No match was found.")
+            else:
+                player = Player.objects.filter(name__iexact=player_name, session=self.session)
                 if player.exists():
-                    self.cleaned_data["player"] = player.first()
-            else:
-                raise forms.ValidationError("No match was found.")
-        else:
-            player_name = player_name.title()
-            player = Player.objects.filter(name=player_name, session=self.session)
-            if player.exists():
-                player = player.first()
-                user = player.user
-                self.cleaned_data["player"] = player
-                self.cleaned_data["user"] = user
-            else:
-                self.add_error(
-                    "player_name",
-                    forms.ValidationError(
-                        "No player with this name is registered for this session."
-                    ),
-                )
+                    player = player.first()
+                    user = player.user
+                    self.cleaned_data["player"] = player
+                    self.cleaned_data["user"] = user
+                else:
+                    self.add_error(
+                        "player_name",
+                        forms.ValidationError(
+                            "No player with this name is registered for this session."
+                        ),
+                    )
 
-        if user:
-            password = self.cleaned_data["password"]
-            user = authenticate(username=user.username, password=password)
-            if not user:
-                self.add_error(
-                    "password", forms.ValidationError("The password is incorrect.")
-                )
+            if user:
+                password = self.cleaned_data["password"]
+                user = authenticate(username=user.username, password=password)
+                if not user:
+                    self.add_error(
+                        "password", forms.ValidationError("The password is incorrect.")
+                    )
 
 
 class PlayerRegistrationForm(forms.Form):
@@ -342,12 +343,12 @@ class PlayerRegistrationForm(forms.Form):
         return password2
 
     def clean_player_name(self):
-        player_name = self.cleaned_data["player_name"].title()
+        player_name = self.cleaned_data["player_name"]
         if not self.player:
             username = player_username(self.session, player_name)
             if CustomUser.objects.filter(
                 username=username
-            ).exists() or Player.objects.filter(session=self.session, name=player_name).exists():
+            ).exists() or Player.objects.filter(session=self.session, name__iexact=player_name).exists():
                 raise forms.ValidationError(
                     "This player name is already used by someone in this session. Choose another "
                     "one."

@@ -32,52 +32,62 @@
             <div class="grid2-wrapper game-grid">
                 {% for game in games %}
                     <div class="grid-item">
-                        <div class="game-grid-title">
+                        <div class="grid-item-title">
                             <h3 id="games_{{ game.name }}">
                                 {{ game.game_config.long_name }} - {{ game.name }}
                             </h3>
                         </div>
+                        <div class="grid-item-content">
+                            {% if game.description %}
+                                <p>{{ game.description }}</p>
+                            {% endif %}
 
-                        {% if game.description %}
-                            <p>{{ game.description }}</p>
-                        {% endif %}
-
-                        {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
-                            <p class="center-align">
-                                <span>
-                                    <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
-                                </span>
-                            </p>
-                        {% endwith %}
+                            {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
+                                <p class="center-align">
+                                    <span>
+                                        <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
+                                    </span>
+                                </p>
+                            {% endwith %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
             <p>No games are currently available.</p>
         {% endif %}
+    </section>
 
-        {% if invisible_games %}
-            <div class="warning-section">
-                <p>
-                    These games are not visible to the players. You can see them since you are
-                    logged in as an admin.
-                </p>
+    {% if invisible_games %}
+        <section class="warning-section">
+            <p>
+                These games are not visible to the players. You can see them since you are
+                logged in as an admin.
+            </p>
+            <div class="grid2-wrapper game-grid">
                 {% for game in invisible_games %}
-                    <h2>{{ game.game_config.long_name }} - {{ game.name }}</h2>
+                    <div class="grid-item">
+                        <div class="grid-item-title">
+                            <h3 id="games_{{ game.name }}">
+                                {{ game.game_config.long_name }} - {{ game.name }}
+                            </h3>
+                        </div>
+                        <div class="grid-item-content">
+                            {% if game.description %}
+                                <p>{{ game.description }}</p>
+                            {% endif %}
 
-                    {% if game.description %}
-                        <p>{{ game.description }}</p>
-                    {% endif %}
-
-                    {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
-                        <p class="center-align">
-                            <span class="green-button">
-                                <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
-                            </span>
-                        </p>
-                    {% endwith %}
+                            {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
+                                <p class="center-align">
+                                    <span>
+                                        <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
+                                    </span>
+                                </p>
+                            {% endwith %}
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
-        {% endif %}
-    </section>
+        </section>
+    {% endif %}
 {% endblock %}

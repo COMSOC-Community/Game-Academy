@@ -1,154 +1,52 @@
+{% extends 'core/base_game_submit_answers.html' %}
+
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-	<title>Centipede Game</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+{% block extra_head %}
 	<link rel="stylesheet" type="text/css" href="{% static 'css/centistyle.css' %}"/>
-</head>
+{% endblock %}
 
-<body>
-{% if request.user.is_authenticated %}
-    {% if game.playable or admin_user %}
-        {% if player or admin_user %}
-            <h1> {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
+{% block game_content %}
+    <section>
+        {% if submitted_answer %}
+            <p>Your answer has been submitted, thanks!</p>
 
-            <div class="navigation">
-                <span class="navigation-button">
-                    <a href="{% url 'centipede_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-                </span>
-                <br>
-                <span class="navigation-button">
-                    <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-                </span>
-            </div>
+            <p>
+                You will be redirected soon to the {{ game.game_config.long_name }} page.
+                If not, <a class="button navigation-button" href="{% url 'centipede_game:index' session.url_tag game.url_tag %}">click here</a>!
+            </p>
 
-            {% if admin_user and not player %}
-                <div class="warning-section">
-                    <p>
-                        Because you are not logged in as a player, you can only see (part of) this page, but not submit an answer.
-                    </p>
-                </div>
-            {% endif %}
-
-            {% if answer_submitted %}
-                <p>Your answer has been submitted, thanks!</p>
-
-                <p>
-                    You will be redirected soon to the {{ game.game_config.long_name }} page.
-                    If not, <a href="{% url 'centipede_game:index' session.url_tag game.url_tag %}">click here</a>!
-                </p>
-
-                <script>
-                    function redirect () {
-                        window.location.href = "{% url 'centipede_game:index' session.url_tag game.url_tag %}" ;
-                    }
-                    setTimeout(redirect, 3000);
-                </script>
-            {% else %}
-                {% if not current_answer %}
-                    <p>
-                        Fill out the form below to submit your answer to the {{ game.game_config.long_name }}. Please fill out the strategy
-                        you would play if you were <span style="color: #A30000; font-weight: bold;">player 1</span> (the first player to play) and if you were
-                        <span style="color: #008C8C; font-weight: bold;">player 2</span> (the second player to play) as presented in the figure below.
-                        Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
-                    </p>
-                
-                    <p class="center-align">
-                        <img width="50%" src="{% static 'img/centipede_structure.png' %}" alt="Structure of the Centipede Game.">
-                    </p>
-                
-                    {% if submission_error %}
-                        <div class="form-error-message">
-                            <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
-
-                            <p>{{ submission_error }}</p>
-                        </div>
-                    {% endif %}
-
-                    <form action="{% url 'centipede_game:submit_answer' session.url_tag game.url_tag %}" method="post">
-                        {% csrf_token %}
-
-                        {% if submit_answer_form.non_field_errors %}
-                            <ul class="errorlist">
-                                {% for error in submit_answer_form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-
-                        {% for hidden_field in submit_answer_form.hidden_fields %}
-                            {% if hidden_field.errors %}
-                                <ul class="errorlist">
-                                {% for error in hidden_field.errors %}
-                                    <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
-                                {% endfor %}
-                                </ul>
-                            {% endif %}
-                            {{ hidden_field }}
-                        {% endfor %}
-
-                        <table class="center-margin form-table">
-                            {% for field in submit_answer_form.visible_fields %}
-                                <tr>
-                                    <td class="form-field-label">
-                                        {{ field.label_tag }}
-                                        {% if field.help_text %}
-                                            <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {{ field }}
-                                        {% if field.errors %}
-                                            {% for error in field.errors %}
-                                                <br><span class="form-error">{{ error }}</span>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-
-                        <p class="center-align">
-                            <input class="green-button" type="submit" value="Submit your Answer">
-                        </p>
-                    </form>
-                {% else %}
-                    <p>
-                        You have already submitted the answer ({{ current_answer.strategy_as_p1 }}, {{ current_answer.strategy_as_p1 }}).
-                        You cannot submit more than one answer for this game.
-                    </p>
-                {% endif %}
-
-            {% endif %}
-
-        <div class="navigation">
-            <span class="navigation-button">
-                <a href="{% url 'centipede_game:index' session.url_tag game.url_tag %}">&#8610;&nbsp;To game home</a>
-            </span>
-            <br>
-            <span class="navigation-button">
-                <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-            </span>
-        </div>
-
+            <script>
+                function redirect () {
+                    window.location.href = "{% url 'centipede_game:index' session.url_tag game.url_tag %}" ;
+                }
+                setTimeout(redirect, 3000);
+            </script>
         {% else %}
             <p>
-                You are not authenticated for this session. Go to the <a href="{% url 'core:session_portal' session.url_tag %}">
-                session index</a> page to log in.
+                Fill out the form below to submit your answer to the {{ game.game_config.long_name }}. Please fill out the strategy
+                you would play if you were <span style="color: var(--color-player1); font-weight: bold;">player 1</span> (the first player to play) and if you were
+                <span style="color: var(--color-player2); font-weight: bold;">player 2</span> (the second player to play) as presented in the figure below.
+                Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
             </p>
+
+            <div class="center-align">
+                {% include 'include/centipede_svg.html' %}
+            </div>
+
+            {% if submission_error %}
+                    <section class="form-error-message">
+                        <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
+
+                        <p>{{ submission_error }}</p>
+                    </section>
+                {% endif %}
+
+                {% if submit_answer_form %}
+                    <form action="{% url 'centipede_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                        {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
+                    </form>
+            {% endif %}
         {% endif %}
-    {% else %}
-        <p>
-            It is not possible to play this game.
-            Get back to the <a href="{% url "centipede_game:index" session.url_tag game.url_tag %}">home page</a> of the
-            game.
-        </p>
-    {% endif %}
-{% else %}
-    <p>Only authenticated users can see this page.</p>
-{% endif %}
-</body>
-</html>
+    </section>
+{% endblock %}

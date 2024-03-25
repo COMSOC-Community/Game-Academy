@@ -17,6 +17,7 @@ class GameConfig(AppConfig):
         setting_model=None,
         setting_form=None,
         answer_model=None,
+        answer_model_fields=None,
         management_commands=None
     ):
         super().__init__(app_name, app_module)
@@ -33,6 +34,7 @@ class GameConfig(AppConfig):
         self.setting_model = setting_model
         self.setting_form = setting_form
         self.answer_model = answer_model
+        self.answer_model_fields = answer_model_fields
         if type(management_commands) == str:
             management_commands = [management_commands]
         elif isinstance(management_commands, Iterable):
@@ -46,7 +48,7 @@ class GameConfig(AppConfig):
         INSTALLED_GAMES.append(self)
         INSTALLED_GAMES_CHOICES.append((self.name, self.long_name))
 
-    def register_extra_members(self, setting_model=None, setting_form=None, answer_model=None):
+    def register_models(self, setting_model=None, setting_form=None, answer_model=None):
         if setting_model:
             self.setting_model = setting_model
         if setting_form:

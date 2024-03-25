@@ -1,4 +1,14 @@
 {% extends 'core/base_game.html' %}
+{% load core_extras %}
+
+{% load static %}
+
+{% block extra_head %}
+    <script src="{% static 'js/collapsible_next.js' %}"></script>
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/ipdstyle.css' %}">
+{% endblock %}
+
 
 {% block game_content %}
     <section>
@@ -6,6 +16,30 @@
             This is the main page for the {{ game.game_config.long_name }}. In this game, you will play several times the
             Prisoner's Dilemma and you are asked to submit your strategy for the game.
         </p>
+
+        <p>
+            The specific payoff matrix we are using is the following one:
+        </p>
+
+        <table class="center-margin payoff-matrix">
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td class="payoff-player-header payoff-player-2">Cooperate</td>
+                    <td class="payoff-player-header payoff-player-2">Defect</td>
+                </tr>
+                <tr>
+                    <td class="payoff-player-header payoff-player-1">Cooperate</td>
+                    <td><span class="payoff-player-1">{{ game.itepris_setting.payoff_medium|float_formatter:4 }}</span>, <span class="payoff-player-2">{{ game.itepris_setting.payoff_medium|float_formatter:4 }}</span></td>
+                    <td><span class="payoff-player-1">{{ game.itepris_setting.payoff_tiny|float_formatter:4 }}</span>, <span class="payoff-player-2">{{ game.itepris_setting.payoff_high|float_formatter:4 }}</span></td>
+                </tr>
+                <tr>
+                    <td class="payoff-player-header payoff-player-1">Defect</td>
+                    <td><span class="payoff-player-1">{{ game.itepris_setting.payoff_high|float_formatter:4 }}</span>, <span class="payoff-player-2">{{ game.itepris_setting.payoff_tiny|float_formatter:4 }}</span></td>
+                    <td><span class="payoff-player-1">{{ game.itepris_setting.payoff_low|float_formatter:4 }}</span>, <span class="payoff-player-2">{{ game.itepris_setting.payoff_low|float_formatter:4 }}</span></td>
+                </tr>
+            </tbody>
+        </table>
 
         {% if not team %}
             <p>
@@ -23,10 +57,20 @@
                         {{ p.name }},
                     {% endif %}
                 {% endfor %}
-                {% if answer %}
-                    Your team has <em>already</em> submitted an answer.
-                {% endif %}
             </p>
         {% endif %}
     </section>
+
+
+    {% if answer %}
+        <section>
+            <p>
+                Your team has <em>already</em> submitted an answer.
+            </p>
+
+            {% if answer.graph_json_data %}
+                {% include 'include/ipd_automata.html' with width=600 height=400 answer=answer %}
+            {% endif %}
+        </section>
+    {% endif %}
 {% endblock %}

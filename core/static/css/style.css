@@ -652,21 +652,25 @@ Index page
 	border: 1px solid var(--color-background-dark);
 }
 
-.game-grid > .grid-item .game-grid-title {
+.game-grid > .grid-item .grid-item-title {
 	background-color: var(--color-frame);
 	color: white;
 	margin: 0 0 10px;
 	padding: 5px 10px;
 }
 
-.game-grid > .grid-item .game-grid-title h3 {
+.game-grid > .grid-item .grid-item-title h3 {
 	margin: 0;
 	text-align: left;
 }
 
-.game-grid > .grid-item .game-grid-title p {
+.game-grid > .grid-item .grid-item-title p {
 	margin: 0;
 	text-align: right;
+}
+
+.game-grid > .grid-item .grid-item-content {
+	padding: 0 20px;
 }
 
 @media (max-width: 1400px) {

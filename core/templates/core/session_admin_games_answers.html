@@ -1,0 +1,89 @@
+{% extends 'core/base.html' %}{% load static %}
+
+{% load core_extras %}
+
+{% block title %}Session {{ session.name }} &mdash; Game {{ game.name }} &mdash; Admin{% endblock %}
+
+{% block header %}
+    <h1>{{ session.long_name|title }} &mdash; {{ game.name }} &mdash; Admin</h1>
+{% endblock %}
+
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+
+{% block side_panel_extra_nav %}
+    {% include 'include/sidepanel_nav_session.html' %}
+{% endblock %}
+
+{% block content %}
+    <section>
+        {% include "include/session_admin_navigation.html" %}
+    </section>
+
+    <div class="admin-nav-wrapper">
+        <div class="admin-nav-item">
+            {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
+                    <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
+            {% endwith %}
+        </div>
+        <div class="admin-nav-item">
+            <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Modify settings</a>
+        </div>
+    </div>
+
+    <section id="answers">
+        <h2>Manage Answers for Game {{ game.name }}</h2>
+        {% if deleted_answer_id %}
+            <div class="form-success-message">
+                <p>
+                    The answer submitted by {{ deleted_answer_player }} (id was
+                    {{ deleted_answer_id }}) has been successfully deleted.
+                </p>
+
+                {% if game.game_config.management_commands %}
+                    <p>
+                        In many cases, you may want to run the management commands after the deletion
+                        of an answer.
+                    </p>
+                    <p class="center-align" style="margin: 20px 0;">
+                        {% with "core:"|add:game.game_config.url_tag|add:"_run_management" as url_name %}
+                            <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
+                                Run management commands
+                                <span class="info-span" title="Management commands usually perform computations once all the answers have been submitted (determining the winner, preparing the graphs, etc...).">&#9432;</span>
+                            </a>
+                        {% endwith %}
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
+        {% if answers %}
+             <table class="lined-table center-margin">
+             <tr>
+                <th>Player</th>
+                <th>Team</th>
+                 {% for field in answer_model_fields %}
+                     <th>{{ field|title }}</th>
+                 {% endfor %}
+                <th></th>
+             </tr>
+            {% for answer in answers %}
+                <tr>
+                    <td>{{ answer.player.display_name }}</td>
+                    <td>{% if answer.player.is_team_player %}&#10003;{% else %}&#10007;{% endif %}</td>
+                     {% for field in answer_model_fields %}
+                         <td>{{ answer|get_attr:field }}</td>
+                     {% endfor %}
+                    <td>
+                        <form action="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}#answers" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="remove_answer_id" value={{ answer.id }} />
+                                <input class="color-error button" type="submit" value="Delete" name="delete_answer_form" onclick="return confirm('Deleting an answer is irreversible.')"/>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+             </table>
+        {% else %}
+            <p>No answer has been submitted to this game.</p>
+        {% endif %}
+    </section>
+{% endblock %}

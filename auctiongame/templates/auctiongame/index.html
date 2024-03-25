@@ -1,91 +1,20 @@
-{% load static %}
+{% extends 'core/base_game.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-	<title>Auction Game</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/auctionstyle.css' %}"/>
-</head>
-
-<body>
-
-{% if request.user.is_authenticated %}
-
-    <h1> {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-
-    {% if admin_user %}
-        <div class="warning-section">
-            <p>
-                Since you are logged in as an admin, you can also access the
-                <a href="{% url 'core:session_admin' session.url_tag %}">admin page</a>. You will be able to manage the
-                game from there.
-            </p>
-            {% if not game.playable %}
-                <p>
-                    The game cannot be played at the moment. You can access the answer page
-                    <a href="{% url "auction_game:submit_answer" session.url_tag game.url_tag %}">here</a>.
-                </p>
-            {% endif %}
-            {% if not game.results_visible %}
-                <p>
-                    The results are currently not visible to the players. You can access them
-                    <a href="{% url "auction_game:results" session.url_tag game.url_tag %}">here</a>. Note that admin
-                    shortcuts are present there.
-                </p>
-            {% endif %}
-        </div>
-    {% endif %}
-
+{% block game_content %}
+    <section>
     <p>
         This is the main page for the {{ game.game_config.long_name }}.
         In this game players have to submit a bid to win an auction. Their true valuation for the auction is
         drawn at random from a binomial probability distribution.
     </p>
+    </section>
 
-    {% if current_answer.bid %}
-        <p>
-            You have already submitted an answer, you cannot submit another one. Your answer is
-            <em>{{ current_answer.bid }}</em> for auction <em>{{ current_answer.auction_id }}</em>.
-        </p>
+    {% if answer and answer.bid %}
+        <section>
+            <p>
+                You have already submitted an answer, you cannot submit another one. Your answer is
+                <em>{{ answer.bid }}</em> for auction <em>{{ answer.auction_id }}</em>.
+            </p>
+        </section>
     {% endif %}
-
-    <table class="center-margin">
-        <tbody>
-            <tr>
-                {% if game.playable and not current_answer.bid %}
-                    <td style="padding-right: 20px;">
-                        <span class="orange-button">
-                            <a href="{% url 'auction_game:submit_answer' session.url_tag game.url_tag %}">Submit your answer</a>
-                        </span>
-                    </td>
-                {% endif %}
-                {% if game.results_visible %}
-                    <td style="padding-left: 20px;">
-                        <span class="orange-button">
-                            <a href="{% url 'auction_game:results' session.url_tag game.url_tag %}">See the results</a>
-                        </span>
-                    </td>
-                {% endif %}
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-{% else %}
-    <p>Only authenticated users can see this page.</p>
-{% endif %}
-
-</body>
-</html>
+{% endblock %}

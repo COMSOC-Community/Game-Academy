@@ -17,7 +17,8 @@ class NumbersGameConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
-            management_commands="ng_results"
+            management_commands="ng_results",
+            answer_model_fields=("answer",)
         )
 
     def ready(self):
@@ -25,4 +26,4 @@ class NumbersGameConfig(GameConfig):
 
         from numbersgame.models import Setting, Answer
         from numbersgame.forms import SettingForm
-        self.register_extra_members(Setting, SettingForm, Answer)
+        self.register_models(Setting, SettingForm, Answer)

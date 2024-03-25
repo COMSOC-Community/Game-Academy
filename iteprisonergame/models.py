@@ -44,7 +44,7 @@ class Answer(models.Model):
     motivation = models.TextField()
     name = models.CharField(max_length=100)
     avg_score = models.FloatField(default=0.0, blank=True, null=True)
-    winner = models.BooleanField(blank=True, null=True)
+    winner = models.BooleanField(blank=True, null=True, default=False)
     graph_json_data = models.TextField(blank=True, null=True)
 
     def formatted_avg_score(self):

@@ -601,11 +601,41 @@ def session_admin_games(request, session_url_tag):
                 modify_game_setting_form = game.game_config().setting_form(
                     instance=game_setting_obj
                 )
+                context["modified_game"] = game
         modify_game_forms.append((modify_game_form, modify_game_setting_form))
 
     context["create_game_form"] = create_game_form
     context["modify_game_forms"] = modify_game_forms
     return render(request, "core/session_admin_games.html", context)
+
+
+@session_admin_decorator
+def session_admin_games_answers(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+
+    context["game"] = game
+
+    answer_model = game.game_config().answer_model
+
+    if request.method == "POST" and "delete_answer_form" in request.POST:
+        deleted_answer_id = request.POST["remove_answer_id"]
+        answer_to_delete = answer_model.objects.get(id=deleted_answer_id)
+        context["deleted_answer_id"] = deleted_answer_id
+        context["deleted_answer_player"] = answer_to_delete.player.display_name()
+        answer_to_delete.delete()
+
+    answer_model_fields = game.game_config().answer_model_fields
+    if answer_model_fields is None:
+        omitted_fields = ("id", "game", "player")
+        answer_model_fields = [f.name for f in answer_model._meta.get_fields() if f.name not in omitted_fields]
+    context["answer_model_fields"] = answer_model_fields
+    context["answers"] = answer_model.objects.filter(game=game)
+
+    return render(request, "core/session_admin_games_answers.html", context)
 
 
 @session_admin_decorator

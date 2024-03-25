@@ -2,20 +2,23 @@
 
 <div class="nav-content">
     <ul>
-        <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a></li>
-        {% if game.needs_teams %}
+        {% if game_nav_display_home %}
+            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='index' %}">Home</a></li>
+        {% endif %}
+        {% if game_nav_display_team %}
             {% with "core:"|add:game.game_config.url_tag|add:'_team' as qualified_url_name %}
                 <li><a class="button navigation-button" href="{% url qualified_url_name session.url_tag game.url_tag %}">Team</a></li>
             {% endwith %}
         {% endif %}
-        {% if game.playable or user_is_session_admin %}
-            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Answer</a></li>
+        {% if game_nav_display_answer or user_is_session_admin %}
+            <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='submit_answer' %}">Play</a></li>
         {% endif %}
-        {% if game.results_visible or user_is_session_admin %}
+        {% if game_nav_display_result or user_is_session_admin %}
             <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='results' %}">Result</a></li>
         {% endif %}
         {% if user_is_session_admin %}
-            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Admin</a></li>
+            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Settings Admin</a></li>
+            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}">Answers Admin</a></li>
         {% endif %}
     </ul>
 </div>

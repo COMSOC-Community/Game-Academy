@@ -1,0 +1,26 @@
+
+:root {
+	--color-player1: #A30000;
+	--color-player2: #008C8C;
+}
+
+.graph_wrap {
+	height: 300px;
+}
+
+.lined-table .winning {
+	background: var(--color-success);
+}
+
+.centi-player-1 {
+	fill: var(--color-player1);
+}
+
+.centi-player-2 {
+	fill: var(--color-player2);
+}
+
+.centi-player-turn {
+	font-size: 1.4rem;
+	font-weight: bold;
+}

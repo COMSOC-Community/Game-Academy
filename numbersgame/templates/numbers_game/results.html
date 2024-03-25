@@ -23,7 +23,7 @@
                     </tr>
                     {% for answer in shuffled_answers %}
                         <tr class="show-one-by-one" style="display: none">
-                            <td>{{ answer.answer }}</td>
+                            <td>{{ answer.answer|float_formatter:4 }}</td>
                             <td>{{ answer.motivation }}</td>
                         </tr>
                     {% endfor %}
@@ -69,17 +69,17 @@
                 <table class="lined-table center-margin">
                     <tr>
                         <th>Average answer</th>
-                        <td>{{ game.result_ng.average|floatformat:5 }}</td>
+                        <td>{{ game.result_ng.average|float_formatter:5 }}</td>
                     </tr>
                     <tr>
                         <th>{{ game.numbers_setting.factor_display }} of the average</th>
-                        <td>{{ game.result_ng.corrected_average|floatformat:5 }}</td>
+                        <td>{{ game.result_ng.corrected_average|float_formatter:5 }}</td>
                     </tr>
                     <tr>
                         <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
                         <td>{{ winning_answers_formatted|float_formatter:5 }}</td>
                     </tr>
-                    {% if admin_user %}
+                    {% if user_is_session_admin %}
                         <tr>
                             <th>Winner{{ winners|length|pluralize:',s' }}</th>
                             <td>{{ winners_formatted }}</td>
@@ -101,7 +101,7 @@
                     </tr>
                     {% for answer in answers %}
                         <tr>
-                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer|float_formatter:5 }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
                             <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
                         </tr>
@@ -125,7 +125,7 @@
                         {% for answer in answers %}
                             <tr>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.display_name }}</td>
-                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer }}</td>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer|float_formatter:5 }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
                             </tr>

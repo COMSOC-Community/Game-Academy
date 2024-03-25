@@ -19,6 +19,7 @@ urlpatterns = [
     path("<slug:session_url_tag>/home/", views.session_home, name="session_home",),
     path("<slug:session_url_tag>/admin/", views.session_admin, name="session_admin"),
     path("<slug:session_url_tag>/admin/games/", views.session_admin_games, name="session_admin_games"),
+    path("<slug:session_url_tag>/admin/games/<slug:game_url_tag>/answers/", views.session_admin_games_answers, name="session_admin_games_answers"),
     path("<slug:session_url_tag>/admin/players/", views.session_admin_players, name="session_admin_players"),
     path("<slug:session_url_tag>/admin/player/<int:player_user_id>/password/", views.session_admin_player_password, name="session_admin_player_password"),
 ]

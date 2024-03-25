@@ -3,6 +3,52 @@ from django.db import models
 from core.models import Player, Game
 
 
+class Setting(models.Model):
+    game = models.OneToOneField(
+        Game, on_delete=models.CASCADE, related_name="centi_setting"
+    )
+    payoff_d_p1 = models.FloatField(
+        default=10,
+        help_text="Payoff of player 1 for the path: 'down'."
+    )
+    payoff_d_p2 = models.FloatField(
+        default=10,
+        help_text="Payoff of player 2 for the path: 'down'."
+    )
+    payoff_rd_p1 = models.FloatField(
+        default=0,
+        help_text="Payoff of player 1 for the path: 'right - down'."
+    )
+    payoff_rd_p2 = models.FloatField(
+        default=40,
+        help_text="Payoff of player 2 for the path: 'right - down'."
+    )
+    payoff_rrd_p1 = models.FloatField(
+        default=30,
+        help_text="Payoff of player 1 for the path: 'right - right - down'."
+    )
+    payoff_rrd_p2 = models.FloatField(
+        default=30,
+        help_text="Payoff of player 2 for the path: 'right - right - down'."
+    )
+    payoff_rrrd_p1 = models.FloatField(
+        default=20,
+        help_text="Payoff of player 1 for the path: 'right - right - right - down'."
+    )
+    payoff_rrrd_p2 = models.FloatField(
+        default=60,
+        help_text="Payoff of player 2 for the path: 'right - right - right - down'."
+    )
+    payoff_rrrr_p1 = models.FloatField(
+        default=50,
+        help_text="Payoff of player 1 for the path: 'right - right - right - right'."
+    )
+    payoff_rrrr_p2 = models.FloatField(
+        default=50,
+        help_text="Payoff of player 2 for the path: 'right - right - right - right'."
+    )
+
+
 class Answer(models.Model):
     game = models.ForeignKey(
         Game, on_delete=models.CASCADE, related_name="centi_answers"

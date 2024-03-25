@@ -1,6 +1,12 @@
 from django import forms
 
-from centipedegame.models import Answer
+from centipedegame.models import Answer, Setting
+
+
+class SettingForm(forms.ModelForm):
+    class Meta:
+        model = Setting
+        exclude = ["game"]
 
 
 class SubmitAnswerForm(forms.Form):

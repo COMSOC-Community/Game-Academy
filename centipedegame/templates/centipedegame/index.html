@@ -1,95 +1,30 @@
+{% extends 'core/base_game.html' %}
+
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-	<title>Centipede Game</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/mainstyle.css' %}"/>
+{% block extra_head %}
 	<link rel="stylesheet" type="text/css" href="{% static 'css/centistyle.css' %}"/>
-</head>
+{% endblock %}
 
-<body>
-
-{% if request.user.is_authenticated %}
-
-    <h1> {{ game.game_config.long_name }} - Session {{ session.long_name }}</h1>
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-
-    {% if admin_user %}
-        <div class="warning-section">
-            <p>
-                Since you are logged in as an admin, you can also access the
-                <a href="{% url 'core:session_admin' session.url_tag %}">admin page</a>. You will be able to manage the
-                game from there.
-            </p>
-            {% if not game.playable %}
-                <p>
-                    The game cannot be played at the moment. You can access the answer page
-                    <a href="{% url "centipede_game:submit_answer" session.url_tag game.url_tag %}">here</a>.
-                </p>
-            {% endif %}
-            {% if not game.results_visible %}
-                <p>
-                    The results are currently not visible to the players. You can access them
-                    <a href="{% url "centipede_game:results" session.url_tag game.url_tag %}">here</a>. Note that admin
-                    shortcuts are present there.
-                </p>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    <p>
-        This is the main page for the {{ game.game_config.long_name }}.
-        This is a two-player sequential game with the following structure.
-    </p>
-
-    <p class="center-align">
-        <img width="50%" src="{% static 'img/centipede_structure.png' %}" alt="Structure of the Centipede Game.">
-    </p>
-
-    {% if current_answer %}
+{% block game_content %}
+    <section>
         <p>
-            You have already submitted an answer, you cannot submit another one. Your answer is
-            <em style="color: #A30000;">{{ current_answer.strategy_as_p1 }}</em> as <span style="color: #A30000; font-weight: bold;">player 1</span> and
-            <em style="color: #008C8C;">{{ current_answer.strategy_as_p2 }}</em> as <span style="color: #008C8C; font-weight: bold;">player 2</span>.
+            This is the main page for the {{ game.game_config.long_name }}.
+            This is a two-player sequential game with the following structure.
         </p>
+
+        <div class="center-align">
+            {% include 'include/centipede_svg.html' with game=game %}
+        </div>
+    </section>
+
+    {% if answer %}
+        <section>
+            <p>
+                You have already submitted an answer, you cannot submit another one. Your answer is
+                <em style="color: var(--color-player1);">{{ answer.strategy_as_p1 }}</em> as <span style="color: var(--color-player1); font-weight: bold;">player 1</span> and
+                <em style="color: var(--color-player2)">{{ answer.strategy_as_p2 }}</em> as <span style="color: var(--color-player2); font-weight: bold;">player 2</span>.
+            </p>
+        </section>
     {% endif %}
-
-    <table class="center-margin">
-        <tbody>
-            <tr>
-                {% if game.playable and not current_answer%}
-                    <td style="padding-right: 20px;">
-                        <span class="orange-button">
-                            <a href="{% url 'centipede_game:submit_answer' session.url_tag game.url_tag %}">Submit your answer</a>
-                        </span>
-                    </td>
-                {% endif %}
-                {% if game.results_visible %}
-                    <td style="padding-left: 20px;">
-                        <span class="orange-button">
-                            <a href="{% url 'centipede_game:results' session.url_tag game.url_tag %}">See the results</a>
-                        </span>
-                    </td>
-                {% endif %}
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="navigation">
-        <span class="navigation-button">
-            <a href="{% url 'core:session_home' session.url_tag %}">&#8610;&nbsp;To session home</a>
-        </span>
-    </div>
-{% else %}
-    <p>Only authenticated users can see this page.</p>
-{% endif %}
-
-</body>
-</html>
+{% endblock %}
