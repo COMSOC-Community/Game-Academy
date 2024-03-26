@@ -13,7 +13,7 @@
 {% block game_content %}
     <section>
         <p>
-            This is the main page for the {{ game.game_config.long_name }}. In this game, you will play several times the
+            This is the main page for the game <em>{{ game.name }}</em>. In this game, you will play several times the
             Prisoner's Dilemma and you are asked to submit your strategy for the game.
         </p>
 
@@ -40,27 +40,30 @@
                 </tr>
             </tbody>
         </table>
-
-        {% if not team %}
-            <p>
-                This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
-                team before being able to submit your answer.
-            </p>
-        {% else %}
-            <p>
-                You are part of the team <em>{{ team.name }}</em> composed of the following
-                player{{ team.players.all|pluralize }}:
-                {% for p in team.players.all %}
-                    {% if forloop.last %}
-                        {{ p.name }}.
-                    {% else %}
-                        {{ p.name }},
-                    {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
     </section>
 
+    {% if game.needs_teams %}
+        <section>
+            {% if not team %}
+                <p>
+                    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
+                    team before being able to play.
+                </p>
+            {% else %}
+                <p>
+                    You are part of the team <em>{{ team.name }}</em> composed of the following
+                    player{{ team.players.all|pluralize }}:
+                    {% for p in team.players.all %}
+                        {% if forloop.last %}
+                            {{ p.name }}.
+                        {% else %}
+                            {{ p.name }},
+                        {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+        </section>
+    {% endif %}
 
     {% if answer %}
         <section>

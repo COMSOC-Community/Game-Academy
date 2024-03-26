@@ -18,7 +18,8 @@ class GameConfig(AppConfig):
         setting_form=None,
         answer_model=None,
         answer_model_fields=None,
-        management_commands=None
+        management_commands=None,
+        illustration_path=None,
     ):
         super().__init__(app_name, app_module)
         self.is_game = True
@@ -43,6 +44,7 @@ class GameConfig(AppConfig):
             raise TypeError("The management_commands parameter of a GameConfig needs to be either "
                             "a string or a collection of string.")
         self.management_commands = management_commands
+        self.illustration_path = illustration_path
 
     def ready(self):
         INSTALLED_GAMES.append(self)

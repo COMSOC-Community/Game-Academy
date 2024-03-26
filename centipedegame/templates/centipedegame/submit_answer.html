@@ -6,13 +6,13 @@
 	<link rel="stylesheet" type="text/css" href="{% static 'css/centistyle.css' %}"/>
 {% endblock %}
 
-{% block game_content %}
+{% block game_submit_answer_content %}
     <section>
         {% if submitted_answer %}
             <p>Your answer has been submitted, thanks!</p>
 
             <p>
-                You will be redirected soon to the {{ game.game_config.long_name }} page.
+                You will be redirected soon to the game <em>{{ game.name }}</em> page.
                 If not, <a class="button navigation-button" href="{% url 'centipede_game:index' session.url_tag game.url_tag %}">click here</a>!
             </p>
 
@@ -24,7 +24,7 @@
             </script>
         {% else %}
             <p>
-                Fill out the form below to submit your answer to the {{ game.game_config.long_name }}. Please fill out the strategy
+                Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>. Please fill out the strategy
                 you would play if you were <span style="color: var(--color-player1); font-weight: bold;">player 1</span> (the first player to play) and if you were
                 <span style="color: var(--color-player2); font-weight: bold;">player 2</span> (the second player to play) as presented in the figure below.
                 Please also write one or two sentences to explain the reasoning you have used to come up with your answer.

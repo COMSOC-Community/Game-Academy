@@ -80,6 +80,10 @@ input {
 	font-size: inherit;
 }
 
+img {
+	max-width: 100%;
+}
+
 /* =============
 Main page layout
 ============= */
@@ -671,6 +675,11 @@ Index page
 
 .game-grid > .grid-item .grid-item-content {
 	padding: 0 20px;
+}
+
+.game-illustration {
+	width: 50%;
+	border: 3px solid var(--color-frame);
 }
 
 @media (max-width: 1400px) {

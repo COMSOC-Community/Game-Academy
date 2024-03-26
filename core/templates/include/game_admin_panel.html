@@ -1,5 +1,16 @@
 <section class="warning-section">
     <div class="side-by-side-centered-wrapper">
+        {% with "core:"|add:game.game_config.url_tag|add:"_visibility_toggle" as url_name %}
+            <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
+                {% if game.visible %}
+                    Hide the game
+                    <span class="info-span" title="Players can currently see the game submit their answers, hiding the game will prevent them to do so.">&#9432;</span>
+                {% else %}
+                    Reveal the game
+                    <span class="info-span" title="Players cannot see the game at the moment, revealing the game will allow them to do so.">&#9432;</span>
+                {% endif %}
+            </a>
+        {% endwith %}
         {% with "core:"|add:game.game_config.url_tag|add:"_play_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
                 {% if game.playable %}

@@ -1,18 +1,45 @@
 {% extends 'core/base_game.html' %}
+{% load core_extras %}
 
 {% block game_content %}
     <section>
         <p>
-            This is the main page for the {{ game.game_config.long_name }}. Remember the rules of the game: every player
-            submits a rational number between 0 and 100. The player closest to {{ game.numbers_setting.factor_display }}
+            This is the main page for the game <em>{{ game.name }}</em>. Remember the rules of the game: every player
+            submits a rational number between {{ game.numbers_setting.lower_bound|float_formatter:5}}
+            and {{ game.numbers_setting.upper_bound|float_formatter:5 }}. The player closest to {{ game.numbers_setting.factor_display }}
             times the average of the answers wins the game.
         </p>
+    </section>
 
-        {% if answer %}
+    {% if game.needs_teams %}
+        <section>
+            {% if not team %}
+                <p>
+                    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
+                    team before being able to play.
+                </p>
+            {% else %}
+                <p>
+                    You are part of the team <em>{{ team.name }}</em> composed of the following
+                    player{{ team.players.all|pluralize }}:
+                    {% for p in team.players.all %}
+                        {% if forloop.last %}
+                            {{ p.name }}.
+                        {% else %}
+                            {{ p.name }},
+                        {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if answer %}
+        <section>
             <p>
                 You have already submitted an answer, you cannot submit another one. Your answer is
-                <em>{{ answer.formatted_answer }}</em>.
+                <em>{{ answer.answer|float_formatter:20 }}</em>.
             </p>
-        {% endif %}
-    </section>
+        </section>
+    {% endif %}
 {% endblock %}

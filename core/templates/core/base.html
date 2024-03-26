@@ -32,7 +32,7 @@
             <div id="side-panel" class="side-panel">
 
                 <h3>
-                    {{ user.display_name|title }}
+                    {{ user.display_name }}
                     <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
                     <div id="side-panel-toggle-in" class="side-panel-toggle"><span>&#9664;</span></div>
                 </h3>
@@ -67,7 +67,7 @@
     </main>
 
     <footer id="main-footer">
-        <p>&copy; 2023 Simon Rey</p>
+        <p>&copy; 2024 Simon Rey</p>
     </footer>
 
     {% block extra_scripts %}{% endblock %}

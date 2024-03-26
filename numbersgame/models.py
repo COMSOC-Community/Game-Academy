@@ -7,6 +7,14 @@ class Setting(models.Model):
     game = models.OneToOneField(
         Game, on_delete=models.CASCADE, related_name="numbers_setting"
     )
+    lower_bound = models.FloatField(
+        default=0,
+        help_text="The lower bound (inclusive) on the numbers the player can submit."
+    )
+    upper_bound = models.FloatField(
+        default=100,
+        help_text="The upper bound (inclusive) on the numbers the player can submit."
+    )
     factor = models.FloatField(
         default=2/3,
         help_text="The winning number is the closest one to the average submitted number times the "
@@ -35,11 +43,6 @@ class Answer(models.Model):
     motivation = models.TextField()
     gap = models.FloatField(null=True)
     winner = models.BooleanField(null=True, default=False)
-
-    def formatted_answer(self):
-        if int(self.answer) == self.answer:
-            return int(self.answer)
-        return self.answer
 
     class Meta:
         ordering = ["game", "winner", "player"]

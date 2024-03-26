@@ -61,18 +61,18 @@ class Command(BaseCommand):
 
         if answers:
             categories = {}
-            current_value = 0
-            while current_value < 100:
+            current_value = game.numbers_setting.lower_bound
+            while current_value < game.numbers_setting.upper_bound:
                 categories[current_value] = 0
                 current_value += game.numbers_setting.histogram_bin_size
 
             average = answers.aggregate(Avg("answer"))["answer__avg"]
             corrected_average = game.numbers_setting.factor * average
             best_answers = []
-            smallest_gap = 100
+            smallest_gap = game.numbers_setting.upper_bound
             for answer in answers:
-                current_value = 0
-                while current_value < answer.answer and current_value < 100 - game.numbers_setting.histogram_bin_size:
+                current_value = game.numbers_setting.lower_bound
+                while current_value < answer.answer and current_value < game.numbers_setting.upper_bound - game.numbers_setting.histogram_bin_size:
                     current_value += game.numbers_setting.histogram_bin_size
                 categories[current_value] += 1
 

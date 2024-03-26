@@ -18,7 +18,8 @@ class CentipedeGameConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands="centi_computescores",
-            answer_model_fields=("strategy_as_p1", "strategy_as_p2")
+            answer_model_fields=("strategy_as_p1", "strategy_as_p2"),
+            illustration_path="img/CentipedeGame.png"
         )
 
     def ready(self):

@@ -18,7 +18,8 @@ class AuctionGameConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands="auct_generategraph",
-            answer_model_fields=("auction_id", "bid", "utility")
+            answer_model_fields=("auction_id", "bid", "utility"),
+            illustration_path="img/AuctionGame.png"
         )
 
     def ready(self):

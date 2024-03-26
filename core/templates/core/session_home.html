@@ -2,10 +2,10 @@
 
 {% load core_extras %}
 
-{% block title %}Session {{ session.name }}{% endblock %}
+{% block title %}{{ session.name }}{% endblock %}
 
 {% block header %}
-    <h1>{{ session.long_name|title }}</h1>
+    <h1>{{ session.long_name }}</h1>
 {% endblock %}
 
 {% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
@@ -33,11 +33,14 @@
                 {% for game in games %}
                     <div class="grid-item">
                         <div class="grid-item-title">
-                            <h3 id="games_{{ game.name }}">
-                                {{ game.game_config.long_name }} - {{ game.name }}
-                            </h3>
+                            <h3 id="games_{{ game.name }}">{{ game.name }}</h3>
                         </div>
                         <div class="grid-item-content">
+                            {% if game.game_config.illustration_path %}
+                                <p class="center-align">
+                                    <img class="game-illustration" src="{% static game.game_config.illustration_path %}" alt="Illustration of the {{ game.game_config.long_name }}."/>
+                                </p>
+                            {% endif %}
                             {% if game.description %}
                                 <p>{{ game.description }}</p>
                             {% endif %}
@@ -68,9 +71,7 @@
                 {% for game in invisible_games %}
                     <div class="grid-item">
                         <div class="grid-item-title">
-                            <h3 id="games_{{ game.name }}">
-                                {{ game.game_config.long_name }} - {{ game.name }}
-                            </h3>
+                            <h3 id="games_{{ game.name }}">{ game.name }}</h3>
                         </div>
                         <div class="grid-item-content">
                             {% if game.description %}

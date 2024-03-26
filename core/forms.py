@@ -132,9 +132,9 @@ class CreateSessionForm(forms.Form):
         label="Name of the session",
         label_suffix="",
         max_length=Session._meta.get_field("name").max_length,
-        help_text="The name of the session is the name commonly used to refer to the session. It is "
-        "typically the string used to find the session on the main page of the website, "
-        "or the one showed on the title of the tab in the browser.",
+        help_text="The name of the session is the name commonly used to refer to the session. It "
+                  "is typically the string used to find the session on the main page of the "
+                  "website, or the one showed on the title of the tab in the browser.",
         widget=forms.TextInput(attrs={"placeholder": "Course2023"}),
     )
     long_name = forms.CharField(
@@ -396,9 +396,8 @@ class CreateGameForm(forms.Form):
         label="Name",
         label_suffix="",
         max_length=Game._meta.get_field("name").max_length,
-        help_text="The name of the game as will be displayed when referencing to this specific game."
-        "It does not have to include the type of game and should typically be a short"
-        "string.",
+        help_text="The name of the game as will be displayed when referencing to this specific "
+                  "game. It typically is the name of the game (e.g., 'Numbers Game').",
     )
     url_tag = forms.SlugField(
         label="URL tag",

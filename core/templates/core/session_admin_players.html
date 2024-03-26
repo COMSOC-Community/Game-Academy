@@ -2,7 +2,7 @@
 
 {% load core_extras %}
 
-{% block title %}Session {{ session.name }} &mdash; Admin{% endblock %}
+{% block title %}{{ session.name }} &mdash; Admin{% endblock %}
 
 {% block extra_head %}
     <script src="{% static 'js/filtered_collection.js' %}" defer></script>
@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block header %}
-    <h1>{{ session.long_name|title }} &mdash; Admin</h1>
+    <h1>{{ session.long_name }} &mdash; Admin</h1>
 {% endblock %}
 
 {% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}

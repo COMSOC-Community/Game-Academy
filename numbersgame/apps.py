@@ -18,7 +18,8 @@ class NumbersGameConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands="ng_results",
-            answer_model_fields=("answer",)
+            answer_model_fields=("answer",),
+            illustration_path="img/NumbersGame.png"
         )
 
     def ready(self):

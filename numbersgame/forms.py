@@ -30,7 +30,7 @@ class SettingForm(forms.ModelForm):
 
 
 class SubmitAnswerForm(forms.Form):
-    answer = forms.FloatField(min_value=0.0, max_value=100.0, label_suffix="")
+    answer = forms.FloatField(label_suffix="")
     motivation = forms.CharField(label_suffix="", widget=forms.Textarea())
 
     def __init__(self, *args, **kwargs):
@@ -42,8 +42,9 @@ class SubmitAnswerForm(forms.Form):
         if "answer" not in self.cleaned_data:
             raise forms.ValidationError("The format of your answer is not correct")
         answer = self.cleaned_data["answer"]
-        if 0 > answer > 100:
-            raise forms.ValidationError("The number should be between 0 and 100")
+        if self.game.numbers_setting.lower_bound > answer or answer > self.game.numbers_setting.upper_bound:
+            raise forms.ValidationError(f"The number should be between {self.game.numbers_setting.lower_bound} "
+                                        f"and {self.game.numbers_setting.upper_bound}")
         return answer
 
     def clean(self):

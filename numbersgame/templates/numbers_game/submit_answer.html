@@ -1,12 +1,12 @@
 {% extends 'core/base_game_submit_answers.html' %}
 
-{% block game_content %}
+{% block game_submit_answer_content %}
     <section>
         {% if submitted_answer %}
             <p>Your answer has been submitted, thanks!</p>
 
             <p>
-                You will be redirected soon to the {{ game.game_config.long_name }} page.
+                You will be redirected soon to the game home page.
                 If not, <a class="button navigation-button" href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">click here</a>!
             </p>
 
@@ -22,7 +22,7 @@
                 <p>You cannot submit more than one answer for this game.</p>
             {% else %}
                 <p>
-                    Fill out the form below to submit your answer to the {{ game.game_config.long_name }}.
+                    Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>.
                     The "answer" field should be a rational number with a dot separator (with the
                     <a href="https://docs.python.org/3/tutorial/floatingpoint.html" target="_blank">
                         limitations</a> of a Python float). Please also write one or two sentences to explain

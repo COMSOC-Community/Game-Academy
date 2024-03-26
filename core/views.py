@@ -184,7 +184,7 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
 
     context["game_nav_display_home"] = True
     context["game_nav_display_team"] = game.needs_teams and not team
-    context["game_nav_display_answer"] = game.playable and not answer
+    context["game_nav_display_answer"] = game.playable and not answer and not context["game_nav_display_team"]
     context["game_nav_display_result"] = game.results_visible
 
     return context
@@ -835,6 +835,22 @@ def quick_game_admin_render(request, session, game, info_message):
             kwargs={"session_url_tag": session.url_tag, "game_url_tag": game.url_tag},
         )
     return redirect("core:message")
+
+
+
+@session_admin_decorator
+def game_visibility_toggle(request, session_url_tag, game_url_tag, game_type):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(
+        Game, session=session, url_tag=game_url_tag, game_type=game_type
+    )
+    game.visible = not game.visible
+    game.save()
+    if game.visible:
+        info_message = "The game is now visible."
+    else:
+        info_message = "The game is no longer visible."
+    return quick_game_admin_render(request, session, game, info_message)
 
 
 @session_admin_decorator

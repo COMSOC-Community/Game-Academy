@@ -36,6 +36,14 @@ for game_config in INSTALLED_GAMES:
         path(
             "<slug:session_url_tag>/"
             + re.escape(str(game_config.url_tag))
+            + r"/<slug:game_url_tag>/admin/visibility_toggle",
+            views.game_visibility_toggle,
+            name=game_config.url_tag + "_visibility_toggle",
+            kwargs={"game_type": game_config.name},
+        ),
+        path(
+            "<slug:session_url_tag>/"
+            + re.escape(str(game_config.url_tag))
             + r"/<slug:game_url_tag>/admin/play_toggle",
             views.game_play_toggle,
             name=game_config.url_tag + "_play_toggle",

@@ -5,7 +5,7 @@
         <p>Your answer <em>{{ submitted_answer.name }}</em> has been submitted, thanks!</p>
 
         <p>
-            You will be redirected soon to the {{ game.game_config.long_name }} page.
+            You will be redirected soon to the game home page.
             If not, <a class="button navigation-button" href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">click here</a>!
         </p>
 
@@ -18,7 +18,7 @@
     {% else %}
         {% if not answer %}
             <p>
-                Fill out the form below to submit your answer to the {{ game.game_config.long_name }}. The "strategy"
+                Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>. The "strategy"
                 field should describe the Moore machine defining your strategy. It should be a list of transitions, one
                 per line, where a transition follows the syntax:
             </p>

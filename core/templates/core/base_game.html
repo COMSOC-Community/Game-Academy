@@ -6,7 +6,7 @@
 
 {% block header %}
     <h1>{{ game.name }}</h1>
-    <p>{{ session.long_name|title }}</p>
+    <p>{{ session.long_name }}</p>
 {% endblock %}
 
 {% block side_panel_extra_nav %}
@@ -22,7 +22,7 @@
     {% block game_content %}
         <section>
             <p>
-                This is the main page for the {{ game.game_config.long_name }}.
+                This is the main page for the game <em>{{ game.name }}</em>.
             </p>
         </section>
     {% endblock %}
