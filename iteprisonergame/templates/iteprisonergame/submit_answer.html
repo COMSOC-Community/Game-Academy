@@ -1,54 +1,56 @@
 {% extends 'core/base_game_submit_answers.html' %}
 
 {% block game_submit_answer_content %}
-    {% if submitted_answer %}
-        <p>Your answer <em>{{ submitted_answer.name }}</em> has been submitted, thanks!</p>
-
-        <p>
-            You will be redirected soon to the game home page.
-            If not, <a class="button navigation-button" href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">click here</a>!
-        </p>
-
-        <script>
-            function redirect () {
-                window.location.href = "{% url 'itepris_game:index' session.url_tag game.url_tag %}" ;
-            }
-            setTimeout(redirect, 3000);
-        </script>
-    {% else %}
-        {% if not answer %}
-            <p>
-                Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>. The "strategy"
-                field should describe the Moore machine defining your strategy. It should be a list of transitions, one
-                per line, where a transition follows the syntax:
-            </p>
-            <p class="center-align">
-                <i>state_id &nbsp;: &nbsp; your_action &nbsp;,&nbsp; state_id_if_opp_C &nbsp;,&nbsp; state_id_if_opp_D</i>
-            </p>
-            <p>
-                For instance, you can write "0: C, 0, 1" to say that you cooperate in state 0, you remain in
-                state 0 if your opponent also cooperates, and you transition to state 1 if your opponent defects.
-                For a more complete example, this describes the standard tit-for-tat strategy (start by cooperating,
-                then replicate the action of the opponent):
-            </p>
-            <p class="center-align">
-                <i>0: C, 0, 1</i><br><i>1: D, 0, 1</i>
-            </p>
-            <p>
-                You also need to specify which state is the initial state of your Moore machine (for example, this might be state 0).
-                Please also write one or two sentences to explain the reasoning you have used to come up with your strategy.
-            </p>
+    <section>
+        {% if submitted_answer %}
+            <p>Your answer <em>{{ submitted_answer.name }}</em> has been submitted, thanks!</p>
 
             <p>
-                Please note that <em>you will submit the answer for the entire team {{ team.name }}</em> and that after submission, no
-                player from the team will be able to submit anymore.
+                You will be redirected soon to the game home page.
+                If not, <a class="button navigation-button" href="{% url 'itepris_game:index' session.url_tag game.url_tag %}">click here</a>!
             </p>
 
-            <form action="{% url 'itepris_game:submit_answer' session.url_tag game.url_tag %}" method="post">
-                {% include "include/form_table_template.html" with form=submit_answer_form form_type='submit_answer_form' submit_button_label='Submit your Answer' %}
-            </form>
+            <script>
+                function redirect () {
+                    window.location.href = "{% url 'itepris_game:index' session.url_tag game.url_tag %}" ;
+                }
+                setTimeout(redirect, 3000);
+            </script>
         {% else %}
-            <p>An answer has already been submitted for your team. This page is not for you.</p>
+            {% if not answer %}
+                <p>
+                    Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>. The "strategy"
+                    field should describe the Moore machine defining your strategy. It should be a list of transitions, one
+                    per line, where a transition follows the syntax:
+                </p>
+                <p class="center-align">
+                    <i>state_id &nbsp;: &nbsp; your_action &nbsp;,&nbsp; state_id_if_opp_C &nbsp;,&nbsp; state_id_if_opp_D</i>
+                </p>
+                <p>
+                    For instance, you can write "0: C, 0, 1" to say that you cooperate in state 0, you remain in
+                    state 0 if your opponent also cooperates, and you transition to state 1 if your opponent defects.
+                    For a more complete example, this describes the standard tit-for-tat strategy (start by cooperating,
+                    then replicate the action of the opponent):
+                </p>
+                <p class="center-align">
+                    <i>0: C, 0, 1</i><br><i>1: D, 0, 1</i>
+                </p>
+                <p>
+                    You also need to specify which state is the initial state of your Moore machine (for example, this might be state 0).
+                    Please also write one or two sentences to explain the reasoning you have used to come up with your strategy.
+                </p>
+
+                <p>
+                    Please note that <em>you will submit the answer for the entire team {{ team.name }}</em> and that after submission, no
+                    player from the team will be able to submit anymore.
+                </p>
+
+                <form action="{% url 'itepris_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                    {% include "include/form_table_template.html" with form=submit_answer_form form_type='submit_answer_form' submit_button_label='Submit your Answer' %}
+                </form>
+            {% else %}
+                <p>An answer has already been submitted for your team. This page is not for you.</p>
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </section>
 {% endblock %}

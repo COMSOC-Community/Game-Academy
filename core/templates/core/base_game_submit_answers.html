@@ -1,14 +1,14 @@
 {% extends 'core/base_game.html' %}
 
 {% block game_content %}
-    <section>
-        {% if game.needs_teams and not team %}
+    {% if game.needs_teams and not team %}
+        <section>
             <p>
                 This game needs to be played in team. You need to first create or join a team to
                 submit an answer.
             </p>
-        {% else %}
-            {% block game_submit_answer_content %}{% endblock %}
-        {% endif %}
-    </section>
+        </section>
+    {% else %}
+        {% block game_submit_answer_content %}{% endblock %}
+    {% endif %}
 {% endblock %}
