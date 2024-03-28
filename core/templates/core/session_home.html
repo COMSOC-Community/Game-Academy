@@ -41,6 +41,7 @@
                                     <img class="game-illustration" src="{% static game.game_config.illustration_path %}" alt="Illustration of the {{ game.game_config.long_name }}."/>
                                 </p>
                             {% endif %}
+
                             {% if game.description %}
                                 <p>{{ game.description }}</p>
                             {% endif %}
@@ -74,6 +75,12 @@
                             <h3 id="games_{{ game.name }}">{{ game.name }}</h3>
                         </div>
                         <div class="grid-item-content">
+                            {% if game.game_config.illustration_path %}
+                                <p class="center-align">
+                                    <img class="game-illustration" src="{% static game.game_config.illustration_path %}" alt="Illustration of the {{ game.game_config.long_name }}."/>
+                                </p>
+                            {% endif %}
+
                             {% if game.description %}
                                 <p>{{ game.description }}</p>
                             {% endif %}
