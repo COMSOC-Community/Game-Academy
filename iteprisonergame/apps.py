@@ -1,7 +1,7 @@
 from core.games import GameConfig
 
 NAME = "iteprisonergame"
-LONGNAME = "Iterative Prisoners' Dilemma Game"
+LONGNAME = "Iterative Prisoner's Dilemma Game"
 URL_TAG = "itepris"
 URL_NAMESPACE = "itepris_game"
 

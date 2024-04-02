@@ -80,4 +80,24 @@ def results(request, session_url_tag, game_url_tag):
     if not game.results_visible and not context["user_is_session_admin"]:
         raise Http404("The results are not visible and the user is not an admin.")
 
+    answers = Answer.objects.filter(game=game).order_by('-round_robin_score')
+    context["answers"] = answers
+    context["answers_sorted_against_opt"] = answers.order_by('-score_against_optimum')
+
+    round_robin_winners = answers.filter(round_robin_winner=True)
+    if round_robin_winners:
+        if len(round_robin_winners) == 1:
+            context["formatted_round_robin_winners"] = round_robin_winners.first().player.display_name()
+        else:
+            winners = [f"'<em>{a.player.display_name()}</em>'" for a in round_robin_winners]
+            context["formatted_round_robin_winners"] = ','.join(winners[:-1]) + ' and ' + winners[-1]
+
+    winners_agains_opt = answers.filter(winner_against_optimum=True)
+    if winners_agains_opt:
+        if len(winners_agains_opt) == 1:
+            context["formatted_winners_against_opt"] = winners_agains_opt.first().player.display_name()
+        else:
+            winners = [f"'<em>{a.player.display_name()}</em>'" for a in winners_agains_opt]
+            context["formatted_winners_against_opt"] = ','.join(winners[:-1]) + ' and ' + winners[-1]
+
     return render(request, os.path.join("simp_poker", "results.html"), context)

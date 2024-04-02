@@ -26,7 +26,15 @@
     </p>
 
     <p>
-        Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.
+        Your answer is:
     </p>
+    <ul>
+        <li>Probability <em>{{ answer.prob_p1_king|floatformat }}</em> of betting on a king;</li>
+        <li>Probability <em>{{ answer.prob_p1_queen|floatformat }}</em> of betting on a queen;</li>
+        <li>Probability <em>{{ answer.prob_p1_jack|floatformat }}</em> of betting on a jack;</li>
+        <li>Probability <em>{{ answer.prob_p2_king|floatformat }}</em> of calling on a king;</li>
+        <li>Probability <em>{{ answer.prob_p2_queen|floatformat }}</em> of calling on a queen;</li>
+        <li>Probability <em>{{ answer.prob_p2_jack|floatformat }}</em> of calling on a jack.</li>
+    </ul>
 </section>
 {% endblock %}

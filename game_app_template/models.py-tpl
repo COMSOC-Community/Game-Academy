@@ -23,6 +23,11 @@ class Answer(models.Model):
 #     motivation = models.TextField()
 
 
+    class Meta:
+        ordering = ["game", "player"]
+        unique_together = ("game", "player")
+
+
 # class Result(models.Model):
 #     game = models.OneToOneField(
 #         Game, on_delete=models.CASCADE, related_name="{{ app_name }}_results"

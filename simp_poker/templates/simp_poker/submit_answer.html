@@ -7,26 +7,36 @@
 
             <p>
                 You will be redirected soon to the game home page.
-                If not, <a class="button navigation-button" href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">click here</a>!
+                If not, <a class="button navigation-button" href="{% url 'simp_poker:index' session.url_tag game.url_tag %}">click here</a>!
             </p>
 
             <script>
                 function redirect() {
-                    window.location.href = "{% url 'numbers_game:index' session.url_tag game.url_tag %}";
+                    window.location.href = "{% url 'simp_poker:index' session.url_tag game.url_tag %}";
                 }
                 setTimeout(redirect, 3000);
             </script>
         {% else %}
             {% if answer %}
-                <p>You have already submitted the answer <em>{{ answer.formatted_answer }}</em>.</p>
+                <p>You have already submitted the answer:</p>
+                <ul>
+                    <li>Probability <em>{{ answer.prob_p1_king|floatformat }}</em> of betting on a king;</li>
+                    <li>Probability <em>{{ answer.prob_p1_queen|floatformat }}</em> of betting on a queen;</li>
+                    <li>Probability <em>{{ answer.prob_p1_jack|floatformat }}</em> of betting on a jack;</li>
+                    <li>Probability <em>{{ answer.prob_p2_king|floatformat }}</em> of calling on a king;</li>
+                    <li>Probability <em>{{ answer.prob_p2_queen|floatformat }}</em> of calling on a queen;</li>
+                    <li>Probability <em>{{ answer.prob_p2_jack|floatformat }}</em> of calling on a jack.</li>
+                </ul>
                 <p>You cannot submit more than one answer for this game.</p>
             {% else %}
                 <p>
                     Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>.
-                    All the probability fields should be a rational number with a dot separator (with the
+                    All the probability fields should contain rational numbers between 0 and 1 with a dot separator (with the
                     <a href="https://docs.python.org/3/tutorial/floatingpoint.html" target="_blank">
-                        limitations</a> of a Python float). Please also write one or two sentences to explain
-                    the reasoning you have used to come up with your answer.
+                        limitations</a> of a Python float).
+                </p>
+                <p>
+                    Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
                 </p>
 
                 {% if submission_error %}
@@ -38,7 +48,7 @@
                 {% endif %}
 
                 {% if submit_answer_form %}
-                    <form action="{% url 'numbers_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                    <form action="{% url 'simp_poker:submit_answer' session.url_tag game.url_tag %}" method="post">
                         {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
                     </form>
                 {% endif %}

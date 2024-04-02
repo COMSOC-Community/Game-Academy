@@ -17,8 +17,8 @@ class SimpPokerConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
-            management_commands=None,
-            answer_model_fields=("answer",),
+            management_commands="simppoker_computeresults",
+            answer_model_fields=("avg_score",),
             illustration_path="img/SimpPoker.png",
         )
 

@@ -14,13 +14,14 @@
 {% endblock %}
 
 {% block game_answer_content %}
-<section>
-    <p>
-        An answer is already linked to your account. You cannot play anymore.
-    </p>
+    <section>
+        <h2>Answer</h2>
+        <p>
+            An answer is already linked to your account. You cannot play anymore.
+        </p>
 
-    <p>
-        Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.
-    </p>
-</section>
+        <p>
+            Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.
+        </p>
+    </section>
 {% endblock %}

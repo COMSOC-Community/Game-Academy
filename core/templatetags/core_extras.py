@@ -17,3 +17,8 @@ def get_attr(obj, attr):
 @register.filter
 def float_formatter(x, num_digits=3):
     return core.utils.float_formatter(x, num_digits=num_digits)
+
+
+@register.filter
+def subtract(value, arg):
+    return value - arg

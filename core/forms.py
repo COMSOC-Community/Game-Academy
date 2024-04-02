@@ -7,7 +7,8 @@ from django.contrib.auth import authenticate
 
 from core.games import INSTALLED_GAMES_CHOICES
 from core.models import Session, Player, Game, Team, CustomUser
-from core.constants import player_username, guest_username, FORBIDDEN_SESSION_URL_TAGS
+from core.constants import player_username, guest_username, FORBIDDEN_SESSION_URL_TAGS, \
+    FORBIDDEN_USERNAMES
 
 
 class SessionFinderForm(forms.Form):
@@ -88,10 +89,15 @@ class UserRegistrationForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data["username"]
-        if not self.user and CustomUser.objects.filter(username=username).exists():
-            raise forms.ValidationError(
-                "A user with this username already exists. Please choose a different one."
-            )
+        if not self.user:
+            if username in FORBIDDEN_USERNAMES:
+                raise forms.ValidationError(
+                    "This is a forbidden username. Please choose a different username."
+                )
+            if CustomUser.objects.filter(username=username).exists():
+                raise forms.ValidationError(
+                    "A user with this username already exists. Please choose a different username."
+                )
         return username
 
     def clean_email(self):

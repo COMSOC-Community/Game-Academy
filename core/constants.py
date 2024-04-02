@@ -5,6 +5,7 @@ TEAM_PLAYERNAME_PREFIX = "TeamPlayer_"
 
 FORBIDDEN_SESSION_URL_TAGS = ("", "admin", "user", "logout", "message", "createsession")
 FORBIDDEN_APP_URL_TAGS = ("forcedlogout", "home", "admin")
+FORBIDDEN_USERNAMES = (TEAM_USER_USERNAME,)
 
 
 def player_username(session, player_name):
