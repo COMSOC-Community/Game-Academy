@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "centipedegame.apps.CentipedeGameConfig",
     "iteprisonergame.apps.ItePrisonerGameConfig",
     "numbersgame.apps.NumbersGameConfig",
+#    "simp_poker.apps.SimpPokerConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

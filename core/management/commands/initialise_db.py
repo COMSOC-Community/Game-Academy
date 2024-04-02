@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = "Initialise the database with all the required objects."
 
     def handle(self, *args, **options):
-        if CustomUser.objects.filter(username=TEAM_USER_USERNAME).exists():
+        if not CustomUser.objects.filter(username=TEAM_USER_USERNAME).exists():
             team_user = CustomUser.objects.create_user(
                 username=TEAM_USER_USERNAME,
                 password=TEAM_USER_PASSWORD,

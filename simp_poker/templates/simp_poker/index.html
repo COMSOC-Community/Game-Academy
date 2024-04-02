@@ -1,0 +1,32 @@
+{% extends 'core/base_game_index.html' %}
+{% load core_extras %}
+
+{% block game_rule_content %}
+    <section>
+        <h2>Rules of the Game</h2>
+        <p>
+            This is the main page for the game <em>{{ game.name }}</em>. This is a simplified
+            variant of the Poker game.
+             For this variant of Poker there are just two players and three cards: King of Hearts, Queen of Hearts, and Jack of Hearts. The rules are as follows:
+        </p>
+        <ul>
+            <li>Each player puts one dollar into the pot.</li>
+            <li>Each player draws one of the cards.</li>
+            <li>Player 1 chooses whether she wants to bet or fold. Betting means putting one extra dollar into the pot. Folding means giving up. If she folds, player 2 gets all the money in the pot and the game ends.</li>
+            <li>If the game did not end yet, player 2 chooses whether she wants to call the other player's bet or fold. Calling the bet means also putting one extra dollar into the pot. Folding again means giving up. If she folds, player 1 gets all the money in the pot and the game ends.</li>
+            <li>If the game did not end yet, we reach the showdown: both players show their cards and the one with the higher card gets all the money in the pot. Here King beats Queen beats Jack.</li>
+        </ul>
+    </section>
+{% endblock %}
+
+{% block game_answer_content %}
+<section>
+    <p>
+        An answer is already linked to your account. You cannot play anymore.
+    </p>
+
+    <p>
+        Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.
+    </p>
+</section>
+{% endblock %}

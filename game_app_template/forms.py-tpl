@@ -1,9 +1,27 @@
 from django import forms
 
-# from {{ app_name }}.models import Answer, Setting
+from {{ app_name }}.models import Answer, Setting
 
 
-# class SettingForm(forms.ModelForm):
-#     class Meta:
-#         model = Setting
-#         exclude = ["game"]
+class SettingForm(forms.ModelForm):
+    class Meta:
+        model = Setting
+        exclude = ["game"]
+
+
+
+class SubmitAnswerForm(forms.Form):
+    # Put here the form fields
+
+    def __init__(self, *args, **kwargs):
+        self.game = kwargs.pop("game", None)
+        self.player = kwargs.pop("player", None)
+        super(SubmitAnswerForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super(SubmitAnswerForm, self).clean()
+        if Answer.objects.filter(player=self.player, game=self.game).exists():
+            raise forms.ValidationError(
+                "You have already submitted an answer for this game!"
+            )
+        return cleaned_data
