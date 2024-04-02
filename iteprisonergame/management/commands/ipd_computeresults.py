@@ -128,6 +128,7 @@ class Command(BaseCommand):
                 best_answer = [answer]
             elif score == best_score:
                 best_answer.append(answer)
-        for answer in best_answer:
-            answer.winner = True
-            answer.save()
+        if best_answer:
+            for answer in best_answer:
+                answer.winner = True
+                answer.save()

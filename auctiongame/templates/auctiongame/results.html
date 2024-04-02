@@ -11,107 +11,115 @@
 {% endblock %}
 
 {% block game_content %}
-    {% for auction_id in "12345" %}
-        <section>
-            <h2 class="next-collapsible">Auction {{ auction_id }} {% if answer.auction_id|slugify == auction_id %}(yours){% endif %}</h2>
-            <div class="collapsed-content hidden">
-                {% if game.result_auct %}
-                    {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
-                        {% if auction_answers %}
-                            <div id="histogram_{{ auction_id }}" class="graph_wrap">
-                            </div>
-                            <script>
-                                var histoData_{{ auction_id }} = [
-                                        {% with 'histo_auct'|add:auction_id|add:'_js_data' as histo_attr %}
-                                            {{ game.result_auct|get_attr:histo_attr|safe }}
-                                        {% endwith %}
-                                    ];
-                                var histoChart_{{ auction_id }} = anychart.column();
-                                histoChart_{{ auction_id }}.title('Distribution of the bids received');
-                                histoChart_{{ auction_id }}.yAxis().title('Bid');
-                                histoChart_{{ auction_id }}.xAxis().title('Bid range');
-                                var histoSerie_{{ auction_id }} = histoChart_{{ auction_id }}.column(histoData_{{ auction_id }});
-                                histoSerie_{{ auction_id }}.name('Number of bids')
-                                histoSerie_{{ auction_id }}.stroke({color:'#ffffff'})
-                                histoSerie_{{ auction_id }}.fill('#FF8000')
-                                histoChart_{{ auction_id }}.container('histogram_{{ auction_id }}');
-                                histoChart_{{ auction_id }}.draw();
-                            </script>
+    {% if answers %}
+        {% for auction_id in "12345" %}
+            <section>
+                <h2 class="next-collapsible">Auction {{ auction_id }} {% if answer.auction_id|slugify == auction_id %}(yours){% endif %}</h2>
+                <div class="collapsed-content hidden">
+                    {% if game.result_auct %}
+                        {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
+                            {% if auction_answers %}
+                                <div id="histogram_{{ auction_id }}" class="graph_wrap">
+                                </div>
+                                <script>
+                                    var histoData_{{ auction_id }} = [
+                                            {% with 'histo_auct'|add:auction_id|add:'_js_data' as histo_attr %}
+                                                {{ game.result_auct|get_attr:histo_attr|safe }}
+                                            {% endwith %}
+                                        ];
+                                    var histoChart_{{ auction_id }} = anychart.column();
+                                    histoChart_{{ auction_id }}.title('Distribution of the bids received');
+                                    histoChart_{{ auction_id }}.yAxis().title('Bid');
+                                    histoChart_{{ auction_id }}.xAxis().title('Bid range');
+                                    var histoSerie_{{ auction_id }} = histoChart_{{ auction_id }}.column(histoData_{{ auction_id }});
+                                    histoSerie_{{ auction_id }}.name('Number of bids')
+                                    histoSerie_{{ auction_id }}.stroke({color:'#ffffff'})
+                                    histoSerie_{{ auction_id }}.fill('#FF8000')
+                                    histoChart_{{ auction_id }}.container('histogram_{{ auction_id }}');
+                                    histoChart_{{ auction_id }}.draw();
+                                </script>
 
-                            <table class="lined-table center-margin">
-                                <tr>
-                                    <th>Valuation</th>
-                                    <th>Bid</th>
-                                    <th>Utility</th>
-                                    <th>Justification</th>
-                                </tr>
-                                {% for answer in auction_answers %}
+                                <table class="lined-table center-margin">
                                     <tr>
-                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
-                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid|float_formatter:20 }}</td>
-                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|float_formatter:4 }}</td>
-                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                                        <th>Valuation</th>
+                                        <th>Bid</th>
+                                        <th>Utility</th>
+                                        <th>Justification</th>
                                     </tr>
-                                {% endfor %}
-                            </table>
+                                    {% for answer in auction_answers %}
+                                        <tr>
+                                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
+                                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid|float_formatter:20 }}</td>
+                                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|float_formatter:4 }}</td>
+                                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
 
-                            {% if user_is_session_admin %}
-                                <p class="center-align" style="margin-top: 20px;">
-                                    <a class="next-collapsible">Display the winner{{ winning_answers|pluralize }}:</a>
-                                    {% with formatted_winners|get_key_dict:auction_id as winners %}
-                                        <span class="collapsed-content hidden"> {{ winners }}</span>
-                                    {% endwith %}
-                                </p>
+                                {% if user_is_session_admin %}
+                                    <p class="center-align" style="margin-top: 20px;">
+                                        <a class="next-collapsible">Display the winner{{ winning_answers|pluralize }}:</a>
+                                        {% with formatted_winners|get_key_dict:auction_id as winners %}
+                                            <span class="collapsed-content hidden"> {{ winners }}</span>
+                                        {% endwith %}
+                                    </p>
+                                {% endif %}
+                            {% else %}
+                                <p>No player has been assigned to this auction.</p>
                             {% endif %}
-                        {% else %}
-                            <p>No player has been assigned to this auction.</p>
-                        {% endif %}
-                    {% endwith %}
-            {% endif %}
-            </div>
-        </section>
-    {% endfor %}
-
-    {% if user_is_session_admin %}
-        <section>
-            <h2 class="next-collapsible">Global winner{{ global_winning_answers|pluralize }}</h2>
-            <div class="collapsed-content hidden">
-                {% if global_winners_formatted %}
-                    <p class="center-align">{{ global_winners_formatted }}</p>
-                {% else %}
-                    <p>
-                        There is no global winner. What most likely happened is that none of the
-                        winners of the auctions ended up with positive utility.
-                    </p>
+                        {% endwith %}
                 {% endif %}
-            </div>
-        </section>
+                </div>
+            </section>
+        {% endfor %}
 
-        <section class="warning-section">
-            <h2 class="next-collapsible">All answers with names</h2>
+        {% if user_is_session_admin %}
+            <section>
+                <h2 class="next-collapsible">Global winner{{ global_winning_answers|pluralize }}</h2>
+                <div class="collapsed-content hidden">
+                    {% if global_winners_formatted %}
+                        <p class="center-align">{{ global_winners_formatted }}</p>
+                    {% else %}
+                        <p>
+                            There is no global winner. What most likely happened is that none of the
+                            winners of the auctions ended up with positive utility.
+                        </p>
+                    {% endif %}
+                </div>
+            </section>
 
-            <div class="collapsed-content hidden">
-                <table class="lined-table center-margin">
-                    <tr>
-                        <th>Player</th>
-                        <th>Auction</th>
-                        <th>Valuation</th>
-                        <th>Bid</th>
-                        <th>Utility</th>
-                        <th>Justification</th>
-                    </tr>
-                    {% for answer in answers %}
+            <section class="warning-section">
+                <h2 class="next-collapsible">All answers with names</h2>
+
+                <div class="collapsed-content hidden">
+                    <table class="lined-table center-margin">
                         <tr>
-                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.player.name }}</td>
-                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.auction_id }}</td>
-                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
-                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid|float_formatter:20 }}</td>
-                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|float_formatter:4 }}</td>
-                            <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                            <th>Player</th>
+                            <th>Auction</th>
+                            <th>Valuation</th>
+                            <th>Bid</th>
+                            <th>Utility</th>
+                            <th>Justification</th>
                         </tr>
-                    {% endfor %}
-                </table>
-            </div>
+                        {% for answer in answers %}
+                            <tr>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.player.name }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.auction_id }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid|float_formatter:20 }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|float_formatter:4 }}</td>
+                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </section>
+        {% endif %}
+    {% else %}
+        <section>
+            <p>
+                No answer has been submitted yet.
+            </p>
         </section>
     {% endif %}
 {% endblock %}

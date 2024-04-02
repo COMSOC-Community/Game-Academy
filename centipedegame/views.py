@@ -1,12 +1,10 @@
 import os
 
 from django.shortcuts import render, get_object_or_404
-from django.core import management
 from django.http import Http404
 
-from core.models import Session, Game, Player
+from core.models import Session, Game
 from core.views import (
-    is_session_admin,
     base_context_initialiser,
     session_context_initialiser,
     game_context_initialiser,

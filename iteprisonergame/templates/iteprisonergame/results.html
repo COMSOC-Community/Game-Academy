@@ -10,113 +10,118 @@
 {% endblock %}
 
 {% block game_content %}
-    <section>
     {% if answers %}
+        <section>
+            <h2>General Results</h2>
 
-        <h2>General Results</h2>
-
-        <table class="center-margin lined-table">
-            <thead>
-                <tr>
-                    {% if user_is_session_admin %}
-                        <th>Team</th>
-                    {% endif %}
-                    <th>Strategy</th>
-                    <th>Average Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for answer in answers %}
+            <table class="center-margin lined-table">
+                <thead>
                     <tr>
                         {% if user_is_session_admin %}
-                            <td {% if answer.winner %}class="winning"{% endif %}>
-                                <a href="#{{ answer.player.display_name }}">{{ answer.player.display_name }}</a>
-                            </td>
+                            <th>Team</th>
                         {% endif %}
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
-                        <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
+                        <th>Strategy</th>
+                        <th>Average Score</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </section>
-
-    {% for answer in answers %}
-        <section>
-
-            <h2 {% if user_is_session_admin %}id="{{ answer.player.display_name }}"{% endif %}>{% if user_is_session_admin %}{{ answer.player.display_name }}: {% endif %}{{ answer.name }}</h2>
-
-            {% if user_is_session_admin %}
-                {% if answer.player.is_team_player %}
-                    <p>
-                        <a class="next-collapsible">Display the member{{ answer.player.represented_team.players.all|length|pluralize:',s' }} of the team:</a>
-
-                        <span class="collapsed-content hidden">
-                            {% for p in answer.player.represented_team.players.all %}
-                                {% if forloop.last %}
-                                    {{ p.name }}.
-                                {% else %}
-                                    {{ p.name }},
-                                {% endif %}
-                            {% endfor %}
-                        </span>
-                    </p>
-                {% endif %}
-            {% endif %}
-
-            <div class="side-by-side-centered-wrapper">
-                <div>
-                    {% if answer.number_states < 100 %}
-                        {% include 'include/ipd_automata.html' with width=400 height=250 answer=answer %}
-                    {% else %}
-                        <p>This answer has {{ answer.number_states }} states. It will not be displayed.</p>
-                    {% endif %}
-                </div>
-                <div class="automata-text-display">
-                    <p>
-                        {{ answer.automata|linebreaksbr }}
-                    </p>
-                </div>
-            </div>
-
-            <p class="center-align">
-                {% if user_is_session_admin %}
-                    <a class="next-collapsible">Display the score:</a>
-                    <span class="collapsed-content hidden">
-                        {{ answer.formatted_avg_score|float_formatter:4 }}
-                    </span>
-                {% else %}
-                    Average score of the strategy: <em>{{ answer.formatted_avg_score|float_formatter:4 }}</em>
-                {% endif %}
-            </p>
-
-            <p>{{ answer.motivation }}</p>
-
-            <p class="next-collapsible"><a>See the detail of the scores.</a></p>
-
-            <div class="collapsed-content hidden">
-                <table class="lined-table center-margin">
-                    <thead>
+                </thead>
+                <tbody>
+                    {% for answer in answers %}
                         <tr>
-                            <th>Opponent</th>
-                            <th>#Rounds</th>
-                            <th>Average Score</th>
-                            <th>Average Score Opponent</th>
+                            {% if user_is_session_admin %}
+                                <td {% if answer.winner %}class="winning"{% endif %}>
+                                    <a href="#{{ answer.player.display_name }}">{{ answer.player.display_name }}</a>
+                                </td>
+                            {% endif %}
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
+                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% for score in answer.scores.all %}
-                            <tr>
-                                <td>{{ score.opponent.name }}</td>
-                                <td>{{ score.number_round }}</td>
-                                <td>{{ score.answer_avg_score|float_formatter:4 }}</td>
-                                <td>{{ score.opp_avg_score|float_formatter:4 }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
-    {% endfor %}
-{% endif %}
+
+        {% for answer in answers %}
+            <section>
+
+                <h2 {% if user_is_session_admin %}id="{{ answer.player.display_name }}"{% endif %}>{% if user_is_session_admin %}{{ answer.player.display_name }}: {% endif %}{{ answer.name }}</h2>
+
+                {% if user_is_session_admin %}
+                    {% if answer.player.is_team_player %}
+                        <p>
+                            <a class="next-collapsible">Display the member{{ answer.player.represented_team.players.all|length|pluralize:',s' }} of the team:</a>
+
+                            <span class="collapsed-content hidden">
+                                {% for p in answer.player.represented_team.players.all %}
+                                    {% if forloop.last %}
+                                        {{ p.name }}.
+                                    {% else %}
+                                        {{ p.name }},
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </p>
+                    {% endif %}
+                {% endif %}
+
+                <div class="side-by-side-centered-wrapper">
+                    <div>
+                        {% if answer.number_states < 100 %}
+                            {% include 'include/ipd_automata.html' with width=400 height=250 answer=answer %}
+                        {% else %}
+                            <p>This answer has {{ answer.number_states }} states. It will not be displayed.</p>
+                        {% endif %}
+                    </div>
+                    <div class="automata-text-display">
+                        <p>
+                            {{ answer.automata|linebreaksbr }}
+                        </p>
+                    </div>
+                </div>
+
+                <p class="center-align">
+                    {% if user_is_session_admin %}
+                        <a class="next-collapsible">Display the score:</a>
+                        <span class="collapsed-content hidden">
+                            {{ answer.formatted_avg_score|float_formatter:4 }}
+                        </span>
+                    {% else %}
+                        Average score of the strategy: <em>{{ answer.formatted_avg_score|float_formatter:4 }}</em>
+                    {% endif %}
+                </p>
+
+                <p>{{ answer.motivation }}</p>
+
+                <p class="next-collapsible"><a>See the detail of the scores.</a></p>
+
+                <div class="collapsed-content hidden">
+                    <table class="lined-table center-margin">
+                        <thead>
+                            <tr>
+                                <th>Opponent</th>
+                                <th>#Rounds</th>
+                                <th>Average Score</th>
+                                <th>Average Score Opponent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for score in answer.scores.all %}
+                                <tr>
+                                    <td>{{ score.opponent.name }}</td>
+                                    <td>{{ score.number_round }}</td>
+                                    <td>{{ score.answer_avg_score|float_formatter:4 }}</td>
+                                    <td>{{ score.opp_avg_score|float_formatter:4 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        {% endfor %}
+    {% else %}
+        <section>
+            <p>
+                No answer has been submitted yet.
+            </p>
+        </section>
+    {% endif %}
 {% endblock %}
