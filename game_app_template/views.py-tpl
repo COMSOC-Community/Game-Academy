@@ -1,9 +1,14 @@
+import os
+
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
+from django.core import management
 
-from core.authorisations import is_session_admin
-from core.models import Session, Game, Player
+from core.models import Session, Game
+from core.views import base_context_initialiser, session_context_initialiser, \
+    game_context_initialiser
 
+# from .forms import SubmitAnswerForm
 from .apps import NAME
 from .models import Answer
 
@@ -13,14 +18,13 @@ def index(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    context = {"session": session, "game": game, "admin_user": is_session_admin(session, request.user)}
-    try:
-        player = Player.objects.get(session=session, user=request.user)
-        context["player"] = player
-        answer = Answer.objects.get(game=game, player=player)
-        context["answer"] = answer
-    except (Player.DoesNotExist, Answer.DoesNotExist):
-        pass
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_home"] = False
+
+    return render(request, os.path.join("{{ app_name }}", "index.html"), context)
 
 
 def submit_answer(request, session_url_tag, game_url_tag):
@@ -28,12 +32,21 @@ def submit_answer(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_answer"] = False
+
+    if not game.playable and not context["user_is_session_admin"]:
+        raise Http404("The game is not playable and the user is not an admin.")
+
+    submitting_player = context["submitting_player"]
+    answer = context["answer"]
+
+    if submitting_player and not answer:
+        # Do something, probably deal with submit answer form
+    return render(request, os.path.join("{{ app_name }}", "submit_answer.html"), context)
 
 
 def results(request, session_url_tag, game_url_tag):
@@ -41,11 +54,13 @@ def results(request, session_url_tag, game_url_tag):
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=NAME
     )
-    admin_user = is_session_admin(session, request.user)
 
-    if not game.visible and not admin_user:
-        raise Http404
-    if not request.user.is_authenticated:
-        raise Http404
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+    game_context_initialiser(request, session, game, Answer, context)
+    context["game_nav_display_result"] = False
 
-    
+    if not game.results_visible and not context["user_is_session_admin"]:
+        raise Http404("The results are not visible and the user is not an admin.")
+
+    return render(request, os.path.join("{{ app_name }}", "results.html"), context)

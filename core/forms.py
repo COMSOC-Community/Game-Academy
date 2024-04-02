@@ -133,8 +133,8 @@ class CreateSessionForm(forms.Form):
         label_suffix="",
         max_length=Session._meta.get_field("name").max_length,
         help_text="The name of the session is the name commonly used to refer to the session. It "
-                  "is typically the string used to find the session on the main page of the "
-                  "website, or the one showed on the title of the tab in the browser.",
+        "is typically the string used to find the session on the main page of the "
+        "website, or the one showed on the title of the tab in the browser.",
         widget=forms.TextInput(attrs={"placeholder": "Course2023"}),
     )
     long_name = forms.CharField(
@@ -245,7 +245,7 @@ class PlayerLoginForm(forms.Form):
         label="Player name",
         label_suffix="",
         max_length=Player._meta.get_field("name").max_length,
-        help_text="This is NOT case sensitive."
+        help_text="This is NOT case sensitive.",
     )
     password = forms.CharField(
         label="Password", label_suffix="", widget=forms.PasswordInput()
@@ -256,7 +256,7 @@ class PlayerLoginForm(forms.Form):
         initial=False,
         required=False,
         help_text="If selected, the player name provided is considered to be a username (for a "
-                  "user) instead of the name of a player for this session.",
+        "user) instead of the name of a player for this session.",
     )
 
     def __init__(self, *args, **kwargs):
@@ -279,7 +279,9 @@ class PlayerLoginForm(forms.Form):
                 else:
                     raise forms.ValidationError("No match was found.")
             else:
-                player = Player.objects.filter(name__iexact=player_name, session=self.session)
+                player = Player.objects.filter(
+                    name__iexact=player_name, session=self.session
+                )
                 if player.exists():
                     player = player.first()
                     user = player.user
@@ -346,9 +348,12 @@ class PlayerRegistrationForm(forms.Form):
         player_name = self.cleaned_data["player_name"]
         if not self.player:
             username = player_username(self.session, player_name)
-            if CustomUser.objects.filter(
-                username=username
-            ).exists() or Player.objects.filter(session=self.session, name__iexact=player_name).exists():
+            if (
+                CustomUser.objects.filter(username=username).exists()
+                or Player.objects.filter(
+                    session=self.session, name__iexact=player_name
+                ).exists()
+            ):
                 raise forms.ValidationError(
                     "This player name is already used by someone in this session. Choose another "
                     "one."
@@ -397,7 +402,7 @@ class CreateGameForm(forms.Form):
         label_suffix="",
         max_length=Game._meta.get_field("name").max_length,
         help_text="The name of the game as will be displayed when referencing to this specific "
-                  "game. It typically is the name of the game (e.g., 'Numbers Game').",
+        "game. It typically is the name of the game (e.g., 'Numbers Game').",
     )
     url_tag = forms.SlugField(
         label="URL tag",
@@ -492,35 +497,41 @@ class CreateGameForm(forms.Form):
 
 def validate_csv_file(value):
     value = deepcopy(value)
-    if not value.name.endswith('.csv'):
-        raise forms.ValidationError("Only CSV files are allowed (extension must be '.csv').")
+    if not value.name.endswith(".csv"):
+        raise forms.ValidationError(
+            "Only CSV files are allowed (extension must be '.csv')."
+        )
     try:
         csv_reader = csv.reader(TextIOWrapper(value))
         header = next(csv_reader, None)
         if header is None:
-            raise forms.ValidationError('CSV file must have a header row.')
+            raise forms.ValidationError("CSV file must have a header row.")
         num_columns = len(header)
         for row in csv_reader:
             if row:
                 if len(row) != num_columns:
-                    raise forms.ValidationError('All rows must have the same number of columns as'
-                                                ' the header.')
+                    raise forms.ValidationError(
+                        "All rows must have the same number of columns as"
+                        " the header."
+                    )
 
     except csv.Error as e:
-        raise forms.ValidationError(f'Error reading CSV file: {e}')
+        raise forms.ValidationError(f"Error reading CSV file: {e}")
 
 
 class ImportCSVFileForm(forms.Form):
     csv_file = forms.FileField(
-        label='Upload CSV File',
+        label="Upload CSV File",
         validators=[validate_csv_file],
-        widget=forms.ClearableFileInput(attrs={'accept': '.csv'}),
+        widget=forms.ClearableFileInput(attrs={"accept": ".csv"}),
     )
 
     def clean_csv_file(self):
-        uploaded_file = self.cleaned_data['csv_file']
-        if not uploaded_file.name.endswith('.csv'):
-            raise forms.ValidationError("Only CSV files are allowed (extension must be '.csv').")
+        uploaded_file = self.cleaned_data["csv_file"]
+        if not uploaded_file.name.endswith(".csv"):
+            raise forms.ValidationError(
+                "Only CSV files are allowed (extension must be '.csv')."
+            )
         return uploaded_file
 
 

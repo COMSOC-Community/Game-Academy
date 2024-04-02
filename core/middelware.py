@@ -20,11 +20,7 @@ OPEN_VIEWS = {
 }
 
 # Views outside of session that can be accessed by players
-PLAYER_OPEN_VIEWS = {
-    "core:logout",
-    "core:force_player_logout",
-    "core:change_password"
-}
+PLAYER_OPEN_VIEWS = {"core:logout", "core:force_player_logout", "core:change_password"}
 
 # Views within a session that can be accessed by anyone (i.e., non-players)
 SESSION_OPEN_VIEWS = {
@@ -73,7 +69,10 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
 
         accessed_session_url_tag = None
         # Enforcing all required login depending on what is asked
-        if split_path and split_path[SESSION_URL_TAG_POSITION] not in FORBIDDEN_SESSION_URL_TAGS:
+        if (
+            split_path
+            and split_path[SESSION_URL_TAG_POSITION] not in FORBIDDEN_SESSION_URL_TAGS
+        ):
             accessed_session_url_tag = split_path[SESSION_URL_TAG_POSITION]
             session = get_object_or_404(Session, url_tag=accessed_session_url_tag)
             # If session admin, all is good, return
@@ -87,10 +86,7 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                 # We know user is authenticated (assert above, and first test), session views are
                 # only available to players of the session. If player_user, we let go so that it's
                 # caught by the session scope enforcement.
-                if (
-                        not player_user
-                        and request.user.players.first().session == session
-                ):
+                if not player_user and request.user.players.first().session == session:
                     raise Http404(
                         "Middleware block: this session view is not accessible to this user "
                         "(not admin, not player)."
@@ -118,10 +114,12 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
             if view_name in PLAYER_OPEN_VIEWS:
                 return
             if (
-                    not accessed_session_url_tag
-                    or accessed_session_url_tag != player_user_session.url_tag
+                not accessed_session_url_tag
+                or accessed_session_url_tag != player_user_session.url_tag
             ):
-                response = redirect("core:force_player_logout", player_user_session.url_tag)
+                response = redirect(
+                    "core:force_player_logout", player_user_session.url_tag
+                )
                 response[
                     "Location"
                 ] += f"?next={path}&prev={reverse('core:session_home', args=(player_user_session.url_tag,))}"

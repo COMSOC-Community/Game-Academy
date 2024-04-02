@@ -110,8 +110,12 @@ class Team(models.Model):
     name = models.CharField(max_length=100)
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     players = models.ManyToManyField(Player, related_name="teams")
-    creator = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="created_teams")
-    team_player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name="represented_team")
+    creator = models.ForeignKey(
+        Player, on_delete=models.CASCADE, related_name="created_teams"
+    )
+    team_player = models.OneToOneField(
+        Player, on_delete=models.CASCADE, related_name="represented_team"
+    )
 
     class Meta:
         ordering = ["name"]

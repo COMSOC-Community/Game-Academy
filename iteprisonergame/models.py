@@ -10,25 +10,23 @@ class Setting(models.Model):
     num_repetitions = models.CharField(
         default="168, 359, 306, 622, 319",
         help_text="The number of repetition. If there is more than one round, separate it with a "
-                  "comma.",
-        max_length=50
+        "comma.",
+        max_length=50,
     )
     payoff_high = models.FloatField(
         default=0,
-        help_text="Payoff of the defecting player when one player defects and the other cooperates."
+        help_text="Payoff of the defecting player when one player defects and the other cooperates.",
     )
     payoff_medium = models.FloatField(
-        default=-10,
-        help_text="Payoff of both players when they both cooperate."
+        default=-10, help_text="Payoff of both players when they both cooperate."
     )
     payoff_low = models.FloatField(
-        default=-20,
-        help_text="Payoff of both players when they both defect."
+        default=-20, help_text="Payoff of both players when they both defect."
     )
     payoff_tiny = models.FloatField(
         default=-25,
         help_text="Payoff of the cooperating player when one player defects and the other "
-                  "cooperates."
+        "cooperates.",
     )
 
 

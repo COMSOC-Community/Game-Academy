@@ -3,28 +3,28 @@ from django.db import models
 from core.models import Player, Game
 
 
-# class Setting(models.Model):
-#     game = models.ForeignKey(
-#         Game,
-#         on_delete=models.CASCADE,
-#         related_name="numbers_setting"
-#     )
+class Setting(models.Model):
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE,
+        related_name="{{ app_name }}_setting"
+    )
 #     setting1 = models.FloatField()
-# 
-# 
-# class Answer(models.Model):
-#     game = models.ForeignKey(
-#         Game, on_delete=models.CASCADE, related_name="numbers_answers"
-#     )
-#     player = models.ForeignKey(
-#         Player, on_delete=models.CASCADE, related_name="numbers_answer"
-#     )
+
+
+class Answer(models.Model):
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="{{ app_name }}_answers"
+    )
+    player = models.ForeignKey(
+        Player, on_delete=models.CASCADE, related_name="{{ app_name }}_answer"
+    )
 #     answer = models.FloatField()
 #     motivation = models.TextField()
-#     
-# 
+
+
 # class Result(models.Model):
 #     game = models.OneToOneField(
-#         Game, on_delete=models.CASCADE, related_name="result_ng"
+#         Game, on_delete=models.CASCADE, related_name="{{ app_name }}_results"
 #     )
 #     result = models.FloatField()

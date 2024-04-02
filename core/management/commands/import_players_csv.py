@@ -12,8 +12,8 @@ class Command(BaseCommand):
     help = "Populate players from a csv file"
 
     def add_arguments(self, parser):
-        parser.add_argument('csv_file', type=str, help='Path to the CSV file')
-        parser.add_argument('session_url_tag', type=str, help="Session URL tag")
+        parser.add_argument("csv_file", type=str, help="Path to the CSV file")
+        parser.add_argument("session_url_tag", type=str, help="Session URL tag")
 
     def handle(self, *args, **options):
         session_url_tag = options["session_url_tag"]
@@ -27,22 +27,26 @@ class Command(BaseCommand):
             )
             return
 
-        csv_file_path = options['csv_file']
+        csv_file_path = options["csv_file"]
         num_created = 0
         num_fail = 0
-        with open(csv_file_path, 'r', encoding="utf-8") as file:
+        with open(csv_file_path, "r", encoding="utf-8") as file:
             reader = csv.DictReader(file, delimiter=";")
             if reader:
                 for row in reader:
                     if "username" not in row:
-                        raise ValueError("The csv needs to have a column with 'username'.")
+                        raise ValueError(
+                            "The csv needs to have a column with 'username'."
+                        )
                     player_name = row["username"].strip()
                     try:
                         validate_slug(player_name)
                     except ValidationError:
                         self.stdout.write(
-                            self.style.ERROR(f"FAIL: username '{player_name}' is not a valid slug, "
-                                             f"line has been skipped.")
+                            self.style.ERROR(
+                                f"FAIL: username '{player_name}' is not a valid slug, "
+                                f"line has been skipped."
+                            )
                         )
                         num_fail += 1
                         continue
@@ -66,19 +70,25 @@ class Command(BaseCommand):
                     if email:
                         email = email.strip()
 
-                    if CustomUser.objects.filter(
-                            username=username
-                    ).exists() or Player.objects.filter(session=session,
-                                                        name=player_name).exists():
+                    if (
+                        CustomUser.objects.filter(username=username).exists()
+                        or Player.objects.filter(
+                            session=session, name=player_name
+                        ).exists()
+                    ):
                         self.stdout.write(
-                            self.style.ERROR(f"FAIL: username '{player_name}' already used, "
-                                             f"line has been skipped.")
+                            self.style.ERROR(
+                                f"FAIL: username '{player_name}' already used, "
+                                f"line has been skipped."
+                            )
                         )
                         num_fail += 1
                     else:
                         user = CustomUser.objects.create_user(
-                            username=username, password=password, email=email,
-                            is_player=True
+                            username=username,
+                            password=password,
+                            email=email,
+                            is_player=True,
                         )
                         Player.objects.create(
                             user=user, name=player_name, session=session

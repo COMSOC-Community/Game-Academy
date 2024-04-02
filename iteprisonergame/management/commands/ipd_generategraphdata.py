@@ -25,9 +25,7 @@ def itepris_graph_data(answer):
             state = state.strip()
             if state not in state_list:
                 state_list.append(state)
-            action, next_state_coop, next_state_def = transition.strip().split(
-                ","
-            )
+            action, next_state_coop, next_state_def = transition.strip().split(",")
             action = action.strip()
             next_state_coop = next_state_coop.strip()
             next_state_def = next_state_def.strip()

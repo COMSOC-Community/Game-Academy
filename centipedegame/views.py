@@ -5,8 +5,12 @@ from django.core import management
 from django.http import Http404
 
 from core.models import Session, Game, Player
-from core.views import is_session_admin, base_context_initialiser, session_context_initialiser, \
-    game_context_initialiser
+from core.views import (
+    is_session_admin,
+    base_context_initialiser,
+    session_context_initialiser,
+    game_context_initialiser,
+)
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
@@ -53,12 +57,8 @@ def submit_answer(request, session_url_tag, game_url_tag):
                 submitted_answer = Answer.objects.create(
                     game=game,
                     player=submitting_player,
-                    strategy_as_p1=submit_answer_form.cleaned_data[
-                        "strategy_as_p1"
-                    ],
-                    strategy_as_p2=submit_answer_form.cleaned_data[
-                        "strategy_as_p2"
-                    ],
+                    strategy_as_p1=submit_answer_form.cleaned_data["strategy_as_p1"],
+                    strategy_as_p2=submit_answer_form.cleaned_data["strategy_as_p2"],
                     motivation=submit_answer_form.cleaned_data["motivation"],
                 )
                 context["submitted_answer"] = submitted_answer

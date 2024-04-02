@@ -6,8 +6,11 @@ from django.shortcuts import render, get_object_or_404
 from django.core import management
 
 from core.models import Session, Game
-from core.views import base_context_initialiser, session_context_initialiser, \
-    game_context_initialiser
+from core.views import (
+    base_context_initialiser,
+    session_context_initialiser,
+    game_context_initialiser,
+)
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
@@ -68,9 +71,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
                     submitted_answer.delete()
                     context["submission_error"] = repr(e)
         else:
-            submit_answer_form = SubmitAnswerForm(
-                game=game, player=submitting_player
-            )
+            submit_answer_form = SubmitAnswerForm(game=game, player=submitting_player)
         context["submit_answer_form"] = submit_answer_form
     return render(request, os.path.join("numbers_game", "submit_answer.html"), context)
 

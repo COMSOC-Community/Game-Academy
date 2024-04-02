@@ -14,6 +14,7 @@ def session_admin_decorator(view_func):
         if is_session_admin(session, request.user):
             return view_func(request, session_url_tag, *args, **kwargs)
         raise Http404("Only administrators of the session can see this page.")
+
     return wrapper
 
 
@@ -24,4 +25,5 @@ def session_super_admin_decorator(view_func):
         if is_session_super_admin(session, request.user):
             return view_func(request, session_url_tag, *args, **kwargs)
         raise Http404("Only super administrators of the session can see this page.")
+
     return wrapper

@@ -5,8 +5,11 @@ from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 
 from core.models import Session, Game
-from core.views import base_context_initialiser, session_context_initialiser, \
-    game_context_initialiser
+from core.views import (
+    base_context_initialiser,
+    session_context_initialiser,
+    game_context_initialiser,
+)
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
@@ -67,17 +70,15 @@ def submit_answer(request, session_url_tag, game_url_tag):
                 if submit_answer_form.is_valid():
                     answer.bid = submit_answer_form.cleaned_data["bid"]
                     answer.utility = (
-                        10
-                        + answer.auction_id
-                        - submit_answer_form.cleaned_data["bid"]
+                        10 + answer.auction_id - submit_answer_form.cleaned_data["bid"]
                     )
-                    answer.motivation = submit_answer_form.cleaned_data[
-                        "motivation"
-                    ]
+                    answer.motivation = submit_answer_form.cleaned_data["motivation"]
                     answer.save()
                     context["submitted_answer"] = answer
             else:
-                submit_answer_form = SubmitAnswerForm(game=game, player=submitting_player)
+                submit_answer_form = SubmitAnswerForm(
+                    game=game, player=submitting_player
+                )
             context["submit_answer_form"] = submit_answer_form
     return render(request, os.path.join("auctiongame", "submit_answer.html"), context)
 

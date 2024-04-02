@@ -19,7 +19,7 @@ class NumbersGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands="ng_results",
             answer_model_fields=("answer",),
-            illustration_path="img/NumbersGame.png"
+            illustration_path="img/NumbersGame.png",
         )
 
     def ready(self):
@@ -27,4 +27,5 @@ class NumbersGameConfig(GameConfig):
 
         from numbersgame.models import Setting, Answer
         from numbersgame.forms import SettingForm
+
         self.register_models(Setting, SettingForm, Answer)

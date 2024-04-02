@@ -107,7 +107,10 @@ class Command(BaseCommand):
                     strat2_histo_data[answer.strategy_as_p2] += 1
                 else:
                     strat2_histo_data[answer.strategy_as_p2] = 1
-                if (answer.strategy_as_p1, answer.strategy_as_p2) not in score_heatmap_data:
+                if (
+                    answer.strategy_as_p1,
+                    answer.strategy_as_p2,
+                ) not in score_heatmap_data:
                     score_heatmap_data[
                         (answer.strategy_as_p1, answer.strategy_as_p2)
                     ] = answer.avg_score
@@ -132,7 +135,9 @@ class Command(BaseCommand):
             )
             game.result_centi.scores_heatmap_js_data = "\n".join(
                 [
-                    "{{x: '{}', y: '{}', heat: {}}},".format(key[0], key[1], float_formatter(value, num_digits=4))
+                    "{{x: '{}', y: '{}', heat: {}}},".format(
+                        key[0], key[1], float_formatter(value, num_digits=4)
+                    )
                     for key, value in score_heatmap_data.items()
                 ]
             )

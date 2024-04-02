@@ -19,12 +19,13 @@ class AuctionGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands="auct_generategraph",
             answer_model_fields=("auction_id", "bid", "utility"),
-            illustration_path="img/AuctionGame.png"
+            illustration_path="img/AuctionGame.png",
         )
 
     def ready(self):
         super(AuctionGameConfig, self).ready()
 
         from auctiongame.models import Answer
+
         # from auctiongame.forms import SettingForm
         self.register_models(answer_model=Answer)

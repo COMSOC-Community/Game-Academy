@@ -10,25 +10,29 @@ class SettingForm(forms.ModelForm):
         exclude = ["game"]
 
     def clean_num_repetitions(self):
-        num_repetitions = self.cleaned_data.get('num_repetitions')
+        num_repetitions = self.cleaned_data.get("num_repetitions")
         print(num_repetitions)
-        if ',' in num_repetitions:
+        if "," in num_repetitions:
             repetitions = [s.strip() for s in num_repetitions.split(",")]
             print(repetitions)
             for r in repetitions:
                 try:
                     float(r)
                 except ValueError:
-                    raise forms.ValidationError("The numbers of repetitions need to be cast as a "
-                                                f"float. This failed for value '{r}'.")
+                    raise forms.ValidationError(
+                        "The numbers of repetitions need to be cast as a "
+                        f"float. This failed for value '{r}'."
+                    )
             num_repetitions = ",".join(repetitions)
         else:
             num_repetitions = num_repetitions.strip()
             try:
                 num_repetitions = float(num_repetitions)
             except ValueError:
-                raise forms.ValidationError("The number of repetitions needs to be cast as a "
-                                            f"float. This failed for value '{num_repetitions}'.")
+                raise forms.ValidationError(
+                    "The number of repetitions needs to be cast as a "
+                    f"float. This failed for value '{num_repetitions}'."
+                )
         return num_repetitions
 
 
@@ -68,7 +72,9 @@ class SubmitAnswerForm(forms.Form):
     def clean(self):
         cleaned_data = super(SubmitAnswerForm, self).clean()
         if self.moore_machine and "initial_state" in cleaned_data:
-            connectivity_error = self.moore_machine.test_connectivity(cleaned_data["initial_state"])
+            connectivity_error = self.moore_machine.test_connectivity(
+                cleaned_data["initial_state"]
+            )
             if connectivity_error:
                 raise forms.ValidationError(connectivity_error)
         if Answer.objects.filter(player=self.player, game=self.game).exists():

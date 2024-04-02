@@ -28,8 +28,10 @@ class GameConfig(AppConfig):
         self.long_name = long_name
         self.package_name = package_name
         if url_tag in FORBIDDEN_APP_URL_TAGS:
-            raise ValueError(f"The game app {package_name} has url_tag `{url_tag}` which is "
-                             f"forbidden. Choose another url tag for the app.")
+            raise ValueError(
+                f"The game app {package_name} has url_tag `{url_tag}` which is "
+                f"forbidden. Choose another url tag for the app."
+            )
         self.url_tag = url_tag
         self.url_namespace = url_namespace
         self.setting_model = setting_model
@@ -41,8 +43,10 @@ class GameConfig(AppConfig):
         elif isinstance(management_commands, Iterable):
             management_commands = list(management_commands)
         elif management_commands is not None:
-            raise TypeError("The management_commands parameter of a GameConfig needs to be either "
-                            "a string or a collection of string.")
+            raise TypeError(
+                "The management_commands parameter of a GameConfig needs to be either "
+                "a string or a collection of string."
+            )
         self.management_commands = management_commands
         self.illustration_path = illustration_path
 

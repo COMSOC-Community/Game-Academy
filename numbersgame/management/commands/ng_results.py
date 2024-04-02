@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.db.models import Avg
 
@@ -10,7 +9,10 @@ from numbersgame.models import Answer, Result
 
 
 class Command(BaseCommand):
-    help = "Updates the values required for the results page, to be run each time a new answer is submitted."
+    help = (
+        "Updates the values required for the results page, to be run each time a new answer "
+        "is submitted."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)
@@ -72,7 +74,12 @@ class Command(BaseCommand):
             smallest_gap = game.numbers_setting.upper_bound
             for answer in answers:
                 current_value = game.numbers_setting.lower_bound
-                while current_value < answer.answer and current_value < game.numbers_setting.upper_bound - game.numbers_setting.histogram_bin_size:
+                while (
+                    current_value < answer.answer
+                    and current_value
+                    < game.numbers_setting.upper_bound
+                    - game.numbers_setting.histogram_bin_size
+                ):
                     current_value += game.numbers_setting.histogram_bin_size
                 categories[current_value] += 1
 
@@ -95,8 +102,14 @@ class Command(BaseCommand):
                 [
                     "['{}-{}', {}],".format(
                         float_formatter(key, num_digits=3),
-                        float_formatter(min(key + game.numbers_setting.histogram_bin_size, 100), num_digits=3),
-                        val
+                        float_formatter(
+                            min(
+                                key + game.numbers_setting.histogram_bin_size,
+                                game.numbers_setting.upper_bound,
+                            ),
+                            num_digits=3,
+                        ),
+                        val,
                     )
                     for key, val in categories.items()
                 ]

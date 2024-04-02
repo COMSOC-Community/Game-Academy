@@ -4,8 +4,11 @@ from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 
 from core.models import Session, Game
-from core.views import base_context_initialiser, session_context_initialiser, \
-    game_context_initialiser
+from core.views import (
+    base_context_initialiser,
+    session_context_initialiser,
+    game_context_initialiser,
+)
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
@@ -54,20 +57,18 @@ def submit_answer(request, session_url_tag, game_url_tag):
                 new_answer = Answer.objects.create(
                     game=game,
                     player=submitting_player,
-                    initial_state=submit_answer_form.cleaned_data[
-                        "initial_state"
-                    ],
+                    initial_state=submit_answer_form.cleaned_data["initial_state"],
                     automata=submit_answer_form.cleaned_data["automata"],
-                    motivation=submit_answer_form.cleaned_data[
-                        "motivation"
-                    ],
+                    motivation=submit_answer_form.cleaned_data["motivation"],
                     name=submit_answer_form.cleaned_data["name"],
                 )
                 new_answer.graph_json_data = itepris_graph_data(new_answer)
                 new_answer.save()
                 context["submitted_answer"] = new_answer
         context["submit_answer_form"] = submit_answer_form
-    return render(request, os.path.join("iteprisonergame", "submit_answer.html"), context)
+    return render(
+        request, os.path.join("iteprisonergame", "submit_answer.html"), context
+    )
 
 
 def results(request, session_url_tag, game_url_tag):

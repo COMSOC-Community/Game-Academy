@@ -30,7 +30,8 @@ from .forms import (
     CreateGameForm,
     CreateTeamForm,
     DeleteSessionForm,
-    MakeAdminForm, ImportCSVFileForm,
+    MakeAdminForm,
+    ImportCSVFileForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 
@@ -122,6 +123,7 @@ def message(request):
 #    CONTEXT INITIALISERS
 # ==========================
 
+
 def base_context_initialiser(request, context=None):
     if context is None:
         context = {}
@@ -147,7 +149,9 @@ def session_context_initialiser(request, session, context=None):
     context["session"] = session
     if request.user.is_authenticated:
         context["user_is_session_admin"] = is_session_admin(session, request.user)
-        context["user_is_session_super_admin"] = is_session_super_admin(session, request.user)
+        context["user_is_session_super_admin"] = is_session_super_admin(
+            session, request.user
+        )
     return context
 
 
@@ -184,7 +188,9 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
 
     context["game_nav_display_home"] = True
     context["game_nav_display_team"] = game.needs_teams and not team
-    context["game_nav_display_answer"] = game.playable and not answer and not context["game_nav_display_team"]
+    context["game_nav_display_answer"] = (
+        game.playable and not answer and not context["game_nav_display_team"]
+    )
     context["game_nav_display_result"] = game.results_visible
 
     return context
@@ -279,7 +285,10 @@ def change_password(request, user_id):
                 "_message_view_message"
             ] = f"Your password has been changed."
             if request.user.is_player:
-                return redirect("core:session_home", session_url_tag=request.user.players.first().session.url_tag)
+                return redirect(
+                    "core:session_home",
+                    session_url_tag=request.user.players.first().session.url_tag,
+                )
             return redirect("core:message")
 
     context = base_context_initialiser(request)
@@ -386,7 +395,9 @@ def session_portal(request, session_url_tag):
                             "core:session_home", session_url_tag=session.url_tag
                         )
                     # If not, we are loging in a user, thus we stay here
-                    return redirect("core:session_portal", session_url_tag=session.url_tag)
+                    return redirect(
+                        "core:session_portal", session_url_tag=session.url_tag
+                    )
                 # Something weird happened: form is valid but authenticate fails
                 context["general_login_error"] = True
             else:
@@ -631,7 +642,11 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
     answer_model_fields = game.game_config().answer_model_fields
     if answer_model_fields is None:
         omitted_fields = ("id", "game", "player")
-        answer_model_fields = [f.name for f in answer_model._meta.get_fields() if f.name not in omitted_fields]
+        answer_model_fields = [
+            f.name
+            for f in answer_model._meta.get_fields()
+            if f.name not in omitted_fields
+        ]
     context["answer_model_fields"] = answer_model_fields
     context["answers"] = answer_model.objects.filter(game=game)
 
@@ -675,17 +690,18 @@ def session_admin_players(request, session_url_tag):
     if request.method == "POST" and "import_player_csv_form" in request.POST:
         import_player_csv_form = ImportCSVFileForm(request.POST, request.FILES)
         if import_player_csv_form.is_valid():
-            uploaded_file = request.FILES['csv_file']
-            file_name = FileSystemStorage(location=tempfile.gettempdir()).save(uploaded_file.name,
-                                                                               uploaded_file)
+            uploaded_file = request.FILES["csv_file"]
+            file_name = FileSystemStorage(location=tempfile.gettempdir()).save(
+                uploaded_file.name, uploaded_file
+            )
             try:
                 out = StringIO()
-                params = {'stdout': out}
+                params = {"stdout": out}
                 management.call_command(
-                    'import_players_csv',
+                    "import_players_csv",
                     os.path.join(tempfile.gettempdir(), file_name),
                     session.url_tag,
-                    **params
+                    **params,
                 )
                 context["import_player_csv_log"] = out.getvalue()
             except Exception as e:
@@ -779,7 +795,9 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
-    game_context_initialiser(request, session, game, game.game_config().answer_model, context)
+    game_context_initialiser(
+        request, session, game, game.game_config().answer_model, context
+    )
     context["game_nav_display_team"] = False
 
     player = context["player"]
@@ -792,26 +810,26 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
                     create_team_form = CreateTeamForm(request.POST, game=game)
                     if create_team_form.is_valid():
                         team_name = create_team_form.cleaned_data["name"]
-                        team_player_user = CustomUser.objects.get(username=TEAM_USER_USERNAME)
+                        team_player_user = CustomUser.objects.get(
+                            username=TEAM_USER_USERNAME
+                        )
                         team_player = Player.objects.create(
                             user=team_player_user,
                             name=team_player_name(team_name),
                             session=session,
-                            is_team_player=True
+                            is_team_player=True,
                         )
                         new_team = Team.objects.create(
                             name=create_team_form.cleaned_data["name"],
                             game=game,
                             creator=player,
-                            team_player=team_player
+                            team_player=team_player,
                         )
                         new_team.players.add(player)
                         new_team.save()
                         context["created_team"] = new_team
                 elif "join_team_form" in request.POST:
-                    joined_team = Team.objects.get(
-                        pk=request.POST["join_team_input"]
-                    )
+                    joined_team = Team.objects.get(pk=request.POST["join_team_input"])
                     joined_team.players.add(player)
                     joined_team.save()
                     context["team_joined"] = True
@@ -835,7 +853,6 @@ def quick_game_admin_render(request, session, game, info_message):
             kwargs={"session_url_tag": session.url_tag, "game_url_tag": game.url_tag},
         )
     return redirect("core:message")
-
 
 
 @session_admin_decorator

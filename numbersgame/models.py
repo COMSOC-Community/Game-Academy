@@ -9,14 +9,14 @@ class Setting(models.Model):
     )
     lower_bound = models.FloatField(
         default=0,
-        help_text="The lower bound (inclusive) on the numbers the player can submit."
+        help_text="The lower bound (inclusive) on the numbers the player can submit.",
     )
     upper_bound = models.FloatField(
         default=100,
-        help_text="The upper bound (inclusive) on the numbers the player can submit."
+        help_text="The upper bound (inclusive) on the numbers the player can submit.",
     )
     factor = models.FloatField(
-        default=2/3,
+        default=2 / 3,
         help_text="The winning number is the closest one to the average submitted number times the "
         "factor.",
     )

@@ -19,7 +19,7 @@ class CentipedeGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands="centi_computescores",
             answer_model_fields=("strategy_as_p1", "strategy_as_p2"),
-            illustration_path="img/CentipedeGame.png"
+            illustration_path="img/CentipedeGame.png",
         )
 
     def ready(self):
@@ -27,4 +27,7 @@ class CentipedeGameConfig(GameConfig):
 
         from centipedegame.models import Answer, Setting
         from centipedegame.forms import SettingForm
-        self.register_models(setting_model=Setting, setting_form=SettingForm, answer_model=Answer)
+
+        self.register_models(
+            setting_model=Setting, setting_form=SettingForm, answer_model=Answer
+        )

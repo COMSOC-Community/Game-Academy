@@ -60,10 +60,22 @@ class Command(BaseCommand):
         ipd_rounds = game.itepris_setting.num_repetitions
         ipd_rounds = [int(r) for r in ipd_rounds.split(",") if r]
         payoffs = {
-            ("C", "C"): (game.itepris_setting.payoff_medium, game.itepris_setting.payoff_medium),
-            ("C", "D"): (game.itepris_setting.payoff_low, game.itepris_setting.payoff_high),
-            ("D", "C"): (game.itepris_setting.payoff_high, game.itepris_setting.payoff_low),
-            ("D", "D"): (game.itepris_setting.payoff_tiny, game.itepris_setting.payoff_tiny),
+            ("C", "C"): (
+                game.itepris_setting.payoff_medium,
+                game.itepris_setting.payoff_medium,
+            ),
+            ("C", "D"): (
+                game.itepris_setting.payoff_low,
+                game.itepris_setting.payoff_high,
+            ),
+            ("D", "C"): (
+                game.itepris_setting.payoff_high,
+                game.itepris_setting.payoff_low,
+            ),
+            ("D", "D"): (
+                game.itepris_setting.payoff_tiny,
+                game.itepris_setting.payoff_tiny,
+            ),
         }
 
         total_scores = {answer: 0 for answer, _ in ans_automatas}
@@ -106,7 +118,9 @@ class Command(BaseCommand):
         best_answer = None
         best_score = None
         for answer, score in total_scores.items():
-            answer.avg_score = score / (sum(ipd_rounds) * (max(1, len(ans_automatas) - 1)))
+            answer.avg_score = score / (
+                sum(ipd_rounds) * (max(1, len(ans_automatas) - 1))
+            )
             answer.winner = False
             answer.save()
             if best_score is None or score > best_score:
