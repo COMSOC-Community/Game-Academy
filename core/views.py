@@ -598,10 +598,10 @@ def session_admin_games(request, session_url_tag):
                 )
                 if modify_game_setting_form.is_valid():
                     modify_game_setting_form.save()
-                modify_game_setting_form = game.game_config().setting_form(
-                    instance=game_setting_obj
-                )
-                context["modified_game"] = game
+                    modify_game_setting_form = game.game_config().setting_form(
+                        instance=game_setting_obj
+                    )
+                    context["modified_game"] = game
         modify_game_forms.append((modify_game_form, modify_game_setting_form))
 
     context["create_game_form"] = create_game_form

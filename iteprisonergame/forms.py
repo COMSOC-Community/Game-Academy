@@ -1,5 +1,3 @@
-import re
-
 from django import forms
 
 from iteprisonergame.automata import MooreMachine
@@ -11,13 +9,27 @@ class SettingForm(forms.ModelForm):
         model = Setting
         exclude = ["game"]
 
-    def clean_histogram_bin_size(self):
-        bin_size = self.cleaned_data.get('histogram_bin_size')
-        if bin_size <= 0:
-            raise forms.ValidationError("The histogram bin size cannot be 0 or less.")
-        if bin_size > 100:
-            raise forms.ValidationError("The histogram bin size cannot be more than 100.")
-        return bin_size
+    def clean_num_repetitions(self):
+        num_repetitions = self.cleaned_data.get('num_repetitions')
+        print(num_repetitions)
+        if ',' in num_repetitions:
+            repetitions = [s.strip() for s in num_repetitions.split(",")]
+            print(repetitions)
+            for r in repetitions:
+                try:
+                    float(r)
+                except ValueError:
+                    raise forms.ValidationError("The numbers of repetitions need to be cast as a "
+                                                f"float. This failed for value '{r}'.")
+            num_repetitions = ",".join(repetitions)
+        else:
+            num_repetitions = num_repetitions.strip()
+            try:
+                num_repetitions = float(num_repetitions)
+            except ValueError:
+                raise forms.ValidationError("The number of repetitions needs to be cast as a "
+                                            f"float. This failed for value '{num_repetitions}'.")
+        return num_repetitions
 
 
 class SubmitAnswerForm(forms.Form):
