@@ -14,7 +14,6 @@ class Command(BaseCommand):
                 password=TEAM_USER_PASSWORD,
                 is_player=True,
                 is_guest_player=True,
-                is_team_player=True,
             )
             team_user.is_active = False
             team_user.save()
