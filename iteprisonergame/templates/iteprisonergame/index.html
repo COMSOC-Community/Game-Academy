@@ -1,4 +1,4 @@
-{% extends 'core/base_game.html' %}
+{% extends 'core/base_game_index.html' %}
 {% load core_extras %}
 
 {% load static %}
@@ -10,15 +10,16 @@
 {% endblock %}
 
 
-{% block game_content %}
+{% block game_rule_content %}
     <section>
+        <h2>Rules of the Game</h2>
         <p>
             This is the main page for the game <em>{{ game.name }}</em>. In this game, you will play several times the
-            Prisoner's Dilemma and you are asked to submit your strategy for the game.
+            Prisoner's Dilemma and you are asked to submit your strategy for this repetitive game.
         </p>
 
         <p>
-            The specific payoff matrix we are using is the following one:
+            The payoff matrix we are using for each individual instance of the Prisoner's Dilemma is the following one:
         </p>
 
         <table class="center-margin payoff-matrix">
@@ -41,39 +42,18 @@
             </tbody>
         </table>
     </section>
+{% endblock %}
 
-    {% if game.needs_teams %}
-        <section>
-            {% if not team %}
-                <p>
-                    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
-                    team before being able to play.
-                </p>
-            {% else %}
-                <p>
-                    You are part of the team <em>{{ team.name }}</em> composed of the following
-                    player{{ team.players.all|pluralize }}:
-                    {% for p in team.players.all %}
-                        {% if forloop.last %}
-                            {{ p.name }}.
-                        {% else %}
-                            {{ p.name }},
-                        {% endif %}
-                    {% endfor %}
-                </p>
-            {% endif %}
-        </section>
+{% block game_answer_content %}
+<section>
+    <h2>Your strategy</h2>
+    <p>
+        An answer is already linked to your account. You cannot play anymore.
+        {% if answer.graph_json_data %} Below is a visualisation of your answer.{% endif %}
+    </p>
+
+    {% if answer.graph_json_data %}
+        {% include 'include/ipd_automata.html' with width=600 height=400 answer=answer %}
     {% endif %}
-
-    {% if answer %}
-        <section>
-            <p>
-                Your team has <em>already</em> submitted an answer.
-            </p>
-
-            {% if answer.graph_json_data %}
-                {% include 'include/ipd_automata.html' with width=600 height=400 answer=answer %}
-            {% endif %}
-        </section>
-    {% endif %}
+</section>
 {% endblock %}

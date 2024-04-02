@@ -1,42 +1,25 @@
-{% extends 'core/base_game.html' %}
+{% extends 'core/base_game_index.html' %}
 
-{% block game_content %}
+{% block game_rule_content %}
     <section>
-    <p>
-        This is the main page for the game <em>{{ game.name }}</em>.
-        In this game players have to submit a bid to win an auction. Their true valuation for the auction is
-        drawn at random from a binomial probability distribution.
-    </p>
+        <h2>Rules of the Game</h2>
+        <p>
+            This is the main page for the game <em>{{ game.name }}</em>.
+            In this game players submit a bid to win an auction. Their true valuation for the
+            auction is drawn at random from a binomial probability distribution.
+        </p>
     </section>
+{% endblock %}
 
-    {% if game.needs_teams %}
-        <section>
-            {% if not team %}
-                <p>
-                    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
-                    team before being able to play.
-                </p>
-            {% else %}
-                <p>
-                    You are part of the team <em>{{ team.name }}</em> composed of the following
-                    player{{ team.players.all|pluralize }}:
-                    {% for p in team.players.all %}
-                        {% if forloop.last %}
-                            {{ p.name }}.
-                        {% else %}
-                            {{ p.name }},
-                        {% endif %}
-                    {% endfor %}
-                </p>
-            {% endif %}
-        </section>
-    {% endif %}
-
-    {% if answer and answer.bid %}
+{% block game_answer_content %}
+    {% if answer.bid %}
         <section>
             <p>
-                You have already submitted an answer, you cannot submit another one. Your answer is
-                <em>{{ answer.bid }}</em> for auction <em>{{ answer.auction_id }}</em>.
+                An answer is already linked to your account. You cannot play anymore.
+            </p>
+            <p>
+                Your bid is <em>{{ answer.bid }}</em> for auction <em>{{ answer.auction_id }}</em>
+                and your true valuation for the item is <em>{{ answer.auction_id|add:"10" }}</em>.
             </p>
         </section>
     {% endif %}

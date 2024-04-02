@@ -1,0 +1,33 @@
+{% extends 'core/base_game.html' %}
+
+{% block game_content %}
+    {% block game_rule_content %}{% endblock %}
+
+    {% if game.needs_teams %}
+        <section>
+            <h2>Team</h2>
+            {% if not team %}
+                <p>
+                    This game is meant to be played <em>in teams</em> (of possibly one player). You
+                    need to first create or join a team before being able to play.
+                </p>
+            {% else %}
+                <p>
+                    You are part of the team <em>{{ team.name }}</em> composed of the following
+                    player{{ team.players.all|pluralize }}:
+                    {% for p in team.players.all %}
+                        {% if forloop.last %}
+                            {{ p.name }}.
+                        {% else %}
+                            {{ p.name }},
+                        {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% if answer %}
+        {% block game_answer_content %}{% endblock %}
+    {% endif %}
+{% endblock %}

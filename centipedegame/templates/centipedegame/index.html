@@ -1,4 +1,4 @@
-{% extends 'core/base_game.html' %}
+{% extends 'core/base_game_index.html' %}
 
 {% load static %}
 
@@ -6,8 +6,9 @@
 	<link rel="stylesheet" type="text/css" href="{% static 'css/centistyle.css' %}"/>
 {% endblock %}
 
-{% block game_content %}
+{% block game_rule_content %}
     <section>
+        <h2>Rules of the game</h2>
         <p>
             This is the main page for the game <em>{{ game.name }}</em>.
             This is a two-player sequential game with the following structure.
@@ -17,37 +18,19 @@
             {% include 'include/centipede_svg.html' with game=game %}
         </div>
     </section>
+{% endblock %}
 
-    {% if game.needs_teams %}
-        <section>
-            {% if not team %}
-                <p>
-                    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
-                    team before being able to play.
-                </p>
-            {% else %}
-                <p>
-                    You are part of the team <em>{{ team.name }}</em> composed of the following
-                    player{{ team.players.all|pluralize }}:
-                    {% for p in team.players.all %}
-                        {% if forloop.last %}
-                            {{ p.name }}.
-                        {% else %}
-                            {{ p.name }},
-                        {% endif %}
-                    {% endfor %}
-                </p>
-            {% endif %}
-        </section>
-    {% endif %}
-
-    {% if answer %}
-        <section>
-            <p>
-                You have already submitted an answer, you cannot submit another one. Your answer is
-                <em style="color: var(--color-player1);">{{ answer.strategy_as_p1 }}</em> as <span style="color: var(--color-player1); font-weight: bold;">player 1</span> and
-                <em style="color: var(--color-player2)">{{ answer.strategy_as_p2 }}</em> as <span style="color: var(--color-player2); font-weight: bold;">player 2</span>.
-            </p>
-        </section>
-    {% endif %}
+{% block game_answer_content %}
+    <section>
+        <p>
+            An answer is already linked to your account. You cannot play anymore.
+        </p>
+        <p>
+            Your strategy is the following:
+        </p>
+        <ul>
+            <li><em style="color: var(--color-player1);">{{ answer.strategy_as_p1 }}</em> as <span style="color: var(--color-player1); font-weight: bold;">player 1</span>;</li>
+            <li><em style="color: var(--color-player2)">{{ answer.strategy_as_p2 }}</em> as <span style="color: var(--color-player2); font-weight: bold;">player 2</span>.</li>
+        </ul>
+    </section>
 {% endblock %}

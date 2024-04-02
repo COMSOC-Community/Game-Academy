@@ -1,45 +1,26 @@
-{% extends 'core/base_game.html' %}
+{% extends 'core/base_game_index.html' %}
 {% load core_extras %}
 
-{% block game_content %}
+{% block game_rule_content %}
     <section>
+        <h2>Rules of the Game</h2>
         <p>
-            This is the main page for the game <em>{{ game.name }}</em>. Remember the rules of the game: every player
+            This is the main page for the game <em>{{ game.name }}</em>. In this game every player
             submits a rational number between {{ game.numbers_setting.lower_bound|float_formatter:5}}
             and {{ game.numbers_setting.upper_bound|float_formatter:5 }}. The player closest to {{ game.numbers_setting.factor_display }}
             times the average of the answers wins the game.
         </p>
     </section>
+{% endblock %}
 
-    {% if game.needs_teams %}
-        <section>
-            {% if not team %}
-                <p>
-                    This game is meant to be played <em>in teams</em> (of possibly one player). You then need to first create or join a
-                    team before being able to play.
-                </p>
-            {% else %}
-                <p>
-                    You are part of the team <em>{{ team.name }}</em> composed of the following
-                    player{{ team.players.all|pluralize }}:
-                    {% for p in team.players.all %}
-                        {% if forloop.last %}
-                            {{ p.name }}.
-                        {% else %}
-                            {{ p.name }},
-                        {% endif %}
-                    {% endfor %}
-                </p>
-            {% endif %}
-        </section>
-    {% endif %}
+{% block game_answer_content %}
+<section>
+    <p>
+        An answer is already linked to your account. You cannot play anymore.
+    </p>
 
-    {% if answer %}
-        <section>
-            <p>
-                You have already submitted an answer, you cannot submit another one. Your answer is
-                <em>{{ answer.answer|float_formatter:20 }}</em>.
-            </p>
-        </section>
-    {% endif %}
+    <p>
+        Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.
+    </p>
+</section>
 {% endblock %}

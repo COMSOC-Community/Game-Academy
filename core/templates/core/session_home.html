@@ -36,17 +36,20 @@
                             <h3 id="games_{{ game.name }}">{{ game.name }}</h3>
                         </div>
                         <div class="grid-item-content">
-                            {% if game.game_config.illustration_path %}
-                                <p class="center-align">
-                                    <img class="game-illustration" src="{% static game.game_config.illustration_path %}" alt="Illustration of the {{ game.game_config.long_name }}."/>
-                                </p>
-                            {% endif %}
-
-                            {% if game.description %}
-                                <p>{{ game.description }}</p>
-                            {% endif %}
 
                             {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
+                                {% if game.game_config.illustration_path %}
+                                    <p class="center-align">
+                                        <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">
+                                            <img class="game-illustration" src="{% static game.game_config.illustration_path %}" alt="Illustration of the {{ game.game_config.long_name }}."/>
+                                        </a>
+                                    </p>
+                                {% endif %}
+
+                                {% if game.description %}
+                                    <p>{{ game.description }}</p>
+                                {% endif %}
+
                                 <p class="center-align">
                                     <span>
                                         <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">To the game</a>
