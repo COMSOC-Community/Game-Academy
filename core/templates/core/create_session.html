@@ -9,11 +9,21 @@
 {% block content %}
     {% if created_session %}
         <section class="form-success-message">
-            <p>The session {{ created_session.long_name }} has been created! Congrats.</p>
-
             <p>
+                The session {{ created_session.long_name }} has been created! Congrats. You will
+                soon be redirected to the main page of the session.
+            </p>
+
+            <p class="center-align">
                 <a class="button navigation-button" href="{% url 'core:session_portal' created_session.url_tag %}">Access the session</a>
             </p>
+
+            <script>
+                function redirect () {
+                    window.location.href = "{% url 'core:session_portal' created_session.url_tag %}" ;
+                }
+                setTimeout(redirect, 3000);
+            </script>
         </section>
     {% else %}
         <section>
