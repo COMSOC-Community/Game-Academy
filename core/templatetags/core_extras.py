@@ -16,6 +16,10 @@ def get_attr(obj, attr):
 
 @register.filter
 def float_formatter(x, num_digits=3):
+    try:
+        float(x)
+    except ValueError:
+        return ''
     return core.utils.float_formatter(x, num_digits=num_digits)
 
 
