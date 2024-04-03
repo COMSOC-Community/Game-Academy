@@ -546,14 +546,22 @@ class MakeAdminForm(forms.Form):
         label="Username",
         max_length=CustomUser._meta.get_field("username").max_length,
         required=False,
+        help_text="The username of the user you want to make admin. be mindful of the difference "
+                  "between a player and a user. Only one fo the 'username' and the 'player name' "
+                  "field should be filled in."
     )
     playername = forms.CharField(
         label="Player name",
         max_length=CustomUser._meta.get_field("username").max_length,
         required=False,
+        help_text="The player name of the user you want to make admin. be mindful of the "
+                  "difference between a player and a user. Only one fo the 'username' and the "
+                  "'player name' field should be filled in."
     )
     super_admin = forms.BooleanField(
-        label="Super admin", label_suffix="", required=False
+        label="Super admin", label_suffix="", required=False,
+        help_text="If ticked, the user will be made super-admin, meaning, among others, that they "
+                  "will be able to manage admins."
     )
 
     def __init__(self, *args, **kwargs):
