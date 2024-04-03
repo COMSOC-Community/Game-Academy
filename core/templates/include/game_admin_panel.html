@@ -42,4 +42,22 @@
             {% endwith %}
         {% endif %}
     </div>
+
+    <table class="lined-table center-margin" style="margin-top: 20px">
+        <tr>
+            <th>#Players</th>
+            <td>{{ num_players }}</td>
+        </tr>
+        {% if num_teams %}
+            <tr>
+                <th>#Teams</th>
+                <td>{{ num_teams }}</td>
+            </tr>
+        {% endif %}
+        <tr>
+            <th>#Answers</th>
+            <td>{{ num_received_answers }} ({{ percent_answer_received|floatformat:2 }}%)</td>
+        </tr>
+    </table>
+
 </section>

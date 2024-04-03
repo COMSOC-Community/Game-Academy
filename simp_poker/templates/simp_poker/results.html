@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block game_content %}
-    {% if answers %}
+    {% if answers_sorted_round_robin %}
         <section>
             <h2 class="next-collapsible">Competing Against the Optimal Strategy</h2>
 
@@ -84,22 +84,19 @@
                         <th>Score</th>
                         <th>Score <br> with Optimum</th>
                         <th>Difference</th>
-                        <th>Justification</th>
                     </tr>
                     <tr>
                         <td>OPT: (1, 1, 1/3, 1, 1/3, 0)</td>
                         <td>&mdash;</td>
-                        <td> {{ game.simp_poker_res.optimal_strategy_score|float_formatter:5 }}</td>
+                        <td> {{ game.simp_poker_res.optimal_strategy_round_robin_score|float_formatter:5 }} ({{ game.simp_poker_res.optimal_strategy_round_robin_position }})</td>
                         <td>&mdash;</td>
-                        <td></td>
                     </tr>
-                    {% for answer in answers %}
+                    {% for answer in answers_sorted_round_robin %}
                         <tr>
-                            <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{% include 'include/answer_as_tuple.html' %}</td>
-                            <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.round_robin_score|float_formatter:5 }}</td>
-                            <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|float_formatter:5 }}</td>
-                            <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|subtract:answer.round_robin_score|float_formatter:5 }}</td>
-                            <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{% include 'include/answer_as_tuple.html' %}</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_score|float_formatter:5 }} ({{ answer.round_robin_position }})</td>
+                            <td {% if answer.round_robin_with_opt_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|float_formatter:5 }} ({{ answer.round_robin_with_opt_position }})</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|subtract:answer.round_robin_score|float_formatter:5 }}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -122,11 +119,11 @@
                         <tr>
                             <td>OPT: (1, 1, 1/3, 1, 1/3, 0)</td>
                             <td>&mdash;</td>
-                            <td> {{ game.simp_poker_res.optimal_strategy_score|float_formatter:5 }}</td>
+                            <td> {{ game.simp_poker_res.optimal_strategy_round_robin_score|float_formatter:5 }}</td>
                             <td>&mdash;</td>
                             <td></td>
                         </tr>
-                        {% for answer in answers %}
+                        {% for answer in answers_sorted_round_robin %}
                             <tr>
                                 <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.player.display_name }}</td>
                                 <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{% include 'include/answer_as_tuple.html' %}</td>
@@ -154,7 +151,7 @@
                         <th>Best Response</th>
                         <th>Score Against Best Response</th>
                     </tr>
-                    {% for answer in answers %}
+                    {% for answer in answers_sorted_round_robin %}
                         <tr>
                             <td>{% include 'include/answer_as_tuple.html' %}</td>
                             <td>{{ answer.best_response }}</td>
@@ -162,6 +159,24 @@
                         </tr>
                     {% endfor %}
                 </table>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="next-collapsible">Globally Best Response</h2>
+            <div class="collapsed-content hidden">
+                <p>
+                    We can also compute the best response given the pool of strategies that have been submitted.
+                </p>
+
+                <p class="center-align">
+                    {{ game.simp_poker_res.global_best_response }}
+                </p>
+
+                <p>
+                    Playing the best response, would have lead to a score of {{ game.simp_poker_res.global_best_response_rr_score|float_formatter:5 }}
+                    in the round-robin tournament.
+                </p>
             </div>
         </section>
     {% else %}

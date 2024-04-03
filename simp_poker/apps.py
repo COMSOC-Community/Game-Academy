@@ -18,7 +18,7 @@ class SimpPokerConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands="simppoker_computeresults",
-            answer_model_fields=("avg_score",),
+            answer_model_fields=("round_robin_score",),
             illustration_path="img/SimpPoker.png",
         )
 

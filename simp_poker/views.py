@@ -80,11 +80,12 @@ def results(request, session_url_tag, game_url_tag):
     if not game.results_visible and not context["user_is_session_admin"]:
         raise Http404("The results are not visible and the user is not an admin.")
 
-    answers = Answer.objects.filter(game=game).order_by('-round_robin_score')
-    context["answers"] = answers
+    answers = Answer.objects.filter(game=game)
+    context["answers_sorted_round_robin"] = answers.order_by('-round_robin_score')
+    context["answers_sorted_round_robin_with_opt"] = answers.order_by('-round_robin_with_opt_score')
     context["answers_sorted_against_opt"] = answers.order_by('-score_against_optimum')
 
-    round_robin_winners = answers.filter(round_robin_winner=True)
+    round_robin_winners = answers.filter(round_robin_position=1)
     if round_robin_winners:
         if len(round_robin_winners) == 1:
             context["formatted_round_robin_winners"] = round_robin_winners.first().player.display_name()

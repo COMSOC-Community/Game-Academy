@@ -193,6 +193,18 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
     )
     context["game_nav_display_result"] = game.results_visible
 
+    if context["user_is_session_admin"]:
+        num_players = game.session.players.filter(is_team_player=False).count()
+        context["num_players"] = num_players
+        num_answer_received = answer_model.objects.filter(game=game).count()
+        context["num_received_answers"] = num_answer_received
+        if game.needs_teams:
+            num_teams = game.teams.count()
+            context["num_teams"] = num_teams
+            context["percent_answer_received"] = num_answer_received / num_teams
+        else:
+            context["percent_answer_received"] = 100 * num_answer_received / num_players
+
     return context
 
 
