@@ -201,9 +201,15 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
         if game.needs_teams:
             num_teams = game.teams.count()
             context["num_teams"] = num_teams
-            context["percent_answer_received"] = 100 * num_answer_received / num_teams
+            if num_teams > 0:
+                context["percent_answer_received"] = 100 * num_answer_received / num_teams
+            else:
+                context["percent_answer_received"] = 0
         else:
-            context["percent_answer_received"] = 100 * num_answer_received / num_players
+            if num_players > 0:
+                context["percent_answer_received"] = 100 * num_answer_received / num_players
+            else:
+                context["percent_answer_received"] = 0
 
     return context
 
