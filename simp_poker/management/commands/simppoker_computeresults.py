@@ -34,38 +34,15 @@ def expected_utility(answer1, answer2):
 
 
 def compute_best_response(answer):
-    from mip import Model, maximize
-
-    m = Model()
-    pq = m.add_var("pq", lb=0, ub=1)  # Force to 1 here!
-    pj = m.add_var("pj", lb=0, ub=1)
-    qq = m.add_var("pj", lb=0, ub=1)
-    m.objective = maximize(
-        pq * (4 + answer.prob_p2_jack - 3 * answer.prob_p2_king) +
-        pj * (4 - 3 * answer.prob_p2_king - 3 * answer.prob_p2_queen) -
-        qq * (answer.prob_p1_king - 3 * answer.prob_p1_jack)
-    )
-    m.optimize()
-    return np.array([1, pq.x, pj.x, 1, qq.x, 0])
+    pj = int(4 - 3 * answer.prob_p2_king - 3 * answer.prob_p2_queen > 0)
+    qq = int(3 * answer.prob_p1_jack - answer.prob_p1_king > 0)
+    return np.array([1, 1, pj, 1, qq, 0])
 
 
 def compute_global_best_response(answers):
-    from mip import Model, maximize
-
-    m = Model()
-    pq = m.add_var("pq", lb=0, ub=1)  # Force to 1 here!
-    pj = m.add_var("pj", lb=0, ub=1)
-    qq = m.add_var("pj", lb=0, ub=1)
-    pq_coeff = sum(4 + answer.prob_p2_jack - 3 * answer.prob_p2_king for answer in answers)
     pj_coeff = sum(4 - 3 * answer.prob_p2_king - 3 * answer.prob_p2_queen for answer in answers)
-    qq_coeff = sum(answer.prob_p1_king - 3 * answer.prob_p1_jack for answer in answers)
-    m.objective = maximize(
-        pq * pq_coeff +
-        pj * pj_coeff -
-        qq * qq_coeff
-    )
-    m.optimize()
-    return np.array([1, pq.x, pj.x, 1, qq.x, 0])
+    qq_coeff = sum(3 * answer.prob_p1_jack - answer.prob_p1_king for answer in answers)
+    return np.array([1, 1, int(pj_coeff > 0), 1, int(qq_coeff > 0), 0])
 
 
 class Command(BaseCommand):
@@ -166,7 +143,7 @@ class Command(BaseCommand):
             score_against_opt = scores_against_opt[answer]
             answer.score_against_optimum = score_against_opt
             answer.winner_against_optimum = score_against_opt >= 0
-            answer.best_response = f"({', '.join(float_formatter(v, num_digits=5) for v in best_responses[answer])})"
+            answer.best_response = ','.join(float_formatter(v, num_digits=5) for v in best_responses[answer])
             answer.score_against_best_response = score_against_best_response[answer]
             answer.save()
 
@@ -185,7 +162,7 @@ class Command(BaseCommand):
             defaults={
                 "optimal_strategy_round_robin_score": optimal_strategy_score / max(1, num_players),
                 "optimal_strategy_round_robin_position": unique_rr_with_opt_scores.index(optimal_strategy_score) + 1,
-                "global_best_response": f"({', '.join(float_formatter(v, num_digits=5) for v in global_best_response)})",
+                "global_best_response": ','.join(float_formatter(v, num_digits=5) for v in global_best_response),
                 "global_best_response_rr_score": global_best_response_score,
             }
         )

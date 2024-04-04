@@ -12,45 +12,63 @@ from simp_poker.models import Answer, Setting
 class SubmitAnswerForm(forms.Form):
     prob_p1_king = forms.FloatField(
         label_suffix="",
-        label="Prob. betting when king",
+        label="Probability of betting when king",
         help_text="The probability of betting when, as player 1, you are holding a king.",
         min_value=0,
         max_value=1,
+        widget=forms.NumberInput(
+            attrs={'step': "0.01"}
+        )
     )
     prob_p1_queen = forms.FloatField(
         label_suffix="",
-        label="Prob. betting when queen",
+        label="Probability of betting when queen",
         help_text="The probability of betting when, as player 1, you are holding a queen.",
         min_value=0,
         max_value=1,
+        widget=forms.NumberInput(
+            attrs={'step': "0.01"}
+        )
     )
     prob_p1_jack = forms.FloatField(
         label_suffix="",
-        label="Prob. betting when jack",
+        label="Probability of betting when jack",
         help_text="The probability of betting when, as player 1, you are holding a jack.",
         min_value=0,
         max_value=1,
+        widget=forms.NumberInput(
+            attrs={'step': "0.01"}
+        )
     )
     prob_p2_king = forms.FloatField(
         label_suffix="",
-        label="Prob. calling when king",
+        label="Probability of calling when king",
         help_text="The probability of calling when, as player 2, you are holding a king.",
         min_value=0,
         max_value=1,
+        widget=forms.NumberInput(
+            attrs={'step': "0.01"}
+        )
     )
     prob_p2_queen = forms.FloatField(
         label_suffix="",
-        label="Prob. calling when queen",
+        label="Probability of calling when queen",
         help_text="The probability of calling when, as player 2, you are holding a queen.",
         min_value=0,
         max_value=1,
+        widget=forms.NumberInput(
+            attrs={'step': "0.01"}
+        )
     )
     prob_p2_jack = forms.FloatField(
         label_suffix="",
-        label="Prob. calling when jack",
+        label="Probability of calling when jack",
         help_text="The probability of calling when, as player 2, you are holding a jack.",
         min_value=0,
         max_value=1,
+        widget=forms.NumberInput(
+            attrs={'step': "0.01"}
+        )
     )
     motivation = forms.CharField(label_suffix="", widget=forms.Textarea())
 

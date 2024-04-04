@@ -1,4 +1,5 @@
 import csv
+import os
 from copy import deepcopy
 from io import TextIOWrapper
 
@@ -453,9 +454,24 @@ class CreateGameForm(forms.Form):
         label="Description",
         label_suffix="",
         required=False,
-        help_text="A brief description of the game displayed on the home page of the "
-        "session.",
+        help_text="A brief description of the game displayed on the home page of the session. "
+                  "It is typically either empty or a short sentence.",
         widget=forms.Textarea(),
+    )
+    illustration_path = forms.ChoiceField(
+        label="Illustration",
+        label_suffix="",
+        required=False,
+        help_text="The image used to illustrate the game. Unfortunately there is no nice display "
+                  "for you to see them before updating the game.",
+    )
+    ordering_priority = forms.IntegerField(
+        label="Ordering Priority",
+        label_suffix="",
+        required=False,
+        help_text="The value used to order the games, the higher values appear first. If no value "
+                  "is provided when creating a game, the new game is given the highest priority "
+                  "plus 1."
     )
 
     def __init__(self, *args, **kwargs):
@@ -472,11 +488,21 @@ class CreateGameForm(forms.Form):
                     "results_visible": self.game.results_visible,
                     "needs_teams": self.game.needs_teams,
                     "description": self.game.description,
+                    "illustration_path": self.game.illustration_path,
+                    "ordering_priority": self.game.ordering_priority,
                 }
             )
+
         super(CreateGameForm, self).__init__(*args, **kwargs)
+
         if self.game:
+            illustration_choices = [
+                (i, os.path.splitext(os.path.basename(i))[0]) for i in self.game.game_config().illustration_paths
+            ]
+            self.fields['illustration_path'].choices = illustration_choices
             self.fields["game_type"].disabled = True
+        else:
+            self.fields.pop('illustration_path')
 
     def clean_name(self):
         name = self.cleaned_data["name"]

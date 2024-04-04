@@ -18,8 +18,8 @@ class ItePrisonerGameConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands=["ipd_computeresults", "ipd_generategraphdata"],
-            answer_model_fields=("name", "avg_score"),
-            illustration_path="img/IPD.png",
+            answer_model_fields=("name", "avg_score", "motivation"),
+            illustration_paths=("img/IPD1.png", "img/IPD2.png", "img/IPD3.png"),
         )
 
     def ready(self):

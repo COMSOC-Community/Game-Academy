@@ -4,7 +4,7 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/ngstyle.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simppokerstyle.css' %}"/>
     <script src="{% static 'js/collapsible_next.js' %}"></script>
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-cartesian.min.js"></script>
@@ -19,16 +19,21 @@
                 <p>
                     This game has a theoretically optimal strategy which is: always bet with the King or the Queen
                     and bet with probability 1/3 with the Jack; always call with the King, call with probability
-                    1/3 with the Queen, and never call with the Jack.
+                    1/3 with the Queen, and never call with the Jack. This corresponds to the strategy:
                 </p>
 
+                <div style="margin-bottom: 20px">
+                    {% include 'simp_poker_include/answer_pretty_print.html' with answer=optimal_strategy %}
+                </div>
+
                 <p>
-                    We compared the submitted strategies to the optimal one.
+                    We compared the submitted strategies to the optimal one, showing for each
+                    strategy submitted the expected loss against the optimal strategy.
                 </p>
 
                 {% if user_is_session_admin %}
                     <p class="next-collapsible">
-                        Display winners
+                        Display winner{% if several_winners_against_opt %}s{% endif %}
                     </p>
                     <p class="collapsed-content hidden center-align">
                         {{ formatted_winners_against_opt|safe }}
@@ -43,7 +48,7 @@
                     </tr>
                     {% for answer in answers_sorted_against_opt %}
                         <tr>
-                            <td {% if answer.winner_against_optimum %}class="winning"{% endif %}>{% include 'include/answer_as_tuple.html' %}</td>
+                            <td {% if answer.winner_against_optimum %}class="winning"{% endif %}>{% include 'simp_poker_include/answer_pretty_print.html' %}</td>
                             <td {% if answer.winner_against_optimum %}class="winning"{% endif %}>{{ answer.score_against_optimum|float_formatter:5 }}</td>
                             <td {% if answer.winner_against_optimum %}class="winning"{% endif %}>{{ answer.motivation }}</td>
                         </tr>
@@ -71,7 +76,7 @@
 
                 {% if user_is_session_admin %}
                     <p class="next-collapsible">
-                        Display winners
+                        Display winner{% if several_winners_round_robin %}s{% endif %}
                     </p>
                     <p class="collapsed-content hidden center-align">
                         {{ formatted_round_robin_winners|safe }}
@@ -81,80 +86,76 @@
                 <table class="lined-table center-margin">
                     <tr>
                         <th>Answer</th>
+                        <th>Rank</th>
                         <th>Score</th>
-                        <th>Score <br> with Optimum</th>
-                        <th>Difference</th>
-                    </tr>
-                    <tr>
-                        <td>OPT: (1, 1, 1/3, 1, 1/3, 0)</td>
-                        <td>&mdash;</td>
-                        <td> {{ game.simp_poker_res.optimal_strategy_round_robin_score|float_formatter:5 }} ({{ game.simp_poker_res.optimal_strategy_round_robin_position }})</td>
-                        <td>&mdash;</td>
+                        <th>Justification</th>
                     </tr>
                     {% for answer in answers_sorted_round_robin %}
                         <tr>
-                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{% include 'include/answer_as_tuple.html' %}</td>
-                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_score|float_formatter:5 }} ({{ answer.round_robin_position }})</td>
-                            <td {% if answer.round_robin_with_opt_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|float_formatter:5 }} ({{ answer.round_robin_with_opt_position }})</td>
-                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|subtract:answer.round_robin_score|float_formatter:5 }}</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{% include 'simp_poker_include/answer_pretty_print.html' %}</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_position }}</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_score|float_formatter:5 }}</td>
+                            <td {% if answer.round_robin_position == 1 %}class="winning"{% endif %}>{{ answer.motivation }}</td>
                         </tr>
                     {% endfor %}
                 </table>
             </div>
         </section>
 
-        {% if user_is_session_admin %}
-            <section class="warning-section">
-                <h2 class="next-collapsible">Round-Robin Tournament with Names</h2>
-
-                <div class="collapsed-content hidden">
-                    <table class="lined-table center-margin">
-                        <tr>
-                            <th>Answer</th>
-                            <th>Score</th>
-                            <th>Score <br> with Optimum</th>
-                            <th>Difference</th>
-                            <th>Justification</th>
-                        </tr>
-                        <tr>
-                            <td>OPT: (1, 1, 1/3, 1, 1/3, 0)</td>
-                            <td>&mdash;</td>
-                            <td>{{ game.simp_poker_res.optimal_strategy_round_robin_score|float_formatter:5 }}</td>
-                            <td>&mdash;</td>
-                            <td></td>
-                        </tr>
-                        {% for answer in answers_sorted_round_robin %}
-                            <tr>
-                                <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.player.display_name }}</td>
-                                <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{% include 'include/answer_as_tuple.html' %}</td>
-                                <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.round_robin_score|float_formatter:5 }}</td>
-                                <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|float_formatter:5 }}</td>
-                                <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|subtract:answer.round_robin_score|float_formatter:5 }}</td>
-                                <td {% if answer.round_robin_winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            </section>
-        {% endif %}
 
         <section>
-            <h2 class="next-collapsible">Best Responses</h2>
-
+            <h2 class="next-collapsible">Round-Robin Tournament with Optimal Strategy</h2>
 
             <div class="collapsed-content hidden">
-              <p>We can compute a best response to each strategy, showing that no strategy can ever be optimal against every possible oppponent.</p>
+                <p>
+                    We can also include the optimal strategy in the round-robin tournament.
+                </p>
+
+                <p class="center-align">
+                    <strong>Rank of OPT in the tournament:</strong> {{ game.simp_poker_res.optimal_strategy_round_robin_position }} (score: {{ game.simp_poker_res.optimal_strategy_round_robin_score|float_formatter:5 }})
+                </p>
 
                 <table class="lined-table center-margin">
                     <tr>
                         <th>Answer</th>
+                        <th>Rank with OPT</th>
+                        <th>Rank without OPT</th>
+                        <th>Score with OPT</th>
+                    </tr>
+                    {% for answer in answers_sorted_round_robin_with_opt %}
+                        <tr>
+                            <td {% if answer.round_robin_with_opt_position == 1 %}class="winning"{% endif %}>{% include 'simp_poker_include/answer_pretty_print.html' %}</td>
+                            <td {% if answer.round_robin_with_opt_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_position }}</td>
+                            <td {% if answer.round_robin_with_opt_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_position }}</td>
+                            <td {% if answer.round_robin_with_opt_position == 1 %}class="winning"{% endif %}>{{ answer.round_robin_with_opt_score|float_formatter:5 }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="next-collapsible">Best Responses</h2>
+
+            <div class="collapsed-content hidden">
+                <p>
+                    For each of the strategies submitted, we can compute its best response.
+                    This shows that every strategy other than the theoretically optimal strategy can
+                    be beaten.
+                </p>
+
+                <table class="lined-table center-margin">
+                    <tr>
+                        <th>Answer</th>
+                        <th>Tournament Rank</th>
                         <th>Best Response</th>
                         <th>Score Against Best Response</th>
                     </tr>
                     {% for answer in answers_sorted_round_robin %}
                         <tr>
-                            <td>{% include 'include/answer_as_tuple.html' %}</td>
-                            <td>{{ answer.best_response }}</td>
+                            <td>{% include 'simp_poker_include/answer_pretty_print.html' %}</td>
+                            <td>{{ answer.round_robin_position }}</td>
+                            <td>{% include 'simp_poker_include/answer_pretty_print.html' with answer=answer.best_response_as_answer %}</td>
                             <td>{{ answer.score_against_best_response|float_formatter:5 }}</td>
                         </tr>
                     {% endfor %}
@@ -169,13 +170,13 @@
                     We can also compute the best response given the pool of strategies that have been submitted.
                 </p>
 
-                <p class="center-align">
-                    {{ game.simp_poker_res.global_best_response }}
-                </p>
+                <div style="margin-bottom: 20px">
+                    {% include 'simp_poker_include/answer_pretty_print.html' with answer=game.simp_poker_res.global_best_response_as_answer %}
+                </div>
 
                 <p>
-                    Playing the best response, would have lead to a score of {{ game.simp_poker_res.global_best_response_rr_score|float_formatter:5 }}
-                    in the round-robin tournament.
+                    Playing the globally best response, would have lead to a score of {{ game.simp_poker_res.global_best_response_rr_score|float_formatter:5 }}
+                    in the round-robin tournament (reaching the top position).
                 </p>
             </div>
         </section>

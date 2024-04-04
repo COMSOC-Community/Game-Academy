@@ -1,0 +1,31 @@
+:root {
+	--color-player1: #A30000;
+	--color-player2: #008C8C;
+}
+
+.player1 {
+	color: var(--color-player1);
+}
+
+.player2 {
+	color: var(--color-player2)
+}
+
+.strategy-wrapper {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-column-gap: 8px;
+	background-color: white;
+	border-radius: 4px;
+	padding: 5px;
+	margin: auto;
+	max-width: 450px;
+}
+
+.lined-table .winning {
+	background: var(--color-success);
+}
+
+.lined-table .winning .strategy-wrapper {
+	border: 1px solid var(--color-frame);
+}

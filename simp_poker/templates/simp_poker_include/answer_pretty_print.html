@@ -1,0 +1,10 @@
+{% load core_extras %}
+
+<div class="strategy-wrapper">
+    <div class="player1">&#127166;: {{ answer.prob_p1_king|float_formatter:5 }}</div>
+    <div class="player1">&#127149;: {{ answer.prob_p1_queen|float_formatter:5 }}</div>
+    <div class="player1">&#127147;: {{ answer.prob_p1_jack|float_formatter:5 }}</div>
+    <div class="player2">&#127166;: {{ answer.prob_p2_king|float_formatter:5 }}</div>
+    <div class="player2">&#127149;: {{ answer.prob_p2_queen|float_formatter:5 }}</div>
+    <div class="player2">&#127147;: {{ answer.prob_p2_jack|float_formatter:5 }}</div>
+</div>

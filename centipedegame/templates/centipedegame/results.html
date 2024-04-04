@@ -15,7 +15,7 @@
 {% block game_content %}
     {% if answers %}
         <section>
-            <h2 class="next-collapsible">Distribution of the Submitted Strategies</h2>
+            <h2 class="next-collapsible">Distribution of the Strategies</h2>
 
             <div class="collapsed-content hidden">
                 <div id="histogram_strat" class="graph_wrap"></div>
@@ -46,7 +46,7 @@
         </section>
 
         <section>
-            <h2 class="next-collapsible">Distribution of Scores per Answer</h2>
+            <h2 class="next-collapsible">Distribution of Scores per Strategy</h2>
 
             <div class="collapsed-content hidden">
                 <div id="score_heatmap" class="graph_wrap"></div>
@@ -72,7 +72,7 @@
         </section>
 
         <section>
-            <h2 class="next-collapsible">All Answers Anonymised</h2>
+            <h2 class="next-collapsible">All Strategies</h2>
 
             <div class="collapsed-content hidden">
                 <table class="lined-table center-margin">
@@ -97,37 +97,6 @@
                 </table>
             </div>
         </section>
-
-        {% if user_is_session_admin %}
-            <section class="warning-section">
-                <h2 class="next-collapsible">All Answers with Names</h2>
-
-                <div class="collapsed-content hidden">
-                    <table class="lined-table center-margin">
-                        <tr>
-                            <th>Player</th>
-                            <th>As Player 1</th>
-                            <th>As Player 2</th>
-                            <th>Average Score</th>
-                            <th>Justification</th>
-                        </tr>
-                        {% for answer in answers %}
-                            <tr>
-                                <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.player.name }}</td>
-                                <td {% if answer.winning %}class="winning"{% endif %}>
-                                    {{ answer.strategy_as_p1 }}<br>{{ answer.avg_score_as_p1|float_formatter:4 }}
-                                </td>
-                                <td {% if answer.winning %}class="winning"{% endif %}>
-                                    {{ answer.strategy_as_p2 }}<br>{{ answer.avg_score_as_p2|float_formatter:4 }}
-                                </td>
-                                <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
-                                <td {% if answer.winning %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            </section>
-        {% endif %}
     {% else %}
         <section>
             <p>

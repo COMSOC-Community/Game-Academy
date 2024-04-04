@@ -87,33 +87,6 @@
                     {% endif %}
                 </div>
             </section>
-
-            <section class="warning-section">
-                <h2 class="next-collapsible">All answers with names</h2>
-
-                <div class="collapsed-content hidden">
-                    <table class="lined-table center-margin">
-                        <tr>
-                            <th>Player</th>
-                            <th>Auction</th>
-                            <th>Valuation</th>
-                            <th>Bid</th>
-                            <th>Utility</th>
-                            <th>Justification</th>
-                        </tr>
-                        {% for answer in answers %}
-                            <tr>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.player.name }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.auction_id }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid|float_formatter:20 }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|float_formatter:4 }}</td>
-                                <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            </section>
         {% endif %}
     {% else %}
         <section>

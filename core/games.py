@@ -19,7 +19,7 @@ class GameConfig(AppConfig):
         answer_model=None,
         answer_model_fields=None,
         management_commands=None,
-        illustration_path=None,
+        illustration_paths=None,
     ):
         super().__init__(app_name, app_module)
         self.is_game = True
@@ -48,7 +48,7 @@ class GameConfig(AppConfig):
                 "a string or a collection of string."
             )
         self.management_commands = management_commands
-        self.illustration_path = illustration_path
+        self.illustration_paths = illustration_paths
 
     def ready(self):
         INSTALLED_GAMES.append(self)

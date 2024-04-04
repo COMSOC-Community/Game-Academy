@@ -71,13 +71,17 @@ class Game(models.Model):
     name = models.CharField(max_length=100, blank=False, null=False)
     url_tag = models.SlugField(max_length=10, blank=False, null=False)
     session = models.ForeignKey(
-        Session, on_delete=models.CASCADE, blank=False, null=False
+        Session, on_delete=models.CASCADE, blank=False, null=False, related_name="games"
     )
     playable = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
     results_visible = models.BooleanField(default=False)
     needs_teams = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
+    illustration_path = models.CharField(max_length=100, blank=True, null=True)
+    ordering_priority = models.IntegerField(help_text="The value used to order the games, the "
+                                                      "higher values appear first.",
+                                            default=0)
 
     def __init__(self, *args, **kwargs):
         super(Game, self).__init__(*args, **kwargs)
@@ -85,7 +89,7 @@ class Game(models.Model):
         self.inner_game_config = None
 
     class Meta:
-        ordering = ["session", "game_type", "name"]
+        ordering = ["session", "-ordering_priority", "game_type", "name"]
         unique_together = [("url_tag", "session"), ("name", "session")]
 
     def __str__(self):

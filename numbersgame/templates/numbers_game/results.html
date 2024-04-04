@@ -13,7 +13,7 @@
 {% block game_content %}
     {% if answers %}
         <section>
-            <h2 class="next-collapsible">Sample answers</h2>
+            <h2 class="next-collapsible">Sample Answers</h2>
 
             <div class="collapsed-content hidden">
                 <table class="lined-table center-margin">
@@ -38,7 +38,7 @@
         </section>
 
         <section>
-            <h2 class="next-collapsible">Distribution of the answers</h2>
+            <h2 class="next-collapsible">Distribution of the Answers</h2>
 
             <div class="collapsed-content hidden">
                 <div id="histogram" class="graph_wrap">
@@ -90,7 +90,7 @@
         </section>
 
         <section>
-            <h2 class="next-collapsible">All answers anonymised</h2>
+            <h2 class="next-collapsible">All Answers</h2>
 
             <div class="collapsed-content hidden">
                 <table class="lined-table center-margin">
@@ -109,31 +109,6 @@
                 </table>
             </div>
         </section>
-
-        {% if user_is_session_admin %}
-            <section class="warning-section">
-                <h2 class="next-collapsible">All answers with names</h2>
-
-                <div class="collapsed-content hidden">
-                    <table class="lined-table center-margin">
-                        <tr>
-                            <th>Player</th>
-                            <th>Answer</th>
-                            <th>Gap</th>
-                            <th>Justification</th>
-                        </tr>
-                        {% for answer in answers %}
-                            <tr>
-                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.player.display_name }}</td>
-                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.answer|float_formatter:5 }}</td>
-                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.gap|float_formatter:5 }}</td>
-                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-            </section>
-        {% endif %}
     {% else %}
         <section>
             <p>No answer has been submitted yet.</p>

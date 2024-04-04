@@ -90,15 +90,26 @@ def results(request, session_url_tag, game_url_tag):
         if len(round_robin_winners) == 1:
             context["formatted_round_robin_winners"] = round_robin_winners.first().player.display_name()
         else:
-            winners = [f"'<em>{a.player.display_name()}</em>'" for a in round_robin_winners]
-            context["formatted_round_robin_winners"] = ','.join(winners[:-1]) + ' and ' + winners[-1]
+            winners = [f"<em>{a.player.display_name()}</em>" for a in round_robin_winners]
+            context["formatted_round_robin_winners"] = ', '.join(winners[:-1]) + ' and ' + winners[-1]
+            context["several_winners_round_robin"] = True
 
     winners_agains_opt = answers.filter(winner_against_optimum=True)
     if winners_agains_opt:
         if len(winners_agains_opt) == 1:
             context["formatted_winners_against_opt"] = winners_agains_opt.first().player.display_name()
         else:
-            winners = [f"'<em>{a.player.display_name()}</em>'" for a in winners_agains_opt]
-            context["formatted_winners_against_opt"] = ','.join(winners[:-1]) + ' and ' + winners[-1]
+            winners = [f"<em>{a.player.display_name()}</em>" for a in winners_agains_opt]
+            context["formatted_winners_against_opt"] = ', '.join(winners[:-1]) + ' and ' + winners[-1]
+            context["several_winners_against_opt"] = True
+
+    context["optimal_strategy"] = Answer(
+        prob_p1_king=1,
+        prob_p1_queen=1,
+        prob_p1_jack=1/3,
+        prob_p2_king=1,
+        prob_p2_queen=1/3,
+        prob_p2_jack=0
+    )
 
     return render(request, os.path.join("simp_poker", "results.html"), context)

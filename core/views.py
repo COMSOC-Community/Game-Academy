@@ -7,6 +7,7 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import FileSystemStorage
+from django.db.models import Max
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -549,6 +550,9 @@ def session_admin_games(request, session_url_tag):
     if request.method == "POST" and "create_game_form" in request.POST:
         create_game_form = CreateGameForm(request.POST, session=session)
         if create_game_form.is_valid():
+            ordering_priority = create_game_form.cleaned_data.get("ordering_priority", None)
+            if ordering_priority is None:
+                ordering_priority = session.games.aggregate(Max('ordering_priority'))['ordering_priority__max'] + 1
             new_game = Game.objects.create(
                 game_type=create_game_form.cleaned_data["game_type"],
                 name=create_game_form.cleaned_data["name"],
@@ -559,11 +563,16 @@ def session_admin_games(request, session_url_tag):
                 results_visible=create_game_form.cleaned_data["results_visible"],
                 needs_teams=create_game_form.cleaned_data["needs_teams"],
                 description=create_game_form.cleaned_data["description"],
+                ordering_priority=ordering_priority,
             )
             create_game_form = CreateGameForm(session=session)
             context["new_game"] = new_game
 
             game_config = new_game.game_config()
+            num_games_of_type = session.games.filter(game_type=new_game.game_type).count() - 1
+            all_illustrations = game_config.illustration_paths
+            new_game.illustration_path = all_illustrations[num_games_of_type % len(all_illustrations)]
+            new_game.save()
             if game_config.setting_model is not None:
                 game_config.setting_model.objects.create(game=new_game)
 
@@ -611,6 +620,8 @@ def session_admin_games(request, session_url_tag):
                     ]
                     game.needs_teams = modify_game_form.cleaned_data["needs_teams"]
                     game.description = modify_game_form.cleaned_data["description"]
+                    game.illustration_path = modify_game_form.cleaned_data["illustration_path"]
+                    game.ordering_priority = modify_game_form.cleaned_data["ordering_priority"]
                     game.save()
 
                     modify_game_form = CreateGameForm(
