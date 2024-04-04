@@ -28,6 +28,14 @@ class Setting(models.Model):
         help_text="Payoff of the cooperating player when one player defects and the other "
         "cooperates.",
     )
+    forbidden_strategies = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Specify here a list of forbidden strategies. Specify the strategies by using "
+                  "the same syntax as the one used to submit an answer. Separate strategies by "
+                  "a line starting with '---'. Forbidden strategies (and isomorphic ones) cannot "
+                  "be submitted."
+    )
 
 
 class Answer(models.Model):

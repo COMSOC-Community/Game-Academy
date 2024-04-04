@@ -1,6 +1,10 @@
 import re
 
 
+class AutomataNotIsomorphicError(ValueError):
+    pass
+
+
 class MooreMachine:
     def __init__(self):
         self.current_state = ""
@@ -67,7 +71,7 @@ class MooreMachine:
                     )
         return errors
 
-    def test_connectivity(self, initial_state):
+    def test_connectivity(self):
         def aux(state):
             if state not in visited_states:
                 visited_states.add(state)
@@ -75,7 +79,7 @@ class MooreMachine:
                     aux(next_state)
 
         visited_states = set()
-        aux(initial_state)
+        aux(self.initial_state)
 
         if len(visited_states) != len(self.transitions):
             unconnected_states = sorted(
@@ -84,12 +88,35 @@ class MooreMachine:
             if unconnected_states:
                 return (
                     f"The automata is composed of more than one connected components. From "
-                    f"the initial state '{initial_state} ' the following states could "
+                    f"the initial state '{self.initial_state} ' the following states could "
                     f"not be reached: {' '.join(unconnected_states)}"
                 )
 
     def transition(self, input_symbol):
         self.current_state = self.transitions[self.current_state][input_symbol]
+
+    def is_isomorphic(self, other_automata):
+        def aux(self_state, other_state):
+            state_renaming[self_state] = other_state
+            for input_symbol in ("C", "D"):
+                self_next_state = self.transitions[self_state][input_symbol]
+                other_next_state = other_automata.transitions[other_state][input_symbol]
+                print(self_state, other_state, input_symbol, self_next_state, other_next_state)
+                if self_next_state in state_renaming:
+                    if state_renaming[self_next_state] != other_next_state:
+                        raise AutomataNotIsomorphicError("The automatas are not isomorphic")
+                else:
+                    state_renaming[self_next_state] = other_next_state
+                    aux(self_next_state, other_next_state)
+        if len(self.transitions) != len(other_automata.transitions):
+            return False
+
+        state_renaming = {self.initial_state: other_automata.initial_state}
+        try:
+            aux(self.initial_state, other_automata.initial_state)
+        except AutomataNotIsomorphicError:
+            return False
+        return True
 
     def __str__(self):
         res = "Init: {}\n".format(self.initial_state)

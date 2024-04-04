@@ -51,7 +51,7 @@ class SubmitAnswerForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.game = kwargs.pop("game", None)
+        self.game = kwargs.pop("game")
         self.player = kwargs.pop("player", None)
         self.moore_machine = None
         super(SubmitAnswerForm, self).__init__(*args, **kwargs)
@@ -71,12 +71,6 @@ class SubmitAnswerForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(SubmitAnswerForm, self).clean()
-        if self.moore_machine and "initial_state" in cleaned_data:
-            connectivity_error = self.moore_machine.test_connectivity(
-                cleaned_data["initial_state"]
-            )
-            if connectivity_error:
-                raise forms.ValidationError(connectivity_error)
         if Answer.objects.filter(player=self.player, game=self.game).exists():
             raise forms.ValidationError(
                 "This player already submitted an answer for this game!"
@@ -90,4 +84,30 @@ class SubmitAnswerForm(forms.Form):
                 raise forms.ValidationError(
                     "The initial state is not part of the states described in the strategy."
                 )
+            if self.moore_machine:
+                self.moore_machine.initial_state = cleaned_data["initial_state"]
+                connectivity_error = self.moore_machine.test_connectivity()
+                if connectivity_error:
+                    raise forms.ValidationError(connectivity_error)
+            if self.game.itepris_setting.forbidden_strategies:
+                forbidden_strategies = []
+                current_strategy = []
+                for line in self.game.itepris_setting.forbidden_strategies.split("\n"):
+                    line = line.strip()
+                    if len(line) > 0:
+                        if line.startswith("---"):
+                            forbidden_strategies.append(current_strategy)
+                            current_strategy = []
+                        else:
+                            current_strategy.append(line)
+                if current_strategy:
+                    forbidden_strategies.append(current_strategy)
+                for s in forbidden_strategies:
+                    m = MooreMachine()
+                    m.parse(s)
+                    m.initial_state = s[0].split(':')[0].strip()
+                    if m.is_isomorphic(self.moore_machine):
+                        raise forms.ValidationError("The admin of this session has forbidden this "
+                                                    "strategy, please submit another one.")
+
         return cleaned_data
