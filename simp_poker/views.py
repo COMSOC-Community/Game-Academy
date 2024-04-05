@@ -9,6 +9,7 @@ from core.views import base_context_initialiser, session_context_initialiser, \
 
 from .forms import SubmitAnswerForm
 from .apps import NAME
+from .management.commands.simppoker_computeresults import get_score_against_opt
 from .models import Answer
 
 
@@ -49,7 +50,7 @@ def submit_answer(request, session_url_tag, game_url_tag):
                 request.POST, game=game, player=submitting_player
             )
             if submit_answer_form.is_valid():
-                context["submitted_answer"] = Answer.objects.create(
+                answer = Answer.objects.create(
                     game=game,
                     player=submitting_player,
                     prob_p1_king=submit_answer_form.cleaned_data["prob_p1_king"],
@@ -60,6 +61,17 @@ def submit_answer(request, session_url_tag, game_url_tag):
                     prob_p2_jack=submit_answer_form.cleaned_data["prob_p2_jack"],
                     motivation=submit_answer_form.cleaned_data["motivation"],
                 )
+                try:
+                    print("I'm here!")
+                    print(get_score_against_opt(answer))
+                    answer.score_against_optimum = get_score_against_opt(answer)
+                    answer.save()
+                    print(answer.score_against_optimum)
+                    context["submitted_answer"] = answer
+                except Exception as e:
+                    answer.delete()
+                    context["submission_error"] = e.__repr__()
+                    context["submitted_answer"] = False
         else:
             submit_answer_form = SubmitAnswerForm(game=game, player=submitting_player)
         context["submit_answer_form"] = submit_answer_form

@@ -90,24 +90,25 @@ class Command(BaseCommand):
 
         for a in answers:
             player_name = a[0]
-            if not Player.objects.filter(name=player_name, session=session).exists():
-                username = player_username(session, player_name)
-                user = CustomUser.objects.create_user(
-                    username=username, password='azeazeaze', is_player=True
-                )
-                player = Player.objects.create(
-                    user=user, name=player_name, session=session, is_guest=False
-                )
-                Answer.objects.update_or_create(
-                    player=player,
-                    game=game,
-                    defaults={
-                        "prob_p1_king": a[1],
-                        "prob_p1_queen": a[2],
-                        "prob_p1_jack": a[3],
-                        "prob_p2_king": a[4],
-                        "prob_p2_queen": a[5],
-                        "prob_p2_jack": a[6],
-                        "motivation": "Test player"
-                    }
-                )
+            while Player.objects.filter(name=player_name, session=session).exists():
+                player_name += "a"
+            username = player_username(session, player_name)
+            user = CustomUser.objects.create_user(
+                username=username, password='azeazeaze', is_player=True
+            )
+            player = Player.objects.create(
+                user=user, name=player_name, session=session, is_guest=False
+            )
+            Answer.objects.update_or_create(
+                player=player,
+                game=game,
+                defaults={
+                    "prob_p1_king": a[1],
+                    "prob_p1_queen": a[2],
+                    "prob_p1_jack": a[3],
+                    "prob_p2_king": a[4],
+                    "prob_p2_queen": a[5],
+                    "prob_p2_jack": a[6],
+                    "motivation": "Test player"
+                }
+            )

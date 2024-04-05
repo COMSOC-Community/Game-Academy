@@ -7,9 +7,6 @@ class SubmitAnswerForm(forms.Form):
     bid = forms.FloatField(
         min_value=0.0,
         label_suffix="",
-        widget=forms.NumberInput(
-            attrs={'step': "0.5"}
-        )
     )
     motivation = forms.CharField(label_suffix="", widget=forms.Textarea())
 

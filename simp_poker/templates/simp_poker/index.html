@@ -1,5 +1,10 @@
 {% extends 'core/base_game_index.html' %}
+{% load static %}
 {% load core_extras %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simppokerstyle.css' %}"/>
+{% endblock %}
 
 {% block game_rule_content %}
     <section>
@@ -29,13 +34,19 @@
     <p>
         Your answer is:
     </p>
-    <ul>
-        <li>Probability <em>{{ answer.prob_p1_king|float_formatter }}</em> of betting on a king;</li>
-        <li>Probability <em>{{ answer.prob_p1_queen|float_formatter }}</em> of betting on a queen;</li>
-        <li>Probability <em>{{ answer.prob_p1_jack|float_formatter }}</em> of betting on a jack;</li>
-        <li>Probability <em>{{ answer.prob_p2_king|float_formatter }}</em> of calling on a king;</li>
-        <li>Probability <em>{{ answer.prob_p2_queen|float_formatter }}</em> of calling on a queen;</li>
-        <li>Probability <em>{{ answer.prob_p2_jack|float_formatter }}</em> of calling on a jack.</li>
-    </ul>
+
+    {% include 'simp_poker_include/answer_pretty_print.html' %}
+
+    {% if answer.score_against_optimum < 0 %}
+        <p>
+            With this strategy, if you were to play a large number of games against the
+            computer, you would lose {{ answer.score_against_optimum }} dollars per game on average.
+        </p>
+    {% else %}
+        <p>
+            With this strategy, if you were to play a large number of games against the
+            computer, you would neither win nor lose any money on average.
+        </p>
+    {% endif %}
 </section>
 {% endblock %}

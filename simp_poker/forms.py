@@ -16,9 +16,6 @@ class SubmitAnswerForm(forms.Form):
         help_text="The probability of betting when, as player 1, you are holding a king.",
         min_value=0,
         max_value=1,
-        widget=forms.NumberInput(
-            attrs={'step': "0.01"}
-        )
     )
     prob_p1_queen = forms.FloatField(
         label_suffix="",
@@ -26,9 +23,6 @@ class SubmitAnswerForm(forms.Form):
         help_text="The probability of betting when, as player 1, you are holding a queen.",
         min_value=0,
         max_value=1,
-        widget=forms.NumberInput(
-            attrs={'step': "0.01"}
-        )
     )
     prob_p1_jack = forms.FloatField(
         label_suffix="",
@@ -36,9 +30,6 @@ class SubmitAnswerForm(forms.Form):
         help_text="The probability of betting when, as player 1, you are holding a jack.",
         min_value=0,
         max_value=1,
-        widget=forms.NumberInput(
-            attrs={'step': "0.01"}
-        )
     )
     prob_p2_king = forms.FloatField(
         label_suffix="",
@@ -46,9 +37,6 @@ class SubmitAnswerForm(forms.Form):
         help_text="The probability of calling when, as player 2, you are holding a king.",
         min_value=0,
         max_value=1,
-        widget=forms.NumberInput(
-            attrs={'step': "0.01"}
-        )
     )
     prob_p2_queen = forms.FloatField(
         label_suffix="",
@@ -56,9 +44,6 @@ class SubmitAnswerForm(forms.Form):
         help_text="The probability of calling when, as player 2, you are holding a queen.",
         min_value=0,
         max_value=1,
-        widget=forms.NumberInput(
-            attrs={'step': "0.01"}
-        )
     )
     prob_p2_jack = forms.FloatField(
         label_suffix="",
@@ -66,9 +51,6 @@ class SubmitAnswerForm(forms.Form):
         help_text="The probability of calling when, as player 2, you are holding a jack.",
         min_value=0,
         max_value=1,
-        widget=forms.NumberInput(
-            attrs={'step': "0.01"}
-        )
     )
     motivation = forms.CharField(label_suffix="", widget=forms.Textarea())
 

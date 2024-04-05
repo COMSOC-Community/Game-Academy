@@ -22,9 +22,6 @@ class SettingForm(forms.ModelForm):
 class SubmitAnswerForm(forms.Form):
     answer = forms.FloatField(
         label_suffix="",
-        widget=forms.NumberInput(
-            attrs={'step': "0.5"}
-        )
     )
     motivation = forms.CharField(label_suffix="", widget=forms.Textarea())
 

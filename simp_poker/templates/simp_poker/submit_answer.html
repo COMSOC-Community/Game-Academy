@@ -1,21 +1,42 @@
 {% extends 'core/base_game_submit_answers.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/simppokerstyle.css' %}"/>
+{% endblock %}
 
 {% block game_submit_answer_content %}
     <section>
         {% if submitted_answer %}
-            <p>Your answer has been submitted, thanks!</p>
+            <p>You have submitted the following answer:</p>
 
-            <p>
-                You will be redirected soon to the game home page.
-                If not, <a class="button navigation-button" href="{% url 'simp_poker:index' session.url_tag game.url_tag %}">click here</a>!
-            </p>
+            {% include 'simp_poker_include/answer_pretty_print.html' with answer=submitted_answer %}
 
-            <script>
-                function redirect() {
-                    window.location.href = "{% url 'simp_poker:index' session.url_tag game.url_tag %}";
-                }
-                setTimeout(redirect, 3000);
-            </script>
+            {% if submitted_answer.score_against_optimum != None %}
+                {% if submitted_answer.score_against_optimum < 0 %}
+                    <p>
+                        With this strategy, if you were to play a large number of games against the
+                        computer, you would lose {{ submitted_answer.score_against_optimum }} dollars per game on average.
+                    </p>
+                {% else %}
+                    <p>
+                        With this strategy, if you were to play a large number of games against the
+                        computer, you would neither win nor lose any money on average.
+                    </p>
+                {% endif %}
+            {% else %}
+                <p>
+                    You will be redirected soon to the game home page.
+                    If not, <a class="button navigation-button" href="{% url 'simp_poker:index' session.url_tag game.url_tag %}">click here</a>!
+                </p>
+
+                <script>
+                    function redirect() {
+                        window.location.href = "{% url 'simp_poker:index' session.url_tag game.url_tag %}";
+                    }
+                    setTimeout(redirect, 3000);
+                </script>
+            {% endif %}
         {% else %}
             {% if answer %}
                 <p>You have already submitted the answer:</p>

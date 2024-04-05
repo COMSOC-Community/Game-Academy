@@ -12,32 +12,34 @@
 {% block game_content %}
     {% if answers %}
         <section>
-            <h2>General Results</h2>
+            <h2 class="next-collapsible">General Results</h2>
 
-            <table class="center-margin lined-table">
-                <thead>
-                    <tr>
-                        {% if user_is_session_admin %}
-                            <th>Team</th>
-                        {% endif %}
-                        <th>Strategy</th>
-                        <th>Average Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for answer in answers %}
+            <div class="collapsed-content hidden">
+                <table class="center-margin lined-table">
+                    <thead>
                         <tr>
                             {% if user_is_session_admin %}
-                                <td {% if answer.winner %}class="winning"{% endif %}>
-                                    <a href="#{{ answer.player.display_name }}">{{ answer.player.display_name }}</a>
-                                </td>
+                                <th>Team</th>
                             {% endif %}
-                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
-                            <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
+                            <th>Strategy</th>
+                            <th>Average Score</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for answer in answers %}
+                            <tr>
+                                {% if user_is_session_admin %}
+                                    <td {% if answer.winner %}class="winning"{% endif %}>
+                                        <a href="#{{ answer.player.display_name }}">{{ answer.player.display_name }}</a>
+                                    </td>
+                                {% endif %}
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
+                                <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         {% for answer in answers %}

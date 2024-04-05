@@ -44,17 +44,18 @@ class Answer(models.Model):
 
     @property
     def best_response_as_answer(self):
-        split_best_response = self.best_response.split(',')
-        return Answer(
-            game=self.game,
-            player=self.player,
-            prob_p1_king=float(split_best_response[0]),
-            prob_p1_queen=float(split_best_response[1]),
-            prob_p1_jack=float(split_best_response[2]),
-            prob_p2_king=float(split_best_response[3]),
-            prob_p2_queen=float(split_best_response[4]),
-            prob_p2_jack=float(split_best_response[5]),
-        )
+        if self.best_response:
+            split_best_response = self.best_response.split(',')
+            return Answer(
+                game=self.game,
+                player=self.player,
+                prob_p1_king=float(split_best_response[0]),
+                prob_p1_queen=float(split_best_response[1]),
+                prob_p1_jack=float(split_best_response[2]),
+                prob_p2_king=float(split_best_response[3]),
+                prob_p2_queen=float(split_best_response[4]),
+                prob_p2_jack=float(split_best_response[5]),
+            )
 
     class Meta:
         ordering = ["game", "player", "round_robin_score"]
