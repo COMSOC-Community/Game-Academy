@@ -22,6 +22,10 @@ class MooreMachine:
     def add_outcome(self, state, symbol):
         self.outcome[state] = symbol
 
+    def parse_from_answer(self, answer):
+        self.initial_state = answer.initial_state.strip()
+        return self.parse(answer.automata.strip().split("\n"))
+
     def parse(self, lines):
         pattern = re.compile(
             "^[^\S\n]*([A-Za-z0-9]+):[^\S\n\t]*([CD]),[^\S\n\t]*([A-Za-z0-9]+),[^\S\n\t]*([A-Za-z0-9]+)$"
@@ -118,6 +122,71 @@ class MooreMachine:
             return False
         return True
 
+    def json_data(self):
+        seen_states = set()
+        state_list = []
+        nodes = []
+        links = []
+        for state, transition in self.transitions.items():
+            if state not in seen_states:
+                state_list.append(state)
+                seen_states.add(state)
+            next_state_coop = transition['C']
+            if next_state_coop not in seen_states:
+                state_list.append(next_state_coop)
+                seen_states.add(next_state_coop)
+            next_state_def = transition['D']
+            if next_state_def not in seen_states:
+                state_list.append(next_state_def)
+                seen_states.add(next_state_def)
+            nodes.append(
+                {
+                    "id": state_list.index(state),
+                    "name": self.outcome[state],
+                    "init": str(state == self.initial_state),
+                }
+            )
+            if next_state_coop == next_state_def:
+                links.append(
+                    {
+                        "id": len(links),
+                        "source": state_list.index(state),
+                        "target": state_list.index(next_state_coop),
+                        "label": "CD",
+                    }
+                )
+            else:
+                links.append(
+                    {
+                        "id": len(links),
+                        "source": state_list.index(state),
+                        "target": state_list.index(next_state_coop),
+                        "label": "C",
+                    }
+                )
+                links.append(
+                    {
+                        "id": len(links),
+                        "source": state_list.index(state),
+                        "target": state_list.index(next_state_def),
+                        "label": "D",
+                    }
+                )
+        json_data = "{nodes: ["
+        for node in nodes:
+            json_data += "{"
+            for key in node:
+                json_data += "{}: {}, ".format(key, format_json(node[key]))
+            json_data = json_data[:-2] + "}, "
+        json_data = json_data[:-2] + "], edges: ["
+        for link in links:
+            json_data += "{"
+            for key in link:
+                json_data += "{}: {}, ".format(key, format_json(link[key]))
+            json_data = json_data[:-2] + "}, "
+        json_data = json_data[:-2] + "]}"
+        return json_data
+
     def __str__(self):
         res = "Init: {}\n".format(self.initial_state)
         for state in self.transitions:
@@ -125,6 +194,16 @@ class MooreMachine:
             for symbol in self.transitions[state]:
                 res += "\t{} -> {}\n".format(symbol, self.transitions[state][symbol])
         return res
+
+
+def format_json(x):
+    try:
+        y = int(x)
+        if y == x:
+            return int(x)
+        return x
+    except ValueError:
+        return '"' + str(x).strip() + '"'
 
 
 def fight(automata1, automata2, number_rounds):

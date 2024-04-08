@@ -552,7 +552,11 @@ def session_admin_games(request, session_url_tag):
         if create_game_form.is_valid():
             ordering_priority = create_game_form.cleaned_data.get("ordering_priority", None)
             if ordering_priority is None:
-                ordering_priority = session.games.aggregate(Max('ordering_priority'))['ordering_priority__max'] + 1
+                games = session.games
+                if games.exists():
+                    ordering_priority = session.games.aggregate(Max('ordering_priority'))['ordering_priority__max'] + 1
+                else:
+                    ordering_priority = 0
             new_game = Game.objects.create(
                 game_type=create_game_form.cleaned_data["game_type"],
                 name=create_game_form.cleaned_data["name"],
