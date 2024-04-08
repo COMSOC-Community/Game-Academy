@@ -188,7 +188,7 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
         context["submitting_player"] = player
 
     context["game_nav_display_home"] = True
-    context["game_nav_display_team"] = game.needs_teams and not team and game.playable
+    context["game_nav_display_team"] = game.needs_teams and game.playable and not team
     context["game_nav_display_answer"] = (
         game.playable and not answer and not context["game_nav_display_team"]
     )
