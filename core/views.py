@@ -825,8 +825,6 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 
     if not game.needs_teams:
         raise Http404("This game does not require teams.")
-    if not game.playable and not context["user_is_session_admin"]:
-        raise Http404("The game is not playable and the user is not an admin.")
 
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
@@ -834,6 +832,9 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
         request, session, game, game.game_config().answer_model, context
     )
     context["game_nav_display_team"] = False
+    
+    if not game.playable and not context["user_is_session_admin"]:
+        raise Http404("The game is not playable and the user is not an admin.")
 
     player = context["player"]
     context["teams"] = Team.objects.filter(game=game)
