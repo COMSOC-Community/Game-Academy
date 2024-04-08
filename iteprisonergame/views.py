@@ -82,5 +82,7 @@ def results(request, session_url_tag, game_url_tag):
     game_context_initialiser(request, session, game, Answer, context)
     context["game_nav_display_result"] = False
 
-    context["answers"] = Answer.objects.filter(game=game).order_by("name")
+    all_answers = Answer.objects.filter(game=game)
+    context["answers"] = all_answers.order_by("name")
+    context["answers_sorted_score"] = all_answers.order_by("-avg_score")
     return render(request, os.path.join("iteprisonergame", "results.html"), context)

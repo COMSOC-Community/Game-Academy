@@ -26,7 +26,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for answer in answers %}
+                        {% for answer in answers_sorted_score %}
                             <tr>
                                 {% if user_is_session_admin %}
                                     <td {% if answer.winner %}class="winning"{% endif %}>
