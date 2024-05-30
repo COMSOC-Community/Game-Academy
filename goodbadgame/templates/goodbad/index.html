@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% include 'goodbad/includes/htmlheadercontent.html' %}
+	<title>Good-Choices/Bad-Choices Game</title>
+</head>
+
+<body>
+
+<h1>The Good-Choices/Bad-Choices Game</h1>
+
+<p>Welcome to the good-choices/bad-choices game.</p>
+
+<p>
+    {{ session.index_page_descr|safe }}
+</p>
+
+<p>To play the game, start by entering your name.</p>
+
+<div id="form">
+    <form method="post" action="{% url 'goodbad:goodbad_index' session.slug %}">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <p id="center_p"><input id="submit_button" type="submit" value="Start playing"/><p>
+    </form>
+</div>
+
+</body>
+</html>

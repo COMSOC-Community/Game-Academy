@@ -19,6 +19,7 @@
                     {% if game.result_auct %}
                         {% with answers_per_auction|get_key_dict:auction_id as auction_answers %}
                             {% if auction_answers %}
+                                <p>For this auction, all players were assigned a true valuation of <em>{{ auction_id|add:"10" }}</em>.</p>
                                 <div id="histogram_{{ auction_id }}" class="graph_wrap">
                                 </div>
                                 <script>
@@ -58,10 +59,14 @@
 
                                 {% if user_is_session_admin %}
                                     <p class="center-align" style="margin-top: 20px;">
-                                        <a class="next-collapsible">Display the winner{{ winning_answers|pluralize }}:</a>
-                                        {% with formatted_winners|get_key_dict:auction_id as winners %}
-                                            <span class="collapsed-content hidden"> {{ winners }}</span>
-                                        {% endwith %}
+                                        {% if formatted_winners|get_key_dict:auction_id %}
+                                            <a class="next-collapsible">Display the name{{ winning_answers|pluralize }} of the winner{{ winning_answers|pluralize }}:</a>
+                                            {% with formatted_winners|get_key_dict:auction_id as winners %}
+                                                <span class="collapsed-content hidden"> {{ winners }}</span>
+                                            {% endwith %}
+                                        {% else %}
+                                            There are no winners for this auction.
+                                        {% endif %}
                                     </p>
                                 {% endif %}
                             {% else %}

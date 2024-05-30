@@ -26,3 +26,8 @@ def float_formatter(x, num_digits=3):
 @register.filter
 def subtract(value, arg):
     return value - arg
+
+
+@register.filter
+def absolute(value):
+    return abs(value)

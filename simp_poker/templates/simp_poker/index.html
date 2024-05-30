@@ -40,7 +40,7 @@
     {% if answer.score_against_optimum < 0 %}
         <p>
             With this strategy, if you were to play a large number of games against the
-            computer, you would lose {{ answer.score_against_optimum }} dollars per game on average.
+            computer, you would lose {{ answer.score_against_optimum|absolute }} dollars per game on average.
         </p>
     {% else %}
         <p>

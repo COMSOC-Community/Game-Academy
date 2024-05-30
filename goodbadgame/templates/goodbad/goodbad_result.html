@@ -1,0 +1,245 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% include 'goodbad/includes/htmlheadercontent.html' %}
+	<title>Good-Choice/Bad-Choice Game | Results</title>
+    <script src="https://cdn.anychart.com/releases/8.10.0/js/anychart-base.min.js"></script>
+</head>
+
+<body>
+
+<h1>The Good-Choice/Bad-Choice Game</h1>
+
+{% if not global_results %}
+    <p>You have reached the end. Thank you for participating, <strong>{{ player.name }}</strong>!</p>
+
+    <p>
+        You got {{ player_global_count.1 }} out of {{ player_global_count.0|add:player_global_count.1 }} questions right.
+        Your score is <strong>{{ player_accuracy }}%</strong>.
+    </p>
+{%  endif %}
+
+<p>
+    If for each question we take the most popular answer (i.e., picked by the largest number of participants) we get a score
+    of <strong>{{ crowd_accuracy }}%</strong>.
+    {% if not global_results %}
+        {%  if crowd_accuracy > player_accuracy %}
+            The crowd turns out to be wiser!
+        {%  else %}
+            You beat the crowd, congrats!
+        {% endif %}
+    {% endif %}
+</p>
+
+<div id="graph_global_accuracy" class="graph_wrap">
+</div>
+<script>
+    function getGlobalAccData() {
+        return [
+            {{ session.accuracy_js_data|safe }}
+        ];
+    }
+    var globalChartDataSet = anychart.data.set(getGlobalAccData());
+    var globalAccSeriesData = globalChartDataSet.mapAs({ x: 0, value: 1 });
+    var avgAccSeriesData = globalChartDataSet.mapAs({ x: 0, value: 2 });
+    
+    var globalChart = anychart.line();
+    globalChart.title('Score of the crowd as the size of the group grows');
+    globalChart.yAxis().title('Score (%)');
+    globalChart.xAxis().title('Number of participants');
+    var globalAccLineChart = globalChart.line(globalAccSeriesData);
+    globalAccLineChart.name('Score of the crowd')
+    globalAccLineChart.stroke({color:'#FF8000'})
+    var avgAccLineChart = globalChart.line(avgAccSeriesData);
+    avgAccLineChart.name('Average score of the participants')
+    avgAccLineChart.stroke({color:'#5D5D5D'})
+    globalChart.legend().enabled(true)
+    globalChart.container('graph_global_accuracy');
+    globalChart.draw();
+</script>
+
+{% if detailed %}
+
+        <p>
+           What does this mean?
+        </p>
+
+        <p>
+            Imagine all questions are yes/no questions and everyone has the same accuracy of 0.6 for all of them:
+            that is, we all get the right answer 60% of the time.
+        </p>
+
+        <p>
+            Then, by
+            <a href="https://en.wikipedia.org/wiki/Law_of_large_numbers">the Law of Large Numbers</a>,
+            the average score would stabilize around 0.6 as the number of participants grows.
+            And this means that if we rely on the individual participants' guesses to find the right question,
+            we're correct about 6 times out of 10.
+        </p>
+
+        <p>
+            Can we do better?
+        </p>
+
+        <p>
+            Remarkably, yes!
+            It turns out that even if each of us, by themselves, is correct 60% of the time,
+            we can do better by looking at the answer given by the largest number of participants.
+            By carefully computing the probabilities, we can figure out that a group of 5 people
+            is correct 68% of the time, a group of 9 people is correct 73% of the time,
+            and the accuracy of a group of 51 people is a whopping 92%.
+            This is sometimes called the <i>wisdom of crowds</i>.
+        </p>
+        <p>
+            How do we know this happens? By the magic of maths!
+        </p>
+        <p>
+            Does it always happen? Alas, no. When and under which conditions crowds can be wise is the topic
+            of intense research.
+        </p>
+        <p>
+            One instance in which this is guaranteed to work is if:
+        </p>
+            <ul>
+                <li>
+                    people make up their minds independently of each other, and
+                </li>
+                <li>
+                    everyone is mildly competent, in the sense that their chance of being right is better than random.
+                </li>
+            </ul>
+        <p>
+            Then, under the simplified assumption from above, the accuracy of the group
+            is guaranteed to grow as more and more people join the group.
+            This is a classic result that goes under the name of the
+            <a href="https://en.wikipedia.org/wiki/Condorcet%27s_jury_theorem">Condorcet Jury Theorem</a>.
+        </p>
+        <p>
+            Ask us more if you're curious!
+	</p>
+
+{% endif %}
+
+       <p><i>Brought to you by the <a href="https://staff.science.uva.nl/u.endriss/group.php">COMSOC Group</a> at the ILLC!</i></p>
+
+{% for question_answer in questions_answers %}
+
+    <h2 id="{{ question_answer.0.slug }}_question" class="question_title">{{ question_answer.0.title }}</h2>
+
+    {% if question_answer.0.text %}
+        <p>{{ question_answer.0.text }}</p>
+    {% endif %}
+
+    <div class="alternatives_result_wrap">
+        <div class="alternatives_wrap">
+            <div class="alternative_label
+                {% if not global_results %}
+                     {% if question_answer.1.is_correct %} selected_question_label question_label_correct_answer {% endif %}">
+                {% else %}
+                    ">
+                {% endif %}
+
+                {% if question_answer.0.correct_alt.image %}
+                    <img src="{% static question_answer.0.correct_alt.image %}" alt="Image, correct or not?">
+                {% elif question_answer.0.correct_alt.text %}
+                    <p style="font-weight: bold; margin-bottom: 10px">{{ question_answer.0.correct_alt.text }}</p>
+                {% endif %}
+
+                <p style="margin-bottom: 10px">
+                    {% if not global_results %}
+                        This was the correct answer
+                        {% if question_answer.1 == None %}
+                            (you did not submit an answer yourself).
+                        {% else %}
+                            {% if question_answer.1.is_correct %}
+                                and you got it ... <strong>right!</strong>
+                            {% else %}
+                                and you got it ... <strong style="color: var(--color-red)">wrong.</strong>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        This was the correct answer.
+                    {% endif %}
+                </p>
+
+                <p>
+                    Among all participants {{ question_answer.2.1 }} got it right and {{ question_answer.2.0 }}
+                    got it wrong. The average score is <strong>{% widthratio question_answer.2.1 question_answer.2.0|add:question_answer.2.1 100 %}%</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div class="alternatives_wrap">
+            {% for alternative in question_answer.0.alternatives.all %}
+                {% if alternative != question_answer.0.correct_alt %}
+                    <div class="alternative_label
+                    {% if question_answer.1.answer == alternative %} selected_question_label question_label_wrong_answer {% endif %}
+                    ">
+                        {% if alternative.image %}
+                            <img src="{% static alternative.image %}" alt="Image, correct or not?">
+                        {% elif alternative.text %}
+                            <p>{{ alternative.text }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if detailed %}
+        {% if question_answer.3 %}
+            <p>
+                In the graph below, you can find out how accurate players were for this question. This value is likely to
+                stabilise around what would be the societal accuracy for this question.
+            </p>
+
+            <div id="graph_{{ question_answer.0.slug }}_accuracy" class="graph_wrap">
+            </div>
+            <script>
+                function get{{ question_answer.0.slug }}AccData() {
+                    return [
+                        {{ question_answer.3.data|safe }}
+                    ];
+                }
+                var {{ question_answer.0.slug }}AccDataSet = anychart.data.set(get{{ question_answer.0.slug }}AccData());
+                var {{ question_answer.0.slug }}AccSeriesData = {{ question_answer.0.slug }}AccDataSet.mapAs({ x: 0, value: 1 });
+                var {{ question_answer.0.slug }}AccChart = anychart.line();
+                {{ question_answer.0.slug }}AccChart.title('Proportion of correct answers for {{ question_answer.0.title }} as the size of the group grows');
+                {{ question_answer.0.slug }}AccChart.yAxis().title('Correct answers (%)');
+                {{ question_answer.0.slug }}AccChart.xAxis().title('Number of participants');
+                var {{ question_answer.0.slug }}AccLineChart = {{ question_answer.0.slug }}AccChart.line({{ question_answer.0.slug }}AccSeriesData);
+                {{ question_answer.0.slug }}AccLineChart.name('Correct answers')
+                {{ question_answer.0.slug }}AccLineChart.stroke({color:'#FF8000'})
+                {{ question_answer.0.slug }}AccChart.container('graph_{{ question_answer.0.slug }}_accuracy');
+                {{ question_answer.0.slug }}AccChart.draw();
+            </script>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% if not global_results %}
+    {% if not detailed %}
+        <p style="margin-top: 40px">
+            If you want to learn more have a look at the
+            <a href="{% url 'goodbad:goodbad_detailed_result' session.slug player.slug %}">
+                detailed results
+            </a>.
+        </p>
+    {% endif %}
+{% endif %}
+
+<p style="margin-top: 30px">
+    {% if detailed %}
+        {% if not global_results %}
+            <span><a href="{% url 'goodbad:goodbad_result' session.slug player.slug %}">&#171;- to the result
+                page</a></span>
+            <br>
+        {% endif %}
+    {% endif %}
+    <span><a href="{% url 'goodbad:goodbad_index' session.slug %}">&#171;- to the main page</a></span>
+</p>
+
+</body>
+</html>
