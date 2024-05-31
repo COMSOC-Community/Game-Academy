@@ -50,7 +50,7 @@
         </section>
 
         <section>
-            <h2 class="next-collapsible">Distribution of Scores per Strategy</h2>
+            <h2 class="next-collapsible">Distribution of Score per Strategy</h2>
 
             <div class="collapsed-content hidden">
                 <p>
@@ -80,11 +80,11 @@
                 var score_heatmap_chart = anychart.heatMap(score_heatmap_data);
                 var customColorScale = anychart.scales.ordinalColor([
                     {less: 9, color: "#ffffff"},
-                    {from: 9, to: 20, color: "#bce8f1"},
-                    {from: 20, to: 25, color: "#9cdaeb"},
-                    {from: 25, to: 30, color: "#7bcae2"},
-                    {from: 30, to: 40, color: "#58b9d9"},
-                    {greater: 40, color: "#3686bc"}
+                    {from: 9, to: 20, color: "#ffebc7"},
+                    {from: 20, to: 25, color: "#ffd9a8"},
+                    {from: 25, to: 30, color: "#ffc988"},
+                    {from: 30, to: 40, color: "#ffb869"},
+                    {greater: 40, color: "#ff9e49"}
                 ]);
                 score_heatmap_chart.colorScale(customColorScale);
                 score_heatmap_chart.xAxis().title('Strategy');

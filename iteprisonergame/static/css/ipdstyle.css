@@ -7,7 +7,7 @@
 }
 
 .lined-table .winning {
-	background: var(--color-success);
+	background: var(--color-success-light);
 }
 
 .payoff-matrix {

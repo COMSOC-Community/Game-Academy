@@ -2,6 +2,8 @@ from django.db import models
 
 from random import shuffle
 
+from core.models import Game, Player
+
 
 class Alternative(models.Model):
     slug = models.CharField(max_length=50, unique=True)
@@ -41,24 +43,51 @@ class Question(models.Model):
         return "{} - {}".format(self.title, self.slug)
 
 
-class Session(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    slug = models.SlugField(max_length=20, unique=True)
-    index_page_descr = models.TextField(null=True, blank=True, default="Play to test your knowledge and compare "
-                                                                       "yourself to the crowd!")
-    play_page_descr = models.TextField(null=True, blank=True, default="You will be presented several questions and for "
-                                                                      "each of them several alternatives. Try to find "
-                                                                      "out the correct answer!")
-
-    accuracy_js_data = models.TextField(null=True, blank=True)
-
-    questions = models.ManyToManyField(Question, blank=True, related_name="sessions")
+class Setting(models.Model):
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="goodbad_setting"
+    )
+    questions = models.ManyToManyField(Question, blank=True, related_name="goodbad_settings")
     num_displayed_questions = models.PositiveIntegerField()
+
+
+class Answer(models.Model):
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name="goodbad_answers"
+    )
+    player = models.ForeignKey(
+        Player, on_delete=models.CASCADE, related_name="goodbad_answer"
+    )
+    questions = models.ManyToManyField(Question, blank=True, related_name="players")
+    score = models.IntegerField(blank=True, null=True)
+    accuracy = models.FloatField(blank=True, null=True)
+
+
+class QuestionAnswer(models.Model):
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="question_answers")
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
+    selected_alt = models.ForeignKey(Alternative, on_delete=models.CASCADE)
+    is_correct = models.BooleanField()
+    submission_time = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['answer']
+
+    def __str__(self):
+        return self.answer.player.name + " - " + self.question.title + " - " + ("Correct" if self.is_correct else "Wrong")
+
+
+class Result(models.Model):
+    game = models.OneToOneField(
+        Game, on_delete=models.CASCADE, related_name="goodbad_result"
+    )
+    accuracy_js_data = models.TextField(null=True, blank=True)
+    crowd_accuracy = models.FloatField(blank=True, null=True)
 
     def questions_count(self):
         crowd_num_correct = 0
         crowd_num_wrong = 0
-        for question in self.questions.all():
+        for question in self.game.goodbad_setting.questions.all():
             crowd_answers = Answer.objects.filter(question=question, player__session=self)
             if crowd_answers.exists():
                 if crowd_answers.filter(is_correct=True).count() > crowd_answers.filter(is_correct=False).count():
@@ -68,50 +97,23 @@ class Session(models.Model):
         return crowd_num_wrong, crowd_num_correct
 
     class Meta:
-        ordering = ['name']
+        ordering = ["game"]
 
     def __str__(self):
-        return self.name
+        return "{} - Results Data".format(self.game.name)
 
 
-class JSGraphData(models.Model):
+class QuestionGraphData(models.Model):
+    result = models.ForeignKey(
+        Result, on_delete=models.CASCADE, related_name="questions_graph_data"
+    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE,
+                                 related_name="js_graph_data")
     data = models.TextField(null=True, blank=True)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="questions_js_graph_data")
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="js_graph_data")
 
     class Meta:
         ordering = ['session']
 
     def __str__(self):
-        return "{} - {}".format(self.question, self.session)
+        return "{} - {} - {}".format(self.result.game.session, self.result.game.name, self.question.title)
 
-
-class Player(models.Model):
-    name = models.CharField(max_length=20)
-    slug = models.SlugField(max_length=20)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name="players")
-    questions = models.ManyToManyField(Question, blank=True, related_name="players")
-
-    def questions_count(self):
-        return self.answers.filter(is_correct=False).count(), self.answers.filter(is_correct=True).count()
-
-    class Meta:
-        ordering = ['name']
-        unique_together = (('name', 'session'), ('slug', 'session'))
-
-    def __str__(self):
-        return "{} - {}".format(self.name, self.session.slug)
-
-
-class Answer(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="answers")
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
-    answer = models.ForeignKey(Alternative, on_delete=models.CASCADE)
-    is_correct = models.BooleanField()
-    timestamp = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['player']
-
-    def __str__(self):
-        return self.player.name + " - " + self.question.title + " - " + ("Correct" if self.is_correct else "Wrong")

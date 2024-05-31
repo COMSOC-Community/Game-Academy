@@ -24,7 +24,7 @@
 }
 
 .lined-table .winning {
-	background: var(--color-success);
+	background: var(--color-success-light);
 }
 
 .lined-table .winning .strategy-wrapper {

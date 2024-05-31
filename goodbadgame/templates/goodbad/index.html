@@ -1,33 +1,27 @@
-{% load static %}
+{% extends 'core/base_game_index.html' %}
+{% load core_extras %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	{% include 'goodbad/includes/htmlheadercontent.html' %}
-	<title>Good-Choices/Bad-Choices Game</title>
-</head>
+{% block game_rule_content %}
+    <section>
+        <h2>Rules of the Game</h2>
+        <p>
+            This is the main page for the game <em>{{ game.name }}</em>.
+            In this game every player is presented several questions and for each of them several
+            alternatives. The goal is to find the highest number of correct answers, hopefully doing
+            better than the other players!
+        </p>
+    </section>
+{% endblock %}
 
-<body>
+{% block game_answer_content %}
+    <section>
+        <h2>Answer</h2>
+        <p>
+            An answer is already linked to your account. You cannot play anymore.
+        </p>
 
-<h1>The Good-Choices/Bad-Choices Game</h1>
-
-<p>Welcome to the good-choices/bad-choices game.</p>
-
-<p>
-    {{ session.index_page_descr|safe }}
-</p>
-
-<p>To play the game, start by entering your name.</p>
-
-<div id="form">
-    <form method="post" action="{% url 'goodbad:goodbad_index' session.slug %}">
-        {% csrf_token %}
-
-        {{ form.as_p }}
-
-        <p id="center_p"><input id="submit_button" type="submit" value="Start playing"/><p>
-    </form>
-</div>
-
-</body>
-</html>
+{#        <p>#}
+{#            Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.#}
+{#        </p>#}
+    </section>
+{% endblock %}
