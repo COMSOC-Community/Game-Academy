@@ -63,9 +63,12 @@
                 <div id="score_heatmap" class="graph_wrap"></div>
 
                 {% if user_is_session_admin %}
-                    <p class="center-align" style="margin-top: 20px;">
-                        <a class="next-collapsible">Display the winner{{ winning_answers|length|pluralize:',s' }}:</a>
-                        <span class="collapsed-content hidden"> {{ winners_formatted }}</span>
+                    <p class="center-align next-collapsible" style="margin-top: 20px;">
+                        Display the name{{ winning_answers|length|pluralize:',s' }} of the
+                        winner{{ winning_answers|length|pluralize:',s' }}
+                    </p>
+                    <p class="center-align collapsed-content hidden">
+                        {{ winners_formatted }}
                     </p>
                 {% endif %}
             </div>
