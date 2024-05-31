@@ -136,7 +136,7 @@ class Command(BaseCommand):
             game.result_centi.scores_heatmap_js_data = "\n".join(
                 [
                     "{{x: '{}', y: '{}', heat: {}}},".format(
-                        key[0], key[1], float_formatter(value, num_digits=4)
+                        key[1], key[0], float_formatter(value, num_digits=4)
                     )
                     for key, value in score_heatmap_data.items()
                 ]

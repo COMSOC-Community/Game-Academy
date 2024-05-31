@@ -2,6 +2,7 @@
 :root {
 	--color-player1: #A30000;
 	--color-player2: #008C8C;
+	--color-unselected: #cecece;
 }
 
 .graph_wrap {

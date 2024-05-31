@@ -1,0 +1,40 @@
+{% load core_extras %}
+<svg width="800" height="200">
+    <defs>
+        <marker markerWidth="10" markerHeight="10" refX="2.5" refY="2.5" viewBox="0 0 5 5" orient="auto" id="default-arrow-head">
+            <polygon points="0,5 1.6666666666666667,2.5 0,0 5,2.5" fill="black"></polygon>
+        </marker>
+        <marker markerWidth="10" markerHeight="10" refX="2.5" refY="2.5" viewBox="0 0 5 5" orient="auto" id="unselected-arrow-head">
+            <polygon points="0,5 1.6666666666666667,2.5 0,0 5,2.5" fill="var(--color-unselected)"></polygon>
+        </marker>
+        <marker markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" viewBox="0 0 5 5" orient="auto" id="selected-p1-arrow-head">
+            <polygon points="0,5 1.6666666666666667,2.5 0,0 5,2.5" fill="var(--color-player1)"></polygon>
+        </marker>
+        <marker markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" viewBox="0 0 5 5" orient="auto" id="selected-p2-arrow-head">
+            <polygon points="0,5 1.6666666666666667,2.5 0,0 5,2.5" fill="var(--color-player2)"></polygon>
+        </marker>
+    </defs>
+
+    <text x="50" y="30" alignment-baseline="middle" text-anchor="middle" class="centi-player-turn centi-player-1">1</text>
+    <line x1="80" y1="20" x2="170" y2="20" {% if centi_answer and centi_answer.strategy_as_p1|first == 'R' %}{% include "centipedegame_include/centipede_svg_p1_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <line x1="50" y1="50" x2="50" y2="140" {% if centi_answer and centi_answer.strategy_as_p1|first == 'D' %}{% include "centipedegame_include/centipede_svg_p1_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <text x="50" y="180" alignment-baseline="middle" text-anchor="middle" class="centi-player-1"><tspan fill="black">(</tspan><tspan class="centi-player-1">{{ game.centi_setting.payoff_d_p1|float_formatter|float_formatter }}</tspan><tspan fill="black">, </tspan><tspan class="centi-player-2">{{ game.centi_setting.payoff_d_p2|float_formatter }}</tspan><tspan fill="black">)</tspan></text>
+
+
+    <text x="200" y="30" alignment-baseline="middle" text-anchor="middle" class="centi-player-turn centi-player-2">2</text>
+    <line x1="230" y1="20" x2="310" y2="20" {% if centi_answer and centi_answer.strategy_as_p2|first == 'R' %}{% include "centipedegame_include/centipede_svg_p2_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <line x1="200" y1="50" x2="200" y2="140" {% if centi_answer and centi_answer.strategy_as_p2|first == 'D' %}{% include "centipedegame_include/centipede_svg_p2_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <text x="200" y="180" alignment-baseline="middle" text-anchor="middle" class="centi-player-1"><tspan fill="black">(</tspan><tspan class="centi-player-1">{{ game.centi_setting.payoff_rd_p1|float_formatter }}</tspan><tspan fill="black">, </tspan><tspan class="centi-player-2">{{ game.centi_setting.payoff_rd_p2|float_formatter }}</tspan><tspan fill="black">)</tspan></text>
+
+    <text x="350" y="30" alignment-baseline="middle" text-anchor="middle" class="centi-player-turn centi-player-1">1</text>
+    <line x1="380" y1="20" x2="470" y2="20" {% if centi_answer and centi_answer.strategy_as_p1|last == 't' %}{% include "centipedegame_include/centipede_svg_p1_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <line x1="350" y1="50" x2="350" y2="140" {% if centi_answer and centi_answer.strategy_as_p1|last == 'n' %}{% include "centipedegame_include/centipede_svg_p1_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <text x="350" y="180" alignment-baseline="middle" text-anchor="middle" class="centi-player-1"><tspan fill="black">(</tspan><tspan class="centi-player-1">{{ game.centi_setting.payoff_rrd_p1|float_formatter }}</tspan><tspan fill="black">, </tspan><tspan class="centi-player-2">{{ game.centi_setting.payoff_rrd_p2|float_formatter }}</tspan><tspan fill="black">)</tspan></text>
+
+    <text x="500" y="30" alignment-baseline="middle" text-anchor="middle" class="centi-player-turn centi-player-2">2</text>
+    <line x1="530" y1="20" x2="610" y2="20" {% if centi_answer and centi_answer.strategy_as_p2|last == 't' %}{% include "centipedegame_include/centipede_svg_p2_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <line x1="500" y1="50" x2="500" y2="140" {% if centi_answer and centi_answer.strategy_as_p2|last == 'n' %}{% include "centipedegame_include/centipede_svg_p2_arrows_args.html"%}{% else %}{% include "centipedegame_include/centipede_svg_default_arrows_args.html"%}{% endif %} />
+    <text x="500" y="180" alignment-baseline="middle" text-anchor="middle" class="centi-player-1"><tspan fill="black">(</tspan><tspan class="centi-player-1">{{ game.centi_setting.payoff_rrrd_p1|float_formatter }}</tspan><tspan fill="black">, </tspan><tspan class="centi-player-2">{{ game.centi_setting.payoff_rrrd_p2|float_formatter }}</tspan><tspan fill="black">)</tspan></text>
+
+    <text x="640" y="27" alignment-baseline="middle" text-anchor="left" class="centi-player-1"><tspan fill="black">(</tspan><tspan class="centi-player-1">{{ game.centi_setting.payoff_rrrr_p1|float_formatter }}</tspan><tspan fill="black">, </tspan><tspan class="centi-player-2">{{ game.centi_setting.payoff_rrrr_p2|float_formatter }}</tspan><tspan fill="black">)</tspan></text>
+</svg>

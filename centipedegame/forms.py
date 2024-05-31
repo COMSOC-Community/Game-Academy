@@ -1,5 +1,6 @@
 from django import forms
 
+from centipedegame.constants import CENTIPEDE_STRATEGIES
 from centipedegame.models import Answer, Setting
 
 
@@ -11,25 +12,13 @@ class SettingForm(forms.ModelForm):
 
 class SubmitAnswerForm(forms.Form):
     strategy_as_p1 = forms.ChoiceField(
-        choices=[
-            ("", "----"),
-            ("Down - Down", "Down - Down"),
-            ("Down - Right", "Down - Right"),
-            ("Right - Down", "Right - Down"),
-            ("Right - Right", "Right - Right"),
-        ],
+        choices=[("", "----")] + list(zip(CENTIPEDE_STRATEGIES, CENTIPEDE_STRATEGIES)),
         label="Strategy as Player 1",
         label_suffix="",
         required=True,
     )
     strategy_as_p2 = forms.ChoiceField(
-        choices=[
-            ("", "----"),
-            ("Down - Down", "Down - Down"),
-            ("Down - Right", "Down - Right"),
-            ("Right - Down", "Right - Down"),
-            ("Right - Right", "Right - Right"),
-        ],
+        choices=[("", "----")] + list(zip(CENTIPEDE_STRATEGIES, CENTIPEDE_STRATEGIES)),
         label="Strategy as Player 2",
         label_suffix="",
     )

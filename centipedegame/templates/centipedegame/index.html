@@ -11,11 +11,13 @@
         <h2>Rules of the game</h2>
         <p>
             This is the main page for the game <em>{{ game.name }}</em>.
-            This is a two-player sequential game with the following structure.
+            This is a two-player sequential game with the following structure where the first player
+            to play is <span style="color: var(--color-player1); font-weight: bold;">player 1</span> and the second player to play is
+            <span style="color: var(--color-player2); font-weight: bold;">player 2</span>.
         </p>
 
         <div class="center-align">
-            {% include 'include/centipede_svg.html' with game=game %}
+            {% include 'centipedegame_include/centipede_svg.html' with game=game %}
         </div>
     </section>
 {% endblock %}
@@ -29,6 +31,12 @@
         <p>
             Your strategy is the following:
         </p>
+
+        <div class="center-align">
+            {% include 'centipedegame_include/centipede_svg.html' with game=game centi_answer=answer %}
+        </div>
+
+        which reads as:
         <ul>
             <li><em style="color: var(--color-player1);">{{ answer.strategy_as_p1 }}</em> as <span style="color: var(--color-player1); font-weight: bold;">player 1</span>;</li>
             <li><em style="color: var(--color-player2)">{{ answer.strategy_as_p2 }}</em> as <span style="color: var(--color-player2); font-weight: bold;">player 2</span>.</li>
