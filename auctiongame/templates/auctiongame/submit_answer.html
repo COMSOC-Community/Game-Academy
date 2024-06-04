@@ -17,36 +17,40 @@
                 setTimeout(redirect, 3000);
             </script>
         {% else %}
-            <p>
-                Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>.
-            </p>
+            {% if answer.bid %}
+                <p>You have already submitted an answer. You cannot change your answer.</p>
+            {% else %}
+                <p>
+                    Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>.
+                </p>
 
-            <p>
-                You have been assigned to <em>auction {{ answer.auction_id }}</em>.
-                Your true valuation for the item is <em>{{ answer.auction_id|add:"10" }}</em>.
-                Please choose how much you would like to bid and provide a couple of sentences explaining
-                your choice.
-            </p>
+                <p>
+                    You have been assigned to <em>auction {{ answer.auction_id }}</em>.
+                    Your true valuation for the item is <em>{{ answer.auction_id|add:"10" }}</em>.
+                    Please choose how much you would like to bid and provide a couple of sentences explaining
+                    your choice.
+                </p>
 
-            <p>
-                The "bid" field should be a rational number with a dot separator (with the
-                <a href="https://docs.python.org/3/tutorial/floatingpoint.html" target="_blank"> limitations</a>
-                of a Python float).
-            </p>
-                
-            {% if submission_error %}
-                    <section class="form-error-message">
-                        <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
+                <p>
+                    The "bid" field should be a rational number with a dot separator (with the
+                    <a href="https://docs.python.org/3/tutorial/floatingpoint.html" target="_blank"> limitations</a>
+                    of a Python float).
+                </p>
 
-                        <p>{{ submission_error }}</p>
-                    </section>
+                {% if submission_error %}
+                        <section class="form-error-message">
+                            <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
+
+                            <p>{{ submission_error }}</p>
+                        </section>
+                    {% endif %}
+
+                    {% if submit_answer_form %}
+                        <form action="{% url 'auction_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                            {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
+                        </form>
                 {% endif %}
-
-                {% if submit_answer_form %}
-                    <form action="{% url 'auction_game:submit_answer' session.url_tag game.url_tag %}" method="post">
-                        {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
-                    </form>
             {% endif %}
-        {% endif %}
+        {% endif%}
     </section>
 {% endblock %}

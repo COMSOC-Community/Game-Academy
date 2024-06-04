@@ -85,4 +85,4 @@ def results(request, session_url_tag, game_url_tag):
     all_answers = Answer.objects.filter(game=game)
     context["answers"] = all_answers.order_by("name")
     context["answers_sorted_score"] = all_answers.order_by("-avg_score")
-    return render(request, os.path.join("iteprisonergame", "results.html"), context)
+    return render(request, os.path.join("iteprisonergame", "global_results.html"), context)

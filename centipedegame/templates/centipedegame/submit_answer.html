@@ -23,29 +23,33 @@
                 setTimeout(redirect, 3000);
             </script>
         {% else %}
-            <p>
-                Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>. Please fill out the strategy
-                you would play if you were <span style="color: var(--color-player1); font-weight: bold;">player 1</span> (the first player to play) and if you were
-                <span style="color: var(--color-player2); font-weight: bold;">player 2</span> (the second player to play) as presented in the figure below.
-                Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
-            </p>
+            {% if answer %}
+                <p>You have already submitted an answer. You cannot change your answer.</p>
+            {% else %}
+                <p>
+                    Fill out the form below to submit your answer to the game <em>{{ game.name }}</em>. Please fill out the strategy
+                    you would play if you were <span style="color: var(--color-player1); font-weight: bold;">player 1</span> (the first player to play) and if you were
+                    <span style="color: var(--color-player2); font-weight: bold;">player 2</span> (the second player to play) as presented in the figure below.
+                    Please also write one or two sentences to explain the reasoning you have used to come up with your answer.
+                </p>
 
-            <div class="center-align">
-                {% include 'centipedegame_include/centipede_svg.html' %}
-            </div>
+                <div class="center-align">
+                    {% include 'centipedegame_include/centipede_svg.html' %}
+                </div>
 
-            {% if submission_error %}
-                    <section class="form-error-message">
-                        <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
+                {% if submission_error %}
+                        <section class="form-error-message">
+                            <p>Your answer raised the following error. Contact the administrator to solve the problem.</p>
 
-                        <p>{{ submission_error }}</p>
-                    </section>
+                            <p>{{ submission_error }}</p>
+                        </section>
+                    {% endif %}
+
+                    {% if submit_answer_form %}
+                        <form action="{% url 'centipede_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                            {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
+                        </form>
                 {% endif %}
-
-                {% if submit_answer_form %}
-                    <form action="{% url 'centipede_game:submit_answer' session.url_tag game.url_tag %}" method="post">
-                        {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}
-                    </form>
             {% endif %}
         {% endif %}
     </section>

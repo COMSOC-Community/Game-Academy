@@ -14,7 +14,7 @@ def itepris_graph_data(answer):
 
 
 class Command(BaseCommand):
-    help = "Computes the results of the IPD."
+    help = "Computes the global_results of the IPD."
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)

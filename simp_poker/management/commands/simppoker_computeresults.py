@@ -62,7 +62,7 @@ def compute_global_best_response(answers):
 
 
 class Command(BaseCommand):
-    help = "Computes the results of the simplified poker game."
+    help = "Computes the global_results of the simplified poker game."
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)

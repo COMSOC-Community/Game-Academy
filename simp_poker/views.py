@@ -90,7 +90,7 @@ def results(request, session_url_tag, game_url_tag):
     context["game_nav_display_result"] = False
 
     if not game.results_visible and not context["user_is_session_admin"]:
-        raise Http404("The results are not visible and the user is not an admin.")
+        raise Http404("The global_results are not visible and the user is not an admin.")
 
     answers = Answer.objects.filter(game=game)
     context["answers_sorted_round_robin"] = answers.order_by('-round_robin_score')
@@ -124,4 +124,4 @@ def results(request, session_url_tag, game_url_tag):
         prob_p2_jack=0
     )
 
-    return render(request, os.path.join("simp_poker", "results.html"), context)
+    return render(request, os.path.join("simp_poker", "global_results.html"), context)

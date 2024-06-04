@@ -1,4 +1,5 @@
 {% extends 'core/base_game_submit_answers.html' %}
+{% load core_extras %}
 
 {% block game_submit_answer_content %}
     <section>
@@ -18,7 +19,7 @@
             </script>
         {% else %}
             {% if answer %}
-                <p>You have already submitted the answer <em>{{ answer.formatted_answer }}</em>.</p>
+                <p>You have already submitted the answer <em>{{ answer.answer|float_formatter:20 }}</em>.</p>
                 <p>You cannot submit more than one answer for this game.</p>
             {% else %}
                 <p>

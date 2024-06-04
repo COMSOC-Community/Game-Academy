@@ -931,9 +931,9 @@ def game_result_toggle(request, session_url_tag, game_url_tag, game_type):
     game.save()
 
     if game.results_visible:
-        info_message = "Players can now see the results."
+        info_message = "Players can now see the global_results."
     else:
-        info_message = "Players can no longer see the results."
+        info_message = "Players can no longer see the global_results."
     return quick_game_admin_render(request, session, game, info_message)
 
 

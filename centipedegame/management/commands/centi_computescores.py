@@ -21,7 +21,7 @@ def payoffs(game, player1, player2):
 
 
 class Command(BaseCommand):
-    help = "Updates the values required for the results page, to be run each time a new answer is submitted."
+    help = "Updates the values required for the global_results page, to be run each time a new answer is submitted."
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)

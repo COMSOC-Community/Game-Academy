@@ -14,14 +14,18 @@
 {% endblock %}
 
 {% block game_answer_content %}
-    <section>
-        <h2>Answer</h2>
-        <p>
-            An answer is already linked to your account. You cannot play anymore.
-        </p>
-
-{#        <p>#}
-{#            Your answer is <em>{{ answer.answer|float_formatter:20 }}</em>.#}
-{#        </p>#}
-    </section>
+    {% if answer.score %}
+        <section>
+            <h2>Answer</h2>
+            <p>
+                An answer is already linked to your account. You cannot play anymore.
+            </p>
+            <p>
+                You can see the details of your answer here:
+            </p>
+            <p class="center-align">
+                <a class="button navigation-button" href="{% url "goodbad_game:results" session.url_tag game.url_tag %}">See your result</a>
+            </p>
+        </section>
+    {% endif %}
 {% endblock %}

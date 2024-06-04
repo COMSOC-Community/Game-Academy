@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from goodbadgame.models import *
+from goodbadgame.models import Alternative, Question
 
 
 def add_logo_question(slug_prefix, title, logo_img_prefix, num_alts, correct_alt):

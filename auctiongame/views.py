@@ -95,7 +95,7 @@ def results(request, session_url_tag, game_url_tag):
     context["game_nav_display_result"] = False
 
     if not game.results_visible and not context["user_is_session_admin"]:
-        raise Http404("The results are not visible and the user is not an admin.")
+        raise Http404("The global_results are not visible and the user is not an admin.")
 
     answers = Answer.objects.filter(game=game).order_by("auction_id", "-bid")
     context["answers"] = answers
@@ -127,4 +127,4 @@ def results(request, session_url_tag, game_url_tag):
             global_winners_formatted[-1] = "and " + global_winners_formatted[-1]
         global_winners_formatted = ", ".join(global_winners_formatted)
         context["global_winners_formatted"] = global_winners_formatted
-    return render(request, os.path.join("auctiongame", "results.html"), context)
+    return render(request, os.path.join("auctiongame", "global_results.html"), context)

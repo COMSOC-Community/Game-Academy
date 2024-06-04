@@ -1,6 +1,8 @@
-from django.db import models
-
 from random import shuffle
+
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from core.models import Game, Player
 
@@ -29,26 +31,28 @@ class Question(models.Model):
         shuffle(res)
         return res
 
-    def crowd_count(self, session):
-        crowd_answers = Answer.objects.filter(question=self, player__session=session)
-        if crowd_answers.exists():
-            return crowd_answers.filter(is_correct=False).count(), crowd_answers.filter(is_correct=True).count()
-        else:
-            return 0, 0
-
     class Meta:
         ordering = ['title']
 
     def __str__(self):
-        return "{} - {}".format(self.title, self.slug)
+        return self.title
 
 
 class Setting(models.Model):
-    game = models.ForeignKey(
+    game = models.OneToOneField(
         Game, on_delete=models.CASCADE, related_name="goodbad_setting"
     )
     questions = models.ManyToManyField(Question, blank=True, related_name="goodbad_settings")
-    num_displayed_questions = models.PositiveIntegerField()
+    num_displayed_questions = models.PositiveIntegerField(default=10)
+
+
+@receiver(post_save, sender=Setting, dispatch_uid='set_default_questions')
+def SetDefaulQuestions(**kwargs):
+    setting = kwargs['instance']
+
+    if not setting.questions.all():
+        setting.questions.add(*Question.objects.all())
+        setting.save()
 
 
 class Answer(models.Model):
@@ -82,19 +86,9 @@ class Result(models.Model):
         Game, on_delete=models.CASCADE, related_name="goodbad_result"
     )
     accuracy_js_data = models.TextField(null=True, blank=True)
+    average_accuracy = models.FloatField(blank=True, null=True)
+    crowd_num_correct = models.IntegerField(blank=True, null=True)
     crowd_accuracy = models.FloatField(blank=True, null=True)
-
-    def questions_count(self):
-        crowd_num_correct = 0
-        crowd_num_wrong = 0
-        for question in self.game.goodbad_setting.questions.all():
-            crowd_answers = Answer.objects.filter(question=question, player__session=self)
-            if crowd_answers.exists():
-                if crowd_answers.filter(is_correct=True).count() > crowd_answers.filter(is_correct=False).count():
-                    crowd_num_correct += 1
-                else:
-                    crowd_num_wrong += 1
-        return crowd_num_wrong, crowd_num_correct
 
     class Meta:
         ordering = ["game"]
@@ -103,16 +97,20 @@ class Result(models.Model):
         return "{} - Results Data".format(self.game.name)
 
 
-class QuestionGraphData(models.Model):
+class QuestionResult(models.Model):
     result = models.ForeignKey(
-        Result, on_delete=models.CASCADE, related_name="questions_graph_data"
+        Result, on_delete=models.CASCADE, related_name="questions_result"
     )
     question = models.ForeignKey(Question, on_delete=models.CASCADE,
-                                 related_name="js_graph_data")
-    data = models.TextField(null=True, blank=True)
+                                 related_name="results")
+    num_correct_answers = models.IntegerField(blank=True, null=True)
+    num_wrong_answers = models.IntegerField(blank=True, null=True)
+    accuracy = models.FloatField(blank=True, null=True)
+    graph_js_data = models.TextField(null=True, blank=True)
 
     class Meta:
-        ordering = ['session']
+        ordering = ['question']
+        unique_together = ('result', 'question')
 
     def __str__(self):
         return "{} - {} - {}".format(self.result.game.session, self.result.game.name, self.question.title)

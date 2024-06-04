@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "iteprisonergame.apps.ItePrisonerGameConfig",
     "numbersgame.apps.NumbersGameConfig",
     "simp_poker.apps.SimpPokerConfig",
+    "goodbadgame.apps.GoodBadGameConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

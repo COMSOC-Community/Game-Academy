@@ -1,0 +1,86 @@
+{% extends 'core/base_game_submit_answers.html' %}
+{% load core_extras %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{% static 'goodbad/css/style.css' %}"/>
+{% endblock %}
+
+{% block game_submit_answer_content %}
+    <section>
+        {% if submitted_answer %}
+            <p>Your answer has been submitted, thanks!</p>
+
+            <p>
+                You will be redirected soon to the game page.
+                If not, <a class="button navigation-button" href="{% url 'goodbad_game:index' session.url_tag game.url_tag %}">click here</a>!
+            </p>
+
+            <script>
+                function redirect () {
+                    window.location.href = "{% url 'goodbad_game:index' session.url_tag game.url_tag %}" ;
+                }
+                setTimeout(redirect, 3000);
+            </script>
+        {% else %}
+            {% if answer.score %}
+                <p>You have already played, this page is not for you.</p>
+            {% else %}
+                <form method="post" action="{% url 'goodbad_game:submit_answer' session.url_tag game.url_tag %}"
+                      class="goodbad_play_form">
+                    {% csrf_token %}
+
+                    {% for question in answer.questions.all %}
+
+                        <h2 id="{{ question.slug }}_question" class="question_title">{{ question.title }}</h2>
+
+                        {% if question.text %}
+                            <p>{{ question.text }}</p>
+                        {% endif %}
+
+                        <div class="alternatives_wrap">
+                            {% for alternative in question.random_order_alternatives %}
+                                <label for="label_{{ alternative.id }}" class="alternative_label">
+                                    {% if alternative.image %}
+                                        <img src="{% static alternative.image %}" alt="Image, correct or not?">
+                                    {% elif alternative.text %}
+                                        <p>{{ alternative.text }}</p>
+                                    {% endif %}
+                                    <input type="radio" id="label_{{ alternative.id }}" name="{{ question.slug }}_selector" value="{{ alternative.id }}" class="question_radio_input">
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <p class="center-align">
+                        <input id="submit_button" type="submit" value="Submit your answers"/>
+                    </p>
+                </form>
+            {% endif %}
+        {% endif %}
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function updateRadioCSS(radio){
+        var questionDivs = radio.closest(".alternatives_wrap").querySelectorAll(".alternative_label")
+
+        for (var i = 0, len = questionDivs.length; i < len; i++){
+            if (questionDivs[i].querySelector("input[type=radio]").checked) {
+                questionDivs[i].classList.add("selected_alternative_label");
+            } else {
+                questionDivs[i].classList.remove("selected_alternative_label");
+            }
+        }
+    }
+
+    var radios = document.getElementsByClassName('question_radio_input');
+
+    for (var i = 0, len = radios.length; i < len; i++){
+        radios[i].addEventListener('change', function () {
+            updateRadioCSS(this);
+        })
+    }
+</script>
+{% endblock %}

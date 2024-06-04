@@ -1,8 +1,6 @@
-import random
-
 from django.core.management.base import BaseCommand
 
-from core.constants import player_username, guest_username
+from core.constants import player_username
 from core.models import Session, Player, CustomUser, Game
 from simp_poker.apps import NAME
 from simp_poker.models import Answer

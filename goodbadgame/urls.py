@@ -7,7 +7,6 @@ app_name = URL_NAMESPACE
 urlpatterns = [
     path("", views.index, name="index"),
     path("answer/", views.submit_answer, name="submit_answer"),
-    path("playerresults/", views.player_results, name="player_results"),
-    path("playerresults/details", views.player_results, kwargs={'detailed': True}, name="player_results_detailed"),
-    path("results/", views.results, name="results"),
+    path("playerresults/", views.results, name="results"),
+    path("global_results/", views.global_results, name="global_results"),
 ]

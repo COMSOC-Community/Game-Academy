@@ -19,7 +19,7 @@ class GoodBadGameConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
-            management_commands=["goodbad_generatejsgraphdata"],
+            management_commands=["goodbad_computeresults"],
             answer_model_fields=("score", ),
             illustration_paths=("img/goodbad1.png", "img/goodbad2.png", "img/goodbad3.png", "img/goodbad4.png"),
         )

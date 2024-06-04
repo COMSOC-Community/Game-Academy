@@ -10,7 +10,7 @@ from numbersgame.models import Answer, Result
 
 class Command(BaseCommand):
     help = (
-        "Updates the values required for the results page, to be run each time a new answer "
+        "Updates the values required for the global_results page, to be run each time a new answer "
         "is submitted."
     )
 
@@ -118,5 +118,5 @@ class Command(BaseCommand):
             game.save()
 
         self.stdout.write(
-            "The results for the Numbers Game {} have been updated.".format(game.name)
+            "The global_results for the Numbers Game {} have been updated.".format(game.name)
         )
