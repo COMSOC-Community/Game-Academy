@@ -19,7 +19,7 @@ class SimpPokerConfig(GameConfig):
             URL_NAMESPACE,
             management_commands="simppoker_computeresults",
             answer_model_fields=("probabilities_as_tuple", "round_robin_position", "best_response", "motivation"),
-            illustration_paths=("img/SimpPoker1.png", "img/SimpPoker2.png"),
+            illustration_paths=("simp_poker/img/SimpPoker1.png", "simp_poker/img/SimpPoker2.png"),
         )
 
     def ready(self):

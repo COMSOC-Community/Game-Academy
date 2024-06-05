@@ -105,7 +105,7 @@ class MooreMachine:
             for input_symbol in ("C", "D"):
                 self_next_state = self.transitions[self_state][input_symbol]
                 other_next_state = other_automata.transitions[other_state][input_symbol]
-                print(self_state, other_state, input_symbol, self_next_state, other_next_state)
+                # print(self_state, other_state, input_symbol, self_next_state, other_next_state)
                 if self_next_state in state_renaming:
                     if state_renaming[self_next_state] != other_next_state:
                         raise AutomataNotIsomorphicError("The automatas are not isomorphic")

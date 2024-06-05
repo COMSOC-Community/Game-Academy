@@ -18,7 +18,7 @@ def get_attr(obj, attr):
 def float_formatter(x, num_digits=3):
     try:
         float(x)
-    except ValueError:
+    except (ValueError, TypeError):
         return ''
     return core.utils.float_formatter(x, num_digits=num_digits)
 

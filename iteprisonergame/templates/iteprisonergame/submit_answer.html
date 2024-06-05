@@ -45,9 +45,11 @@
                     player from the team will be able to submit anymore.
                 </p>
 
-                <form action="{% url 'itepris_game:submit_answer' session.url_tag game.url_tag %}" method="post">
-                    {% include "include/form_table_template.html" with form=submit_answer_form form_type='submit_answer_form' submit_button_label='Submit your Answer' %}
-                </form>
+                {% if submit_answer_form %}
+                    <form action="{% url 'itepris_game:submit_answer' session.url_tag game.url_tag %}" method="post">
+                        {% include "include/form_table_template.html" with form=submit_answer_form form_type='submit_answer_form' submit_button_label='Submit your Answer' %}
+                    </form>
+                {% endif %}
             {% else %}
                 <p>An answer has already been submitted for your team. This page is not for you.</p>
             {% endif %}

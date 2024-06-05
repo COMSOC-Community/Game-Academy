@@ -75,10 +75,9 @@ class Command(BaseCommand):
             for answer in answers:
                 current_value = game.numbers_setting.lower_bound
                 while (
-                    current_value < answer.answer
-                    and current_value
+                    current_value + game.numbers_setting.histogram_bin_size <= answer.answer
+                    and current_value + game.numbers_setting.histogram_bin_size
                     < game.numbers_setting.upper_bound
-                    - game.numbers_setting.histogram_bin_size
                 ):
                     current_value += game.numbers_setting.histogram_bin_size
                 categories[current_value] += 1

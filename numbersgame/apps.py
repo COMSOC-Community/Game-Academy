@@ -17,9 +17,9 @@ class NumbersGameConfig(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
-            management_commands="ng_results",
+            management_commands="numbersgame_results",
             answer_model_fields=("answer", "motivation"),
-            illustration_paths=("img/NumbersGame1.png", "img/NumbersGame2.png", "img/NumbersGame3.png", "img/NumbersGame4.png", "img/NumbersGame5.png"),
+            illustration_paths=("numbersgame/img/NumbersGame1.png", "numbersgame/img/NumbersGame2.png", "numbersgame/img/NumbersGame3.png", "numbersgame/img/NumbersGame4.png", "numbersgame/img/NumbersGame5.png"),
         )
 
     def ready(self):

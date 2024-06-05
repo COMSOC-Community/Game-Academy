@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block game_answer_content %}
-    {% if answer.score %}
+    {% if answer.question_answers.exists %}
         <section>
             <h2>Answer</h2>
             <p>

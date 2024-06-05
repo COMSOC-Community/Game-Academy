@@ -23,14 +23,14 @@
                 setTimeout(redirect, 3000);
             </script>
         {% else %}
-            {% if answer.score %}
+            {% if answer.question_answers.exists %}
                 <p>You have already played, this page is not for you.</p>
             {% else %}
                 <form method="post" action="{% url 'goodbad_game:submit_answer' session.url_tag game.url_tag %}"
                       class="goodbad_play_form">
                     {% csrf_token %}
 
-                    {% for question in answer.questions.all %}
+                    {% for question in questions %}
 
                         <h2 id="{{ question.slug }}_question" class="question_title">{{ question.title }}</h2>
 

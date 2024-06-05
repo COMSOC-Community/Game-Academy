@@ -54,4 +54,4 @@ class Command(BaseCommand):
         add_logo_question('Slack_Logo', 'Slack Logo', 'slack', 2, 1)
         add_logo_question('Duolingo_Logo', 'Duolingo Logo', 'duolingo', 2, 2)
         add_logo_question('Twitter_Logo', 'Twitter Logo', 'twitter', 2, 2)
-        print('All logo added')
+        self.stdout.write('All logo added')

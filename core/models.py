@@ -28,6 +28,7 @@ class Session(models.Model):
     super_admins = models.ManyToManyField(
         CustomUser, related_name="super_administrated_sessions"
     )
+    game_after_logging = models.OneToOneField("Game", on_delete=models.CASCADE, related_name="session_entry_point_of", null=True, blank=True)
 
     class Meta:
         ordering = ["url_tag"]
@@ -82,6 +83,9 @@ class Game(models.Model):
     ordering_priority = models.IntegerField(help_text="The value used to order the games, the "
                                                       "higher values appear first.",
                                             default=0)
+    run_management_after_submit = models.BooleanField(blank=True, null=True)
+    initial_view = models.CharField(max_length=50, blank=True, null=True)
+    view_after_submit = models.CharField(max_length=50, blank=True, null=True)
 
     def __init__(self, *args, **kwargs):
         super(Game, self).__init__(*args, **kwargs)

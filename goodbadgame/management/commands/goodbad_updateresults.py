@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         player = Player.objects.filter(name=options['player'], session=session)
         if not player.exists():
-            print('ERROR: no player with name {} has been found'.format(options['player']))
+            self.stderr.write('ERROR: no player with name {} has been found'.format(options['player']))
             return
         player = player.first()
 

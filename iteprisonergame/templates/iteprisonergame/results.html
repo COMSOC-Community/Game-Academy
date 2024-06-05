@@ -6,7 +6,7 @@
 {% block extra_head %}
     <script src="{% static 'js/collapsible_next.js' %}"></script>
 	<script src="https://d3js.org/d3.v3.min.js"></script>
-    <link rel="stylesheet" href="{% static 'css/ipdstyle.css' %}">
+    <link rel="stylesheet" href="{% static 'iteprisonergame/css/style.css' %}">
 {% endblock %}
 
 {% block game_content %}
@@ -68,7 +68,7 @@
                 <div class="side-by-side-centered-wrapper">
                     <div>
                         {% if answer.number_states < 100 %}
-                            {% include 'include/ipd_automata.html' with width=400 height=250 answer=answer %}
+                            {% include 'iteprisonergame_include/ipd_automata.html' with width=400 height=250 answer=answer %}
                         {% else %}
                             <p>This answer has {{ answer.number_states }} states. It will not be displayed.</p>
                         {% endif %}

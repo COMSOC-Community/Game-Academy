@@ -21,7 +21,7 @@ class GoodBadGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands=["goodbad_computeresults"],
             answer_model_fields=("score", ),
-            illustration_paths=("img/goodbad1.png", "img/goodbad2.png", "img/goodbad3.png", "img/goodbad4.png"),
+            illustration_paths=("goodbad/img/goodbad1.png", "goodbad/img/goodbad2.png", "goodbad/img/goodbad3.png", "goodbad/img/goodbad4.png"),
         )
 
     def ready(self):

@@ -1,107 +1,72 @@
 import os
 
-from django.shortcuts import render, get_object_or_404
-from django.http import Http404
+from django.shortcuts import render
 
-from core.models import Session, Game
-from core.views import (
-    base_context_initialiser,
-    session_context_initialiser,
-    game_context_initialiser,
-)
-
+from core.game_views import GameIndexView, GameResultsView, GameSubmitAnswerView
 from .forms import SubmitAnswerForm
-from .apps import NAME
 from .models import Answer
 
 
-def index(request, session_url_tag, game_url_tag):
-    session = get_object_or_404(Session, url_tag=session_url_tag)
-    game = get_object_or_404(
-        Game, session=session, url_tag=game_url_tag, game_type=NAME
-    )
-
-    context = base_context_initialiser(request)
-    session_context_initialiser(request, session, context)
-    game_context_initialiser(request, session, game, Answer, context)
-    context["game_nav_display_home"] = False
-
-    return render(request, os.path.join("centipedegame", "index.html"), context)
+class Index(GameIndexView):
+    def get(self, request, session_url_tag, game_url_tag):
+        return render(request, os.path.join("centipedegame", "index.html"), self.context)
 
 
-def submit_answer(request, session_url_tag, game_url_tag):
-    session = get_object_or_404(Session, url_tag=session_url_tag)
-    game = get_object_or_404(
-        Game, session=session, url_tag=game_url_tag, game_type=NAME
-    )
+class SubmitAnswer(GameSubmitAnswerView):
+    def get(self, request, session_url_tag, game_url_tag):
+        if self.context["submitting_player"] and not self.context["answer"]:
+            self.context["submit_answer_form"] = SubmitAnswerForm(game=self.game, player=self.context["submitting_player"])
+        return render(request, os.path.join("centipedegame", "submit_answer.html"), self.context)
 
-    context = base_context_initialiser(request)
-    session_context_initialiser(request, session, context)
-    game_context_initialiser(request, session, game, Answer, context)
-    context["game_nav_display_answer"] = False
+    def post_validated_form(self, request):
+        submit_answer_form = SubmitAnswerForm(
+            request.POST, game=self.game, player=self.context["submitting_player"]
+        )
+        submit_answer_form.is_valid()
+        return submit_answer_form
 
-    if not game.playable and not context["user_is_session_admin"]:
-        raise Http404("The game is not playable and the user is not an admin.")
+    def post_code_if_form_valid(self, request, form_object):
+        submitted_answer = Answer.objects.create(
+            game=self.game,
+            player=self.context["submitting_player"],
+            strategy_as_p1=form_object.cleaned_data["strategy_as_p1"],
+            strategy_as_p2=form_object.cleaned_data["strategy_as_p2"],
+            motivation=form_object.cleaned_data["motivation"],
+        )
+        self.context["submitted_answer"] = submitted_answer
 
-    submitting_player = context["submitting_player"]
-    answer = context["answer"]
+    def post_code_if_form_invalid(self, request, form_object):
+        self.context["submit_answer_form"] = form_object
 
-    if submitting_player and not answer:
-        if request.method == "POST":
-            submit_answer_form = SubmitAnswerForm(
-                request.POST, game=game, player=submitting_player
-            )
-            if submit_answer_form.is_valid():
-                submitted_answer = Answer.objects.create(
-                    game=game,
-                    player=submitting_player,
-                    strategy_as_p1=submit_answer_form.cleaned_data["strategy_as_p1"],
-                    strategy_as_p2=submit_answer_form.cleaned_data["strategy_as_p2"],
-                    motivation=submit_answer_form.cleaned_data["motivation"],
+    def post_code_render(self, request):
+        return render(request, os.path.join("centipedegame", "submit_answer.html"), self.context)
+
+
+class Results(GameResultsView):
+
+    def get(self, request, session_url_tag, game_url_tag):
+        context = self.context
+        answers = Answer.objects.filter(game=self.game).order_by("-avg_score")
+        context["answers"] = answers
+        if answers:
+            winning_answers = answers.filter(winning=True)
+            context["winning_answers"] = winning_answers
+            if winning_answers:
+                winning_answers_formatted = sorted(
+                    list(set(answer.avg_score for answer in winning_answers))
                 )
-                context["submitted_answer"] = submitted_answer
-        else:
-            submit_answer_form = SubmitAnswerForm(game=game, player=submitting_player)
-        context["submit_answer_form"] = submit_answer_form
-
-    return render(request, os.path.join("centipedegame", "submit_answer.html"), context)
-
-
-def results(request, session_url_tag, game_url_tag):
-    session = get_object_or_404(Session, url_tag=session_url_tag)
-    game = get_object_or_404(
-        Game, session=session, url_tag=game_url_tag, game_type=NAME
-    )
-
-    context = base_context_initialiser(request)
-    session_context_initialiser(request, session, context)
-    game_context_initialiser(request, session, game, Answer, context)
-    context["game_nav_display_result"] = False
-
-    if not game.results_visible and not context["user_is_session_admin"]:
-        raise Http404("The global_results are not visible and the user is not an admin.")
-
-    answers = Answer.objects.filter(game=game).order_by("-avg_score")
-    context["answers"] = answers
-    if answers:
-        winning_answers = answers.filter(winning=True)
-        context["winning_answers"] = winning_answers
-        if winning_answers:
-            winning_answers_formatted = sorted(
-                list(set(answer.avg_score for answer in winning_answers))
-            )
-            if len(winning_answers_formatted) > 1:
-                winning_answers_formatted = "{} and {}".format(
-                    winning_answers_formatted[0], winning_answers_formatted[1]
+                if len(winning_answers_formatted) > 1:
+                    winning_answers_formatted = "{} and {}".format(
+                        winning_answers_formatted[0], winning_answers_formatted[1]
+                    )
+                else:
+                    winning_answers_formatted = "{}".format(winning_answers_formatted[0])
+                context["winning_answers_formatted"] = winning_answers_formatted
+                winners_formatted = sorted(
+                    list(answer.player.name for answer in winning_answers)
                 )
-            else:
-                winning_answers_formatted = "{}".format(winning_answers_formatted[0])
-            context["winning_answers_formatted"] = winning_answers_formatted
-            winners_formatted = sorted(
-                list(answer.player.name for answer in winning_answers)
-            )
-            if len(winners_formatted) > 1:
-                winners_formatted[-1] = "and " + winners_formatted[-1]
-            winners_formatted = ", ".join(winners_formatted)
-            context["winners_formatted"] = winners_formatted
-    return render(request, os.path.join("centipedegame", "global_results.html"), context)
+                if len(winners_formatted) > 1:
+                    winners_formatted[-1] = "and " + winners_formatted[-1]
+                winners_formatted = ", ".join(winners_formatted)
+                context["winners_formatted"] = winners_formatted
+        return render(request, os.path.join("centipedegame", "results.html"), context)

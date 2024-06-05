@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/simppokerstyle.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'simp_poker/css/style.css' %}"/>
 {% endblock %}
 
 {% block game_submit_answer_content %}
@@ -68,7 +68,6 @@
                         <p>{{ submission_error }}</p>
                     </section>
                 {% endif %}
-
                 {% if submit_answer_form %}
                     <form action="{% url 'simp_poker:submit_answer' session.url_tag game.url_tag %}" method="post">
                         {% include "include/form_table_template.html" with form=submit_answer_form form_type="submit_answer" submit_button_label='Submit your Answer' %}

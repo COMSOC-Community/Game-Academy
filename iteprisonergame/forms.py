@@ -11,10 +11,8 @@ class SettingForm(forms.ModelForm):
 
     def clean_num_repetitions(self):
         num_repetitions = self.cleaned_data.get("num_repetitions")
-        print(num_repetitions)
         if "," in num_repetitions:
             repetitions = [s.strip() for s in num_repetitions.split(",")]
-            print(repetitions)
             for r in repetitions:
                 try:
                     float(r)
