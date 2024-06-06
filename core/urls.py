@@ -36,9 +36,19 @@ urlpatterns = [
         name="session_admin_games",
     ),
     path(
+        "<slug:session_url_tag>/admin/games/<slug:game_url_tag>/",
+        views.session_admin_games_settings,
+        name="session_admin_games_settings",
+    ),
+    path(
         "<slug:session_url_tag>/admin/games/<slug:game_url_tag>/answers/",
         views.session_admin_games_answers,
         name="session_admin_games_answers",
+    ),
+    path(
+        "<slug:session_url_tag>/admin/games/<slug:game_url_tag>/data/",
+        views.session_admin_games_data,
+        name="session_admin_games_data",
     ),
     path(
         "<slug:session_url_tag>/admin/players/",

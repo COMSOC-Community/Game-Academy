@@ -23,8 +23,10 @@ class SubmitAnswer(GameSubmitAnswerView):
         submit_answer_form = SubmitAnswerForm(
             request.POST, game=self.game, player=self.context["submitting_player"]
         )
-        submit_answer_form.is_valid()
-        return submit_answer_form
+        if submit_answer_form.is_valid():
+            return True, submit_answer_form
+        else:
+            return False, submit_answer_form
 
     def post_code_if_form_valid(self, request, form_object):
         answer = Answer.objects.create(
@@ -91,4 +93,4 @@ class Results(GameResultsView):
             prob_p2_jack=0
         )
 
-        return render(request, os.path.join("simp_poker", "global_results.html"), context)
+        return render(request, os.path.join("simp_poker", "results.html"), context)

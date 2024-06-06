@@ -22,12 +22,6 @@
     {% endif %}
 
     <section>
-        <p>
-            The games that are available can be accessed below. For each game, you will find a way to submit your
-            answer as well as the results of the game. Once a game will have been played, you will be able to see the
-            (anonymised) answers that were given by the other players.
-        </p>
-
         {% if games %}
             <div class="grid2-wrapper game-grid">
                 {% for game in games %}
@@ -37,7 +31,7 @@
                         </div>
                         <div class="grid-item-content">
 
-                            {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
+                            {% with game.game_config.url_namespace|add:':'|add:game.initial_view as index_url_shortcut %}
                                 {% if game.illustration_path %}
                                     <p class="center-align">
                                         <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">
@@ -78,7 +72,7 @@
                             <h3 id="games_{{ game.name }}">{{ game.name }}</h3>
                         </div>
                         <div class="grid-item-content">
-                            {% with game.game_config.url_namespace|add:':index' as index_url_shortcut %}
+                            {% with game.game_config.url_namespace|add:':'|add:game.initial_view as index_url_shortcut %}
                                 {% if game.game_config.illustration_path %}
                                     <p class="center-align">
                                         <a href="{% url index_url_shortcut session.url_tag game.url_tag %}">

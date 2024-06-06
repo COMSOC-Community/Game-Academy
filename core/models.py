@@ -1,3 +1,5 @@
+import importlib
+
 from django.db import models
 from django.contrib.auth.models import Group, AbstractUser
 
@@ -21,8 +23,9 @@ class Session(models.Model):
     url_tag = models.SlugField(unique=True, max_length=50, blank=False, null=False)
     name = models.CharField(unique=True, max_length=50, blank=False, null=False)
     long_name = models.CharField(max_length=100, blank=False, null=False)
-    can_register = models.BooleanField(default=True)
-    need_registration = models.BooleanField(default=True)
+    show_create_account = models.BooleanField(default=True)
+    show_guest_login = models.BooleanField(default=True)
+    show_user_login = models.BooleanField(default=True)
     visible = models.BooleanField(default=False)
     admins = models.ManyToManyField(CustomUser, related_name="administrated_sessions")
     super_admins = models.ManyToManyField(
@@ -112,6 +115,10 @@ class Game(models.Model):
                     f"list. Something is wrong."
                 )
         return self.inner_game_config
+
+    def all_url_names(self):
+        urls = getattr(importlib.import_module(f'{self.game_config().name}.urls'), "urlpatterns")
+        return tuple(url.name for url in urls)
 
 
 class Team(models.Model):

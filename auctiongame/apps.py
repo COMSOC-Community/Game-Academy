@@ -23,9 +23,10 @@ class AuctionGameConfig(GameConfig):
         )
 
     def ready(self):
-        super(AuctionGameConfig, self).ready()
 
         from auctiongame.models import Answer
 
         # from auctiongame.forms import SettingForm
         self.register_models(answer_model=Answer)
+
+        super(AuctionGameConfig, self).ready()

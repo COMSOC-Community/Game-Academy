@@ -6,17 +6,19 @@
         {% if submitted_answer %}
             <p>Your answer has been submitted, thanks!</p>
 
-            <p>
-                You will be redirected soon to the game home page.
-                If not, <a class="button navigation-button" href="{% url 'numbers_game:index' session.url_tag game.url_tag %}">click here</a>!
-            </p>
+            {% with game.game_config.url_namespace|add:':'|add:game.view_after_submit as url_name %}
+                <p>
+                    You will be redirected soon.
+                    If not, <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">click here</a>!
+                </p>
 
-            <script>
-                function redirect() {
-                    window.location.href = "{% url 'numbers_game:index' session.url_tag game.url_tag %}";
-                }
-                setTimeout(redirect, 3000);
-            </script>
+                <script>
+                        function redirect () {
+                            window.location.href = "{% url url_name session.url_tag game.url_tag %}" ;
+                        }
+                    setTimeout(redirect, 3000);
+                </script>
+            {% endwith %}
         {% else %}
             {% if answer %}
                 <p>You have already submitted the answer <em>{{ answer.answer|float_formatter:20 }}</em>.</p>

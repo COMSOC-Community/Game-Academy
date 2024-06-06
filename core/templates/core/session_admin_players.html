@@ -25,7 +25,7 @@
     </section>
 
     <section id="add_player">
-        <h2>Adding Players</h2>
+        <h2>Add Players</h2>
             {% if new_player %}
                 <div class="form-success-message">
                     <p>The player {{ new_player.name }} has been successfully added to the session.</p>
@@ -70,7 +70,7 @@
     </section>
 
     <section id="admins">
-        <h2>Admins</h2>
+        <h2>Admins of the Session</h2>
 
         {% if removed_admin %}
             <div class="form-success-message">
@@ -156,7 +156,7 @@
     </section>
 
     <section id="players">
-        <h2>Players</h2>
+        <h2>Players of the Session</h2>
 
         {% if deleted_player_name %}
             <div class="form-success-message">
@@ -206,14 +206,9 @@
     </section>
 
     <section id="guests">
-        <h2>Guests Users</h2>
+        <h2>Guests of the Session</h2>
 
-        {% if session.need_registration %}
-            <p>
-                This session does not allow for guests to play. If you want to enable this, you can change the settings
-                on <a class="button navigation-button" href="{% url 'core:session_admin' session.url_tag %}">this page</a>.
-            </p>
-        {% else %}
+        {% if session.show_guest_login %}
             {% if deleted_guest_name %}
                 <div class="form-success-message">
                     <p>The guest {{ deleted_guest_name }} has been successfully removed from the session.</p>
@@ -250,6 +245,11 @@
             {% else %}
                 <p>There are no guest users yet.</p>
             {% endif %}
+        {% else %}
+            <p>
+                This session does not allow for guests to play. If you want to enable this, you can change the settings
+                on <a class="button navigation-button" href="{% url 'core:session_admin' session.url_tag %}">this page</a>.
+            </p>
         {% endif %}
     </section>
 {% endblock %}

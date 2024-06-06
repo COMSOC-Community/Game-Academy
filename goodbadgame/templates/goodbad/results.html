@@ -16,10 +16,8 @@
         <h2>Global Results</h2>
 
         {% if not global_results %}
-            <p>You have reached the end. Thank you for participating!</p>
-
             <p>
-                You got {{ answer.score }} out of {{ answer.questions|length }} questions right.
+                You got {{ answer.score }} out of {{ answer.question_answers.all|length }} questions right.
                 Your score is <strong>{{ answer.accuracy|percentage:3 }}%</strong>.
             </p>
 
@@ -30,7 +28,7 @@
             number of players) we get a score of <strong>{{ game_result.crowd_accuracy|percentage:3 }}%</strong>.
 
             {% if not global_results %}
-                {%  if crowd_accuracy > answer.accuracy %}
+                {%  if game_result.crowd_accuracy > answer.accuracy %}
                     The crowd turns out to be wiser!
                 {%  else %}
                     You beat the crowd, congrats!
@@ -202,7 +200,7 @@
 
         var globalChart = anychart.line();
         globalChart.title('Score of the crowd as the size of the group grows');
-        globalChart.yAxis().title('Score (%)');
+        globalChart.yAxis().title('Score (Proportion)');
         globalChart.xAxis().title('Number of participants');
         var globalAccLineChart = globalChart.line(globalAccSeriesData);
         globalAccLineChart.name('Score of the crowd')
@@ -226,7 +224,7 @@
                 var {{ question.slug }}AccSeriesData = {{ question.slug }}AccDataSet.mapAs({ x: 0, value: 1 });
                 var {{ question.slug }}AccChart = anychart.line();
                 {{ question.slug }}AccChart.title('Proportion of correct answers for {{ question.title }} as the size of the group grows');
-                {{ question.slug }}AccChart.yAxis().title('Correct answers (%)');
+                {{ question.slug }}AccChart.yAxis().title('Correct answers (Proportion)');
                 {{ question.slug }}AccChart.xAxis().title('Number of participants');
                 var {{ question.slug }}AccLineChart = {{ question.slug }}AccChart.line({{ question.slug }}AccSeriesData);
                 {{ question.slug }}AccLineChart.name('Correct answers')

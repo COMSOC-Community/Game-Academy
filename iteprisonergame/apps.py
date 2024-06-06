@@ -23,9 +23,9 @@ class ItePrisonerGameConfig(GameConfig):
         )
 
     def ready(self):
-        super(ItePrisonerGameConfig, self).ready()
-
         from iteprisonergame.models import Setting, Answer
         from iteprisonergame.forms import SettingForm
 
         self.register_models(Setting, SettingForm, Answer)
+
+        super(ItePrisonerGameConfig, self).ready()

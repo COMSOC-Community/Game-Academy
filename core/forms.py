@@ -152,26 +152,33 @@ class CreateSessionForm(forms.Form):
         "in paragraphs, or titles.",
         widget=forms.TextInput(attrs={"placeholder": "The Course, Edition 2023"}),
     )
-    need_registration = forms.BooleanField(
-        label="Registration needed",
+    show_guest_login = forms.BooleanField(
+        label="Guest login available",
         label_suffix="",
         initial=True,
         required=False,
-        help_text="If registration is needed, only registered players will be able "
-        "to play within the session. Otherwise, there will be an option "
-        "to play as a guest.",
+        help_text="If the guest login is available users have the possibility to join the session "
+                  "as guests, i.e., they do not need to have an account.",
     )
-    can_register = forms.BooleanField(
+    show_user_login = forms.BooleanField(
+        label="User login available",
+        label_suffix="",
+        initial=True,
+        required=False,
+        help_text="If the user login is available users have the possibility to join the session by"
+                  " logging in to their user account.",
+    )
+    show_create_account = forms.BooleanField(
         label="Registration open",
         label_suffix="",
         initial=False,
         required=False,
-        help_text="If the registration is open users can register to the session.",
+        help_text="If the registration is open users can create accounts to join the session.",
     )
     visible = forms.BooleanField(
         label="Visible",
         label_suffix="",
-        initial=True,
+        initial=False,
         required=False,
         help_text="If the session is not visible, only admins can see the pages related to "
         "the session. It is useful to prepare things in advance for instance.",
@@ -187,8 +194,9 @@ class CreateSessionForm(forms.Form):
                     "url_tag": self.session.url_tag,
                     "name": self.session.name,
                     "long_name": self.session.long_name,
-                    "need_registration": self.session.need_registration,
-                    "can_register": self.session.can_register,
+                    "show_guest_login": self.session.show_guest_login,
+                    "show_user_login": self.session.show_user_login,
+                    "show_create_account": self.session.show_create_account,
                     "visible": self.session.visible,
                 }
             )
@@ -473,6 +481,31 @@ class CreateGameForm(forms.Form):
                   "is provided when creating a game, the new game is given the highest priority "
                   "plus 1."
     )
+    run_management_after_submit = forms.BooleanField(
+        label="Automatic Management Commands",
+        label_suffix="",
+        required=False,
+        help_text="If selected the management commands will be run each time an answer is "
+                  "submitted. This means that the administrator will not have to run them manually."
+                  "Selecting this can induce delays for the users of the website."
+    )
+    initial_view = forms.ChoiceField(
+        label="Main Page",
+        label_suffix="",
+        required=False,
+        help_text="The first page accessed by a user when clicking on a link to the game. The "
+                  "default is the home page of the game. You can use this setting to directly "
+                  "bring the users to the answer page for instance."
+    )
+    view_after_submit = forms.ChoiceField(
+        label="Page After Submit",
+        label_suffix="",
+        required=False,
+        help_text="The page that the user is redirected to after having submitted an answer. The "
+                  "default is the main page of the game (see the main page setting). You can use "
+                  "this setting to bring the users to the results page directly after submitting "
+                  "for instance."
+    )
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session")
@@ -490,6 +523,9 @@ class CreateGameForm(forms.Form):
                     "description": self.game.description,
                     "illustration_path": self.game.illustration_path,
                     "ordering_priority": self.game.ordering_priority,
+                    "run_management_after_submit": self.game.run_management_after_submit,
+                    "initial_view": self.game.initial_view,
+                    "view_after_submit": self.game.view_after_submit,
                 }
             )
 
@@ -500,9 +536,16 @@ class CreateGameForm(forms.Form):
                 (i, os.path.splitext(os.path.basename(i))[0]) for i in self.game.game_config().illustration_paths
             ]
             self.fields['illustration_path'].choices = illustration_choices
+            all_views = [(u, u) for u in self.game.all_url_names()]
+            self.fields['initial_view'].choices = all_views
+            self.fields['view_after_submit'].choices = all_views
             self.fields["game_type"].disabled = True
         else:
             self.fields.pop('illustration_path')
+            self.fields.pop('ordering_priority')
+            self.fields.pop('run_management_after_submit')
+            self.fields.pop('initial_view')
+            self.fields.pop('view_after_submit')
 
     def clean_name(self):
         name = self.cleaned_data["name"]

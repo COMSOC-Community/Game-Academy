@@ -37,7 +37,7 @@ class Command(BaseCommand):
             while Player.objects.filter(name=player_name).exists():
                 player_name = random.choices(list(map(chr, range(97, 123))), k=3)
             guest = False
-            if not session.need_registration:
+            if not session.show_guest_login:
                 guest = random.random() > 0.5
             if guest:
                 username = guest_username(session, player_name)

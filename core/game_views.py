@@ -52,7 +52,7 @@ class GameSubmitAnswerView(GameView):
         if not self.game.playable and not self.context["user_is_session_admin"]:
             raise Http404("The game is not playable and the user is not an admin.")
 
-    def post_validated_form(self, request):
+    def post_validated_form(self, request) -> (bool, object):
         pass
 
     def post_code_if_form_valid(self, request, form_object):
@@ -65,8 +65,8 @@ class GameSubmitAnswerView(GameView):
         pass
 
     def post(self, request, *args, **kwargs):
-        form_object = self.post_validated_form(request)
-        if form_object is not None and hasattr(form_object, 'cleaned_data'):
+        success, form_object = self.post_validated_form(request)
+        if success:
             self.post_code_if_form_valid(request, form_object)
             game = self.game
             if game.run_management_after_submit:
@@ -78,7 +78,6 @@ class GameSubmitAnswerView(GameView):
         else:
             self.post_code_if_form_invalid(request, form_object)
         return self.post_code_render(request)
-
 
 class GameResultsView(GameView):
 

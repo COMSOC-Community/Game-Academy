@@ -25,7 +25,11 @@ def float_formatter(x, num_digits=3):
 
 @register.filter
 def percentage(x, num_digits=None):
-    return float_formatter(100 * x, num_digits=num_digits)
+    try:
+        float(x)
+    except (ValueError, TypeError):
+        return ''
+    return core.utils.float_formatter(100 * x, num_digits=num_digits)
 
 
 @register.filter

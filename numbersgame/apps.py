@@ -23,9 +23,9 @@ class NumbersGameConfig(GameConfig):
         )
 
     def ready(self):
-        super(NumbersGameConfig, self).ready()
-
         from numbersgame.models import Setting, Answer
         from numbersgame.forms import SettingForm
 
         self.register_models(Setting, SettingForm, Answer)
+
+        super(NumbersGameConfig, self).ready()

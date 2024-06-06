@@ -335,7 +335,9 @@ def create_session(request):
                     url_tag=create_session_form.cleaned_data["url_tag"],
                     name=create_session_form.cleaned_data["name"],
                     long_name=create_session_form.cleaned_data["long_name"],
-                    can_register=create_session_form.cleaned_data["can_register"],
+                    show_guest_login=create_session_form.cleaned_data["show_guest_login"],
+                    show_user_login=create_session_form.cleaned_data["show_user_login"],
+                    show_create_account=create_session_form.cleaned_data["show_create_account"],
                     visible=create_session_form.cleaned_data["visible"],
                 )
                 session_obj.admins.add(request.user)
@@ -360,7 +362,7 @@ def session_portal(request, session_url_tag):
         session_context_initialiser(request, session, context)
 
     if request.method == "POST":
-        if "registration_form" in request.POST and session.can_register:
+        if "registration_form" in request.POST and session.show_create_account:
             registration_form = PlayerRegistrationForm(
                 request.POST,
                 session=session,
@@ -399,7 +401,7 @@ def session_portal(request, session_url_tag):
 
             else:
                 context["registration_form"] = registration_form
-        elif "login_form" in request.POST:
+        elif "login_form" in request.POST and session.show_user_login:
             login_form = PlayerLoginForm(request.POST, session=session)
             if login_form.is_valid():
                 user = authenticate(
@@ -422,7 +424,7 @@ def session_portal(request, session_url_tag):
             else:
                 context["login_form"] = login_form
 
-        elif "guest_form" in request.POST and not session.need_registration:
+        elif "guest_form" in request.POST and session.show_guest_login:
             guest_form = SessionGuestRegistration(request.POST, session=session)
             if guest_form.is_valid():
                 user = CustomUser.objects.create_user(
@@ -461,18 +463,18 @@ def session_portal(request, session_url_tag):
             raise Http404("POST request received, but no valid form type was found")
 
     # We put in the context all the forms that are needed and not already in there
-    if session.can_register and "registration_form" not in context:
+    if session.show_create_account and "registration_form" not in context:
         context["registration_form"] = PlayerRegistrationForm(
             session=session, passwords_display=not authenticated_user
         )
-    if not session.need_registration and "guest_form" not in context:
+    if session.show_guest_login and "guest_form" not in context:
         context["guest_form"] = SessionGuestRegistration(session=session)
     if authenticated_user:
         player_profile = Player.objects.filter(session=session, user=request.user)
         if player_profile.exists():
             player_profile = player_profile.first()
             context["player_profile"] = player_profile
-    elif "login_form" not in context:
+    elif session.show_user_login and "login_form" not in context:
         context["login_form"] = PlayerLoginForm(session=session)
     return render(request, "core/session_portal.html", context)
 
@@ -512,10 +514,14 @@ def session_admin(request, session_url_tag):
             if modify_session_form.is_valid():
                 session.name = modify_session_form.cleaned_data["name"]
                 session.long_name = modify_session_form.cleaned_data["long_name"]
-                session.need_registration = modify_session_form.cleaned_data[
-                    "need_registration"
+                session.show_user_login = modify_session_form.cleaned_data[
+                    "show_user_login"
                 ]
-                session.can_register = modify_session_form.cleaned_data["can_register"]
+                session.show_guest_login = modify_session_form.cleaned_data[
+                    "show_guest_login"
+                ]
+                session.show_create_account = modify_session_form.cleaned_data[
+                    "show_create_account"]
                 session.visible = modify_session_form.cleaned_data["visible"]
                 session.save()
 
@@ -550,13 +556,11 @@ def session_admin_games(request, session_url_tag):
     if request.method == "POST" and "create_game_form" in request.POST:
         create_game_form = CreateGameForm(request.POST, session=session)
         if create_game_form.is_valid():
-            ordering_priority = create_game_form.cleaned_data.get("ordering_priority", None)
-            if ordering_priority is None:
-                games = session.games
-                if games.exists():
-                    ordering_priority = session.games.aggregate(Max('ordering_priority'))['ordering_priority__max'] + 1
-                else:
-                    ordering_priority = 0
+            games = session.games
+            if games.exists():
+                ordering_priority = session.games.aggregate(Max('ordering_priority'))['ordering_priority__max'] + 1
+            else:
+                ordering_priority = 0
             new_game = Game.objects.create(
                 game_type=create_game_form.cleaned_data["game_type"],
                 name=create_game_form.cleaned_data["name"],
@@ -569,6 +573,17 @@ def session_admin_games(request, session_url_tag):
                 description=create_game_form.cleaned_data["description"],
                 ordering_priority=ordering_priority,
             )
+            if new_game.game_config().home_view is not None:
+                home_view = new_game.game_config().home_view
+            else:
+                all_url_names = new_game.all_url_names()
+                if "index" in all_url_names:
+                    home_view = "index"
+                else:
+                    home_view = all_url_names[0]
+            new_game.initial_view = home_view
+            new_game.view_after_submit = home_view
+            new_game.save()
             create_game_form = CreateGameForm(session=session)
             context["new_game"] = new_game
 
@@ -587,103 +602,9 @@ def session_admin_games(request, session_url_tag):
         context["deleted_game_name"] = deleted_game.name
         deleted_game.delete()
 
-    games = Game.objects.filter(session=session)
-
-    # Modify game form
-    modify_game_forms = []
-    for game in games:
-        modify_game_form = CreateGameForm(
-            session=session, game=game, prefix=game.url_tag
-        )
-        modify_game_setting_form = None
-        if game.game_config().setting_form is not None:
-            setting_model = game.game_config().setting_model
-            game_setting_obj = None
-            try:
-                game_setting_obj = getattr(
-                    game, setting_model._meta.get_field("game").related_query_name()
-                )
-            except ObjectDoesNotExist:
-                pass
-            if game_setting_obj:
-                modify_game_setting_form = game.game_config().setting_form(
-                    instance=game_setting_obj
-                )
-        if request.method == "POST":
-            if "modify_game_form_" + str(game.url_tag) in request.POST:
-                modify_game_form = CreateGameForm(
-                    request.POST, session=session, game=game, prefix=game.url_tag
-                )
-                if modify_game_form.is_valid():
-                    game.name = modify_game_form.cleaned_data["name"]
-                    game.url_tag = modify_game_form.cleaned_data["url_tag"]
-                    game.playable = modify_game_form.cleaned_data["playable"]
-                    game.visible = modify_game_form.cleaned_data["visible"]
-                    game.results_visible = modify_game_form.cleaned_data[
-                        "results_visible"
-                    ]
-                    game.needs_teams = modify_game_form.cleaned_data["needs_teams"]
-                    game.description = modify_game_form.cleaned_data["description"]
-                    game.illustration_path = modify_game_form.cleaned_data["illustration_path"]
-                    game.ordering_priority = modify_game_form.cleaned_data["ordering_priority"]
-                    game.save()
-
-                    modify_game_form = CreateGameForm(
-                        session=session, game=game, prefix=game.url_tag
-                    )
-                    context["modified_game"] = game
-            elif "modify_game_setting_form_" + str(game.url_tag) in request.POST:
-                setting_model = game.game_config().setting_model
-                game_setting_obj = getattr(
-                    game, setting_model._meta.get_field("game").related_query_name()
-                )
-                modify_game_setting_form = game.game_config().setting_form(
-                    request.POST, instance=game_setting_obj
-                )
-                if modify_game_setting_form.is_valid():
-                    modify_game_setting_form.save()
-                    modify_game_setting_form = game.game_config().setting_form(
-                        instance=game_setting_obj
-                    )
-                    context["modified_game"] = game
-        modify_game_forms.append((modify_game_form, modify_game_setting_form))
-
     context["create_game_form"] = create_game_form
-    context["modify_game_forms"] = modify_game_forms
+    context["games"] = Game.objects.filter(session=session)
     return render(request, "core/session_admin_games.html", context)
-
-
-@session_admin_decorator
-def session_admin_games_answers(request, session_url_tag, game_url_tag):
-    session = get_object_or_404(Session, url_tag=session_url_tag)
-    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
-
-    context = base_context_initialiser(request)
-    session_context_initialiser(request, session, context)
-
-    context["game"] = game
-
-    answer_model = game.game_config().answer_model
-
-    if request.method == "POST" and "delete_answer_form" in request.POST:
-        deleted_answer_id = request.POST["remove_answer_id"]
-        answer_to_delete = answer_model.objects.get(id=deleted_answer_id)
-        context["deleted_answer_id"] = deleted_answer_id
-        context["deleted_answer_player"] = answer_to_delete.player.display_name()
-        answer_to_delete.delete()
-
-    answer_model_fields = game.game_config().answer_model_fields
-    if answer_model_fields is None:
-        omitted_fields = ("id", "game", "player")
-        answer_model_fields = [
-            f.name
-            for f in answer_model._meta.get_fields()
-            if f.name not in omitted_fields
-        ]
-    context["answer_model_fields"] = answer_model_fields
-    context["answers"] = answer_model.objects.filter(game=game)
-
-    return render(request, "core/session_admin_games_answers.html", context)
 
 
 @session_admin_decorator
@@ -832,7 +753,7 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
         request, session, game, game.game_config().answer_model, context
     )
     context["game_nav_display_team"] = False
-    
+
     if not game.playable and not context["user_is_session_admin"]:
         raise Http404("The game is not playable and the user is not an admin.")
 
@@ -877,6 +798,129 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 # ======================
 #    ADMIN GAME VIEWS
 # ======================
+
+@session_admin_decorator
+def session_admin_games_settings(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+
+    context["game"] = game
+
+    # Modify game form
+    modify_game_form = CreateGameForm(
+        session=session, game=game, prefix=game.url_tag
+    )
+    modify_game_setting_form = None
+    if game.game_config().setting_form is not None:
+        setting_model = game.game_config().setting_model
+        game_setting_obj = None
+        try:
+            game_setting_obj = getattr(
+                game, setting_model._meta.get_field("game").related_query_name()
+            )
+        except ObjectDoesNotExist:
+            pass
+        if game_setting_obj:
+            modify_game_setting_form = game.game_config().setting_form(
+                instance=game_setting_obj
+            )
+    if request.method == "POST":
+        if "modify_game_form" in request.POST:
+            modify_game_form = CreateGameForm(
+                request.POST, session=session, game=game, prefix=game.url_tag
+            )
+            if modify_game_form.is_valid():
+                game.name = modify_game_form.cleaned_data["name"]
+                game.url_tag = modify_game_form.cleaned_data["url_tag"]
+                game.playable = modify_game_form.cleaned_data["playable"]
+                game.visible = modify_game_form.cleaned_data["visible"]
+                game.results_visible = modify_game_form.cleaned_data[
+                    "results_visible"
+                ]
+                game.needs_teams = modify_game_form.cleaned_data["needs_teams"]
+                game.description = modify_game_form.cleaned_data["description"]
+                game.illustration_path = modify_game_form.cleaned_data["illustration_path"]
+                game.ordering_priority = modify_game_form.cleaned_data["ordering_priority"]
+                game.run_management_after_submit = modify_game_form.cleaned_data["run_management_after_submit"]
+                game.initial_view = modify_game_form.cleaned_data["initial_view"]
+                game.view_after_submit = modify_game_form.cleaned_data["view_after_submit"]
+                game.save()
+
+                modify_game_form = CreateGameForm(
+                    session=session, game=game, prefix=game.url_tag
+                )
+                context["game_modified"] = True
+        elif "modify_game_setting_form" in request.POST:
+            setting_model = game.game_config().setting_model
+            game_setting_obj = getattr(
+                game, setting_model._meta.get_field("game").related_query_name()
+            )
+            modify_game_setting_form = game.game_config().setting_form(
+                request.POST, instance=game_setting_obj
+            )
+            if modify_game_setting_form.is_valid():
+                modify_game_setting_form.save()
+                modify_game_setting_form = game.game_config().setting_form(
+                    instance=game_setting_obj
+                )
+                context["setting_modified"] = True
+    context["modify_game_form"] = modify_game_form
+    context["modify_game_setting_form"] = modify_game_setting_form
+
+    return render(request, "core/session_admin_games_settings.html", context)
+
+
+@session_admin_decorator
+def session_admin_games_answers(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+
+    context["game"] = game
+
+    answer_model = game.game_config().answer_model
+    if answer_model is not None:
+        if request.method == "POST" and "delete_answer_form" in request.POST:
+            deleted_answer_id = request.POST["remove_answer_id"]
+            answer_to_delete = answer_model.objects.get(id=deleted_answer_id)
+            context["deleted_answer_id"] = deleted_answer_id
+            context["deleted_answer_player"] = answer_to_delete.player.display_name()
+            answer_to_delete.delete()
+
+        answer_model_fields = game.game_config().answer_model_fields
+        if answer_model_fields is None:
+            omitted_fields = ("id", "game", "player")
+            answer_model_fields = [
+                f.name
+                for f in answer_model._meta.get_fields()
+                if f.name not in omitted_fields
+            ]
+        context["answer_model_fields"] = answer_model_fields
+        context["answers"] = answer_model.objects.filter(game=game)
+    else:
+        context["no_answer_model"] = True
+
+    return render(request, "core/session_admin_games_answers.html", context)
+
+
+@session_admin_decorator
+def session_admin_games_data(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+    context = base_context_initialiser(request)
+    session_context_initialiser(request, session, context)
+
+    context["game"] = game
+
+    answer_model = game.game_config().answer_model
+
+    return render(request, "core/session_admin_games_data.html", context)
 
 
 def quick_game_admin_render(request, session, game, info_message):

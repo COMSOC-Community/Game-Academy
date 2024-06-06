@@ -25,9 +25,9 @@ class GoodBadGameConfig(GameConfig):
         )
 
     def ready(self):
-        super(GoodBadGameConfig, self).ready()
-
         from goodbadgame.models import Setting, Answer
         from goodbadgame.forms import SettingForm
 
         self.register_models(Setting, SettingForm, Answer)
+
+        super(GoodBadGameConfig, self).ready()

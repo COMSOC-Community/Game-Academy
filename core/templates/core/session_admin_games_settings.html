@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}{% load static %}
+
+{% load core_extras %}
+
+{% block title %}{{ session.name }} &mdash; {{ game.name }} &mdash; Admin{% endblock %}
+
+{% block header %}
+    <h1>{{ session.long_name }} &mdash; {{ game.name }} &mdash; Admin</h1>
+{% endblock %}
+
+{% block logout_next %}?next={% if session.visible %}{% url 'core:session_portal' session.url_tag %}{% else %}{% url 'core:index' %}{% endif %}{% endblock %}
+
+{% block side_panel_extra_nav %}
+    {% include 'include/sidepanel_nav_session.html' %}
+{% endblock %}
+
+{% block content %}
+    <section>
+        {% include "include/game_admin_navigation.html" %}
+    </section>
+
+    {% if modify_game_form %}
+        <section id="general_settings">
+            <h2>General Settings</h2>
+                {% if game_modified %}
+                    <div class="form-success-message">
+                        <p>The game has been successfully modified.</p>
+                    </div>
+                {% endif %}
+                <form action="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}#general_settings" method="post">
+                    {% include "include/form_table_template.html" with form=modify_game_form form_type="modify_game_form" submit_button_label='Modify Game' %}
+                </form>
+        </section>
+    {% endif %}
+
+    {% if modify_game_setting_form %}
+        <section id="game_specific_settings">
+            <h2>Game-Specific Settings</h2>
+                {% if setting_modified %}
+                    <div class="form-success-message">
+                        <p>The settings of the game have been successfully updated.</p>
+                    </div>
+                {% endif %}
+                <form action="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}#game_specific_settings" method="post">
+                    {% include "include/form_table_template.html" with form=modify_game_setting_form form_type="modify_game_setting_form" submit_button_label='Update Settings' %}
+                </form>
+        </section>
+    {% endif %}
+
+    <section class="color-error-light">
+        <h2>Danger Zone</h2>
+
+        <p>Here you can delete the game.</p>
+        <form action="{% url 'core:session_admin_games' session.url_tag %}#games" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="remove_game_id" value={{ game.id }} />
+            <p class="center-align">
+                <input class="color-error-dark button" type="submit" value="Delete Game" name="delete_game_form" onclick="return confirm('Deleting a game is irreversible.')"/>
+            </p>
+        </form>
+    </section>
+{% endblock %}

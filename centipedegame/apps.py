@@ -23,11 +23,11 @@ class CentipedeGameConfig(GameConfig):
         )
 
     def ready(self):
-        super(CentipedeGameConfig, self).ready()
-
         from centipedegame.models import Answer, Setting
         from centipedegame.forms import SettingForm
 
         self.register_models(
             setting_model=Setting, setting_form=SettingForm, answer_model=Answer
         )
+
+        super(CentipedeGameConfig, self).ready()

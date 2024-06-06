@@ -23,9 +23,9 @@ class SimpPokerConfig(GameConfig):
         )
 
     def ready(self):
-        super(SimpPokerConfig, self).ready()
-
         from simp_poker.models import Setting, Answer
 
         # from simp_poker.forms import SettingForm
         self.register_models(Setting, None, Answer)
+
+        super(SimpPokerConfig, self).ready()

@@ -27,6 +27,12 @@
         {% if new_game %}
             <div class="form-success-message">
                 <p>The game {{ new_game.name }} has been added to the session.</p>
+                <div class="admin-nav-wrapper">
+                    {% with new_game.game_config.url_namespace|add:':'|add:new_game.initial_view as index_url_shortcut %}
+                        <a class="admin-nav-item button navigation-button" href="{% url index_url_shortcut session.url_tag new_game.url_tag %}">To the Game</a>
+                    {% endwith %}
+                    <a class="admin-nav-item button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag new_game.url_tag %}">To the Settings</a>
+                </div>
             </div>
         {% endif %}
 
@@ -37,73 +43,47 @@
         {% endif %}
     </section>
 
-    {% if modify_game_forms %}
-        <section id="modify_games">
-            <h2>Modify Games</h2>
+    <section id="games">
+        <h2>Games of the Session</h2>
 
-            <p>Here are the games that have been created for this session. You can modify them below.</p>
+        {% if deleted_game_name %}
+            <div class="form-success-message">
+                <p>The game {{ deleted_game_name }} has been successfully deleted.</p>
+            </div>
+        {% endif %}
 
-            {% if deleted_game_name %}
-                <div class="form-success-message">
-                    <p>The game {{ deleted_game_name }} has been successfully deleted.</p>
-                </div>
-            {% endif %}
+        {% if games %}
 
-            {% if modify_game_forms %}
-                <div class="grid2-wrapper game-grid">
-                    {% for modify_game_form, modify_game_setting_form in modify_game_forms %}
-                        <div class="grid-item" id="modify_{{ modify_game_form.game.id }}">
-                            <div class="side-by-side-pushed-wrapper grid-item-title">
-                                <div>
-                                    <h3 id="games_{{ modify_game_form.game.name }}">
-                                        {{ modify_game_form.game.name }}
-                                    </h3>
-                                </div>
-                                <div>
-                                    <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_games" method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="remove_game_id" value={{ modify_game_form.game.id }} />
-                                        <p class="center-align">
-                                            <input class="color-error button" type="submit" value="Delete" name="delete_game_form" onclick="return confirm('Deleting a game is irreversible.')"/>
-                                        </p>
-                                    </form>
-                                </div>
-                            </div>
+            <table class="lined-table center-margin">
+                <th>Game</th>
+                <th>Type</th>
+                {% for game in games %}
+                    <tr>
+                        <td>{{ game.name }}</td>
+                        <td>{{ game.game_type }}</td>
+                        <td>
+                            {% with game.game_config.url_namespace|add:':'|add:game.initial_view as index_url_shortcut %}
+                                <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">Game Home</a>
+                            {% endwith %}
+                        </td>
+                        <td>
+                            <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}">Admin Pages</a>
+                        </td>
+                        <td>
+                            <form action="{% url 'core:session_admin_games' session.url_tag %}#games" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="remove_game_id" value={{ game.id }} />
+                                <span class="center-align">
+                                    <input class="color-error button" type="submit" value="Delete Game" name="delete_game_form" onclick="return confirm('Deleting a game is irreversible.')"/>
+                                </span>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
 
-                            <div class="grid-item-content">
-                                {% if modified_game and modified_game.name == modify_game_form.game.name %}
-                                    <div class="form-success-message">
-                                        <p>The game {{ modified_game.name }} has been successfully modified.</p>
-                                    </div>
-                                {% endif %}
-
-                                {% with modify_game_form.game.game_config.url_namespace|add:':index' as index_url_shortcut %}
-                                    <p class="center-align">
-                                        <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag modify_game_form.game.url_tag %}">To the game</a>
-                                    </p>
-                                {% endwith %}
-                                <p class="center-align">
-                                    <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_answers' session.url_tag modify_game_form.game.url_tag %}">Answers admin page</a>
-                                </p>
-
-                                <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ modify_game_form.game.id }}" method="post">
-                                    {% with 'modify_game_form_'|add:modify_game_form.game.url_tag as form_type %}
-                                        {% include "include/form_table_template.html" with form=modify_game_form form_type=form_type submit_button_label='Modify Game' %}
-                                    {% endwith %}
-                                </form>
-
-                                {% if modify_game_setting_form %}
-                                    <form action="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ modify_game_form.game.id }}" method="post">
-                                        {% with 'modify_game_setting_form_'|add:modify_game_form.game.url_tag as form_type %}
-                                            {% include "include/form_table_template.html" with form=modify_game_setting_form form_type=form_type submit_button_label='Modify Game Setting' %}
-                                        {% endwith %}
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </section>
-    {% endif %}
+        {% else %}
+            <p>There are no games yet in this session.</p>
+        {% endif %}
+    </section>
 {% endblock %}

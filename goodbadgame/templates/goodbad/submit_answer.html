@@ -11,17 +11,19 @@
         {% if submitted_answer %}
             <p>Your answer has been submitted, thanks!</p>
 
-            <p>
-                You will be redirected soon to the game page.
-                If not, <a class="button navigation-button" href="{% url 'goodbad_game:index' session.url_tag game.url_tag %}">click here</a>!
-            </p>
+            {% with game.game_config.url_namespace|add:':'|add:game.view_after_submit as url_name %}
+                <p>
+                    You will be redirected soon.
+                    If not, <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">click here</a>!
+                </p>
 
-            <script>
-                function redirect () {
-                    window.location.href = "{% url 'goodbad_game:index' session.url_tag game.url_tag %}" ;
-                }
-                setTimeout(redirect, 3000);
-            </script>
+                <script>
+                        function redirect () {
+                            window.location.href = "{% url url_name session.url_tag game.url_tag %}" ;
+                        }
+                    setTimeout(redirect, 3000);
+                </script>
+            {% endwith %}
         {% else %}
             {% if answer.question_answers.exists %}
                 <p>You have already played, this page is not for you.</p>

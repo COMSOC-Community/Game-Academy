@@ -1,16 +1,19 @@
 <p>
-    You are in the admin pages the session <em>{{ session.long_name }}</em>. Several pages are available depending on what you
+    You are in the admin pages of the session <em>{{ session.long_name }}</em>. Several pages are available depending on what you
     want to do.
 </p>
 
 <div class="admin-nav-wrapper">
     <div class="admin-nav-item">
-        <a class="button navigation-button" href="{% url "core:session_admin" session.url_tag %}">Main Parameters</a>
+        <a class="button navigation-button" href="{% url 'core:session_home' session.url_tag %}">Session Home Page</a>
     </div>
     <div class="admin-nav-item">
-        <a class="button navigation-button" href="{% url "core:session_admin_players" session.url_tag %}">Users and Players</a>
+        <a class="button navigation-button color-warning-dark" href="{% url "core:session_admin" session.url_tag %}">Parameters</a>
     </div>
     <div class="admin-nav-item">
-        <a class="button navigation-button" href="{% url 'core:session_admin_games' session.url_tag %}">Games of the Session</a>
+        <a class="button navigation-button color-warning-dark" href="{% url "core:session_admin_players" session.url_tag %}">Users and Players</a>
+    </div>
+    <div class="admin-nav-item">
+        <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}">Games of the Session</a>
     </div>
 </div>

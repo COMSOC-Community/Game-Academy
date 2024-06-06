@@ -6,7 +6,7 @@
             <p>
                 Your team {{ created_team.name }} has now been registered. You can start playing for
                 the team.
-                {% with game.game_config.url_namespace|add:':index' as url_name %}
+                {% with game.game_config.url_namespace|add:':'|add:game.initial_view as url_name %}
                     <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">To the game</a>
                 {% endwith %}
             </p>
@@ -14,7 +14,7 @@
             {% if team_joined %}
                 <p>
                     You have joined the team {{ joined_team.name }}. You can now play for the team.
-                    {% with game.game_config.url_namespace|add:':index' as url_name %}
+                    {% with game.game_config.url_namespace|add:':'|add:game.initial_view as url_name %}
                         Go to the <a href="{% url url_name session.url_tag game.url_tag %}">game page</a>.
                     {% endwith %}
                 </p>

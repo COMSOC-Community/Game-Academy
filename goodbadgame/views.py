@@ -39,7 +39,10 @@ class SubmitAnswer(GameSubmitAnswerView):
                 self.context["questions"] = questions
         return render(request, os.path.join("goodbad", "submit_answer.html"), self.context)
 
-    def post(self, request, *args, **kwargs):
+    def post_validated_form(self, request):
+        return True, None
+
+    def post_code_if_form_valid(self, request, form_object):
         for question in self.context["answer"].questions.all():
             if question.slug + "_selector" in request.POST:
                 QuestionAnswer.objects.create(
@@ -51,6 +54,8 @@ class SubmitAnswer(GameSubmitAnswerView):
                         question.slug + "_selector")) == question.correct_alt
                 )
                 self.context["submitted_answer"] = True
+
+    def post_code_render(self, request):
         return render(request, os.path.join("goodbad", "submit_answer.html"), self.context)
 
 

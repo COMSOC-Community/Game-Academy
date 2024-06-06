@@ -1,0 +1,21 @@
+<p>
+    You are in the admin pages of the game {{ game.name }} for session <em>{{ session.long_name }}</em>. Several pages are available depending on what you
+    want to do.
+</p>
+
+<div class="admin-nav-wrapper">
+    <div class="admin-nav-item">
+        {% with game.game_config.url_namespace|add:':'|add:game.initial_view as index_url_shortcut %}
+            <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">Game Home Page</a>
+        {% endwith %}
+    </div>
+    <div class="admin-nav-item">
+        <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}">Settings</a>
+    </div>
+    <div class="admin-nav-item">
+        <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}">Answers</a>
+    </div>
+    <div class="admin-nav-item">
+        <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_data' session.url_tag game.url_tag %}">Export Data</a>
+    </div>
+</div>
