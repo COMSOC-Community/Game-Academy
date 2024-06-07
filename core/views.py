@@ -120,6 +120,20 @@ def message(request):
     return render(request, "core/message.html", context)
 
 
+def redirect_to_session_main(session):
+    if session.game_after_logging is not None:
+        return redirect_to_game_main(session.game_after_logging)
+    return redirect(
+        "core:session_home", session_url_tag=session.url_tag
+    )
+
+
+def redirect_to_game_main(game):
+    return redirect(
+        f"{game.game_config().url_namespace}:{game.initial_view}", session_url_tag=game.session.url_tag, game_url_tag=game.url_tag
+    )
+
+
 # ==========================
 #    CONTEXT INITIALISERS
 # ==========================
@@ -387,9 +401,7 @@ def session_portal(request, session_url_tag):
                     )
                     # If user already logged-in we go to session home, otherwise we stay
                     if authenticated_user:
-                        return redirect(
-                            "core:session_home", session_url_tag=session.url_tag
-                        )
+                        return redirect_to_session_main(session)
                     context["created_player"] = created_player
                 except Exception as e:
                     # Problem when creating new player, we clean up the mess
@@ -412,9 +424,7 @@ def session_portal(request, session_url_tag):
                     login(request, user)
                     if "player" in login_form.cleaned_data:
                         # If we are loging in a player, we redirected to home
-                        return redirect(
-                            "core:session_home", session_url_tag=session.url_tag
-                        )
+                        return redirect_to_session_main(session)
                     # If not, we are loging in a user, thus we stay here
                     return redirect(
                         "core:session_portal", session_url_tag=session.url_tag
@@ -446,9 +456,7 @@ def session_portal(request, session_url_tag):
                     )
                     if user:
                         login(request, user)
-                        return redirect(
-                            "core:session_home", session_url_tag=session.url_tag
-                        )
+                        return redirect_to_session_main(session)
                     # Something weird happened: form is valid but authenticate fails
                     context["general_login_error"] = True
                 except Exception as e:
@@ -523,6 +531,8 @@ def session_admin(request, session_url_tag):
                 session.show_create_account = modify_session_form.cleaned_data[
                     "show_create_account"]
                 session.visible = modify_session_form.cleaned_data["visible"]
+                if "game_after_logging" in modify_session_form.cleaned_data:
+                    session.game_after_logging = modify_session_form.cleaned_data["game_after_logging"]
                 session.save()
 
                 context["session_modified"] = True

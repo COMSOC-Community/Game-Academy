@@ -183,6 +183,15 @@ class CreateSessionForm(forms.Form):
         help_text="If the session is not visible, only admins can see the pages related to "
         "the session. It is useful to prepare things in advance for instance.",
     )
+    game_after_logging = forms.ModelChoiceField(
+        label="Game After Login",
+        label_suffix="",
+        queryset=None,
+        required=False,
+        help_text="If a value is set, the users are directly brought to the main page of the "
+                  "selected game after logging in. This means that the session home page is "
+                  "skipped."
+    )
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop(
@@ -198,11 +207,19 @@ class CreateSessionForm(forms.Form):
                     "show_user_login": self.session.show_user_login,
                     "show_create_account": self.session.show_create_account,
                     "visible": self.session.visible,
+                    "game_after_logging": self.session.game_after_logging,
                 }
             )
         super(CreateSessionForm, self).__init__(*args, **kwargs)
         if self.session:
             self.fields["url_tag"].disabled = True
+            games = self.session.games.all()
+            if games.exists():
+                self.fields["game_after_logging"].queryset = games
+            else:
+                self.fields.pop("game_after_logging")
+        else:
+            self.fields.pop("game_after_logging")
 
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]

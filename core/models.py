@@ -31,7 +31,7 @@ class Session(models.Model):
     super_admins = models.ManyToManyField(
         CustomUser, related_name="super_administrated_sessions"
     )
-    game_after_logging = models.OneToOneField("Game", on_delete=models.CASCADE, related_name="session_entry_point_of", null=True, blank=True)
+    game_after_logging = models.OneToOneField("Game", on_delete=models.CASCADE, related_name="entry_point_of", null=True, blank=True)
 
     class Meta:
         ordering = ["url_tag"]
