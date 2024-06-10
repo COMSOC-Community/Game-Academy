@@ -1,3 +1,4 @@
+import csv
 import logging
 import os
 import tempfile
@@ -8,7 +9,7 @@ from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Max
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -931,6 +932,41 @@ def session_admin_games_data(request, session_url_tag, game_url_tag):
     answer_model = game.game_config().answer_model
 
     return render(request, "core/session_admin_games_data.html", context)
+
+
+@session_admin_decorator
+def session_admin_games_data_player(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{game.name}_players.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "Submission #",
+            "SPC",
+            "SPC Email",
+            "Reviewer",
+            "Suitability",
+            "Explanation",
+            "Resolution",
+        ]
+    )
+    for r in SPCResponse.objects.all():
+        writer.writerow(
+            [
+                r.review.submission_id,
+                r.review.assigned_spc.full_name,
+                r.review.assigned_spc.user.email,
+                r.review.pc_member_name,
+                r.status,
+                r.explanation,
+                r.resolution_choice,
+            ]
+        )
+    return response
 
 
 def quick_game_admin_render(request, session, game, info_message):

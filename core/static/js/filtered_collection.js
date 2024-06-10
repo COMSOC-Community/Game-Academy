@@ -11,10 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             items.forEach(item => {
                 const itemName = item.dataset.value.toLowerCase();
-                const displayStyle = itemName.includes(filterValue) ? 'block' : 'none';
-
-                item.style.display = displayStyle;
-                visibleItemCount += displayStyle === 'block' ? 1 : 0;
+                if (!itemName.includes(filterValue)) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = '';
+                    visibleItemCount += 1;
+                }
             });
 
             if (resultCountSpan) {

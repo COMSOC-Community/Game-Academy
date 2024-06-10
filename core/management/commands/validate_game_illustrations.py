@@ -14,7 +14,7 @@ class Command(BaseCommand):
         parser.add_argument("--auto-fix", action='store_true', help="If used, illustration paths are fixed automatically.")
 
     def handle(self, *args, **options):
-        sys.stdout.write("Checking illustration paths of the game...")
+        sys.stdout.write("Checking illustration paths of the games...")
         auto_fix = options["auto_fix"]
         all_games = Game.objects.all()
         for game in all_games:
