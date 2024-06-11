@@ -1,5 +1,3 @@
-from django.apps import AppConfig
-
 from core.games import GameConfig
 
 NAME = "goodbadgame"
@@ -29,5 +27,9 @@ class GoodBadGameConfig(GameConfig):
         from goodbadgame.forms import SettingForm
 
         self.register_models(Setting, SettingForm, Answer)
+
+        from goodbadgame.views import export_answers
+
+        self.export_answer_view = export_answers
 
         super(GoodBadGameConfig, self).ready()

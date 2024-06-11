@@ -722,6 +722,32 @@ def session_admin_players(request, session_url_tag):
 
 
 @session_admin_decorator
+def session_admin_players_export(request, session_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_players.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "player_name",
+            "is_guest",
+            "is_team_player",
+        ]
+    )
+    for p in Player.objects.filter(session=session):
+        writer.writerow(
+            [
+                p.name,
+                p.is_guest,
+                p.is_team_player
+            ]
+        )
+    return response
+
+
+@session_admin_decorator
 def session_admin_player_password(request, session_url_tag, player_user_id):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     player = get_object_or_404(Player, session=session, user__id=player_user_id)
@@ -916,11 +942,22 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
     else:
         context["no_answer_model"] = True
 
+    context["export_answers_configured"] = game.game_config().export_answer_view is not None
+
     return render(request, "core/session_admin_games_answers.html", context)
 
 
 @session_admin_decorator
-def session_admin_games_data(request, session_url_tag, game_url_tag):
+def session_admin_games_answers_export(request, session_url_tag, game_url_tag):
+    session = get_object_or_404(Session, url_tag=session_url_tag)
+    game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+    if game.game_config().export_answer_view is not None:
+        return game.game_config().export_answer_view(session, game)
+
+
+@session_admin_decorator
+def session_admin_games_teams(request, session_url_tag, game_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
@@ -928,44 +965,45 @@ def session_admin_games_data(request, session_url_tag, game_url_tag):
     session_context_initialiser(request, session, context)
 
     context["game"] = game
+    context["teams"] = Team.objects.filter(game=game)
 
-    answer_model = game.game_config().answer_model
+    if request.method == "POST" and "delete_team_form" in request.POST:
+        deleted_team_id = request.POST["remove_team_id"]
+        team_to_delete = Team.objects.get(id=deleted_team_id)
+        context["deleted_team_id"] = deleted_team_id
+        context["deleted_team_name"] = team_to_delete.name
+        team_to_delete.delete()
 
-    return render(request, "core/session_admin_games_data.html", context)
+    return render(request, "core/session_admin_games_teams.html", context)
 
 
 @session_admin_decorator
-def session_admin_games_data_player(request, session_url_tag, game_url_tag):
+def session_admin_games_teams_export(request, session_url_tag, game_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="{game.name}_players.csv"'
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_teams.csv"'
 
     writer = csv.writer(response)
     writer.writerow(
         [
-            "Submission #",
-            "SPC",
-            "SPC Email",
-            "Reviewer",
-            "Suitability",
-            "Explanation",
-            "Resolution",
+            "name",
+            "team_player_name",
+            "player",
+            "is_creator",
         ]
     )
-    for r in SPCResponse.objects.all():
-        writer.writerow(
-            [
-                r.review.submission_id,
-                r.review.assigned_spc.full_name,
-                r.review.assigned_spc.user.email,
-                r.review.pc_member_name,
-                r.status,
-                r.explanation,
-                r.resolution_choice,
-            ]
-        )
+    for team in Team.objects.filter(game=game):
+        for player in team.players.all():
+            writer.writerow(
+                [
+                    team.name,
+                    team.team_player.name,
+                    player.name,
+                    player == team.creator
+                ]
+            )
     return response
 
 

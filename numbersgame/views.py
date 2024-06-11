@@ -1,6 +1,8 @@
+import csv
 import os
 import random
 
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from core.game_views import GameIndexView, GameSubmitAnswerView, GameResultsView
@@ -56,21 +58,33 @@ class Results(GameResultsView):
             context["shuffled_answers"] = shuffled_answers
             winning_answers = answers.filter(winner=True)
             if winning_answers:
-                winning_answers_formatted = sorted(
-                    list(set(answer.answer for answer in winning_answers))
-                )
-                if len(winning_answers_formatted) > 1:
-                    winning_answers_formatted = "{} and {}".format(
-                        winning_answers_formatted[0], winning_answers_formatted[1]
-                    )
-                else:
-                    winning_answers_formatted = "{}".format(winning_answers_formatted[0])
-                context["winning_answers_formatted"] = winning_answers_formatted
-                winners_formatted = sorted(
-                    list(answer.player.name for answer in winning_answers)
-                )
-                if len(winners_formatted) > 1:
-                    winners_formatted[-1] = "and " + winners_formatted[-1]
-                winners_formatted = ", ".join(winners_formatted)
-                context["winners_formatted"] = winners_formatted
+                context["winning_answers"] = winning_answers
+                context["winning_numbers"] = winning_answers.order_by('answer').values_list('answer', flat=True).distinct()
         return render(request, os.path.join("numbers_game", "results.html"), context)
+
+
+def export_answers(session, game):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "player_name",
+            "is_team_player",
+            "answer",
+            "motivation",
+            "gap",
+            "winner"
+        ]
+    )
+    for answer in Answer.objects.filter(game=game):
+        writer.writerow([
+            answer.player.name,
+            answer.player.is_team_player,
+            answer.answer,
+            answer.motivation,
+            answer.gap,
+            answer.winner
+        ])
+    return response

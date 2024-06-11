@@ -28,4 +28,8 @@ class SimpPokerConfig(GameConfig):
         # from simp_poker.forms import SettingForm
         self.register_models(Setting, None, Answer)
 
+        from simp_poker.views import export_answers
+
+        self.export_answer_view = export_answers
+
         super(SimpPokerConfig, self).ready()

@@ -1,13 +1,11 @@
 import importlib
 import warnings
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
 
 from django.apps import AppConfig
 from django.contrib.staticfiles import finders
 from django.core.management import get_commands
-from django.db.models import Model
 from django.db.models.base import ModelBase
-from django.forms import Form, BaseForm
 from django.forms.models import ModelFormMetaclass
 
 from core.constants import FORBIDDEN_APP_URL_TAGS
@@ -27,6 +25,7 @@ class GameConfig(AppConfig):
         setting_form=None,
         answer_model=None,
         answer_model_fields=None,
+        export_answer_view=None,
         home_view=None,
         management_commands=None,
         update_management_commands=None,
@@ -61,6 +60,7 @@ class GameConfig(AppConfig):
                     "string."
             )
         self.answer_model_fields = answer_model_fields
+        self.export_answer_view = export_answer_view
 
         if home_view is not None and not isinstance(home_view, str):
             raise TypeError("The home_view parameter of a GameConfig needs to be a string.")
@@ -175,6 +175,11 @@ class GameConfig(AppConfig):
             if self.home_view not in set(url.name for url in urls):
                 raise ValueError(f"The home_view value {self.home_view} does not seem to be a view "
                                  f"for the app {self.name}")
+
+        # Check that the export view is callable
+        if self.export_answer_view is not None:
+            if not isinstance(self.export_answer_view, Callable):
+                raise ValueError(f"The export answer view for the app {self.name} is not callable.")
 
 
 INSTALLED_GAMES = []

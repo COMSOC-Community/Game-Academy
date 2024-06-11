@@ -423,7 +423,7 @@ class SessionGuestRegistration(forms.Form):
 
 class CreateGameForm(forms.Form):
     game_type = forms.ChoiceField(
-        choices=INSTALLED_GAMES_CHOICES,
+        choices=[],
         label_suffix="",
         label="Type of Game",
         help_text="Choose the type of game from the list. If the one you are looking for is "
@@ -547,6 +547,9 @@ class CreateGameForm(forms.Form):
             )
 
         super(CreateGameForm, self).__init__(*args, **kwargs)
+
+        # Needed here because of the apps are only registered after their ready method.
+        self.fields['game_type'].choices = INSTALLED_GAMES_CHOICES
 
         if self.game:
             illustration_choices = [

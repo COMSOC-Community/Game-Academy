@@ -1,7 +1,8 @@
+import csv
 import os
 import random
 
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 
 from core.game_views import GameIndexView, GameSubmitAnswerView, GameResultsView
@@ -109,3 +110,36 @@ def results(request, session_url_tag, game_url_tag):
     return render(request, os.path.join('goodbad', 'results.html'), context)
 
 
+def export_answers(session, game):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "player_name",
+            "is_team_player",
+            "question_title",
+            "selected_alt",
+            "is_correct",
+            "submission_time"
+        ]
+    )
+    for answer in Answer.objects.filter(game=game):
+        for q in answer.questions.all():
+            row = [
+                    answer.player.name,
+                    answer.player.is_team_player,
+                    q.title
+            ]
+            question_answer = answer.question_answers.filter(question=q).first()
+            if question_answer is not None:
+                row.append(question_answer.selected_alt)
+                row.append(question_answer.is_correct)
+                row.append(question_answer.submission_time)
+            else:
+                row.append(None)
+                row.append(None)
+                row.append(None)
+            writer.writerow(row)
+    return response

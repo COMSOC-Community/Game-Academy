@@ -1,5 +1,7 @@
+import csv
 import os
 
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from core.game_views import GameIndexView, GameSubmitAnswerView, GameResultsView
@@ -94,3 +96,52 @@ class Results(GameResultsView):
         )
 
         return render(request, os.path.join("simp_poker", "results.html"), context)
+
+
+def export_answers(session, game):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "player_name",
+            "is_team_player",
+            "prob_p1_king",
+            "prob_p1_queen",
+            "prob_p1_jack",
+            "prob_p2_king",
+            "prob_p2_queen",
+            "prob_p2_jack",
+            "motivation",
+            "round_robin_score",
+            "round_robin_position",
+            "round_robin_with_opt_score",
+            "round_robin_with_opt_position",
+            "score_against_optimum",
+            "winner_against_optimum",
+            "best_response",
+            "score_against_best_response"
+        ]
+    )
+    for answer in Answer.objects.filter(game=game):
+        writer.writerow([
+            answer.player.name,
+            answer.player.is_team_player,
+            answer.prob_p1_king,
+            answer.prob_p1_queen,
+            answer.prob_p1_jack,
+            answer.prob_p2_king,
+            answer.prob_p2_queen,
+            answer.prob_p2_jack,
+            answer.motivation,
+            answer.round_robin_score,
+            answer.round_robin_position,
+            answer.round_robin_with_opt_score,
+            answer.round_robin_with_opt_position,
+            answer.score_against_optimum,
+            answer.winner_against_optimum,
+            answer.best_response,
+            answer.score_against_best_response
+        ])
+    return response

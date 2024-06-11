@@ -28,4 +28,8 @@ class ItePrisonerGameConfig(GameConfig):
 
         self.register_models(Setting, SettingForm, Answer)
 
+        from iteprisonergame.views import export_answers
+
+        self.export_answer_view = export_answers
+
         super(ItePrisonerGameConfig, self).ready()

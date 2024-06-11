@@ -30,4 +30,8 @@ class CentipedeGameConfig(GameConfig):
             setting_model=Setting, setting_form=SettingForm, answer_model=Answer
         )
 
+        from centipedegame.views import export_answers
+
+        self.export_answer_view = export_answers
+
         super(CentipedeGameConfig, self).ready()

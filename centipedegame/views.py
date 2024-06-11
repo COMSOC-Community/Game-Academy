@@ -1,5 +1,7 @@
+import csv
 import os
 
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from core.game_views import GameIndexView, GameResultsView, GameSubmitAnswerView
@@ -72,3 +74,36 @@ class Results(GameResultsView):
                 winners_formatted = ", ".join(winners_formatted)
                 context["winners_formatted"] = winners_formatted
         return render(request, os.path.join("centipedegame", "results.html"), context)
+
+
+def export_answers(session, game):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "player_name",
+            "is_team_player",
+            "strategy_as_p1",
+            "strategy_as_p2",
+            "avg_score_as_p1",
+            "avg_score_as_p2",
+            "avg_score",
+            "winning",
+            "motivation"
+        ]
+    )
+    for answer in Answer.objects.filter(game=game):
+        writer.writerow([
+            answer.player.name,
+            answer.player.is_team_player,
+            answer.strategy_as_p1,
+            answer.strategy_as_p2,
+            answer.avg_score_as_p1,
+            answer.avg_score_as_p2,
+            answer.avg_score,
+            answer.winning,
+            answer.motivation
+        ])
+    return response

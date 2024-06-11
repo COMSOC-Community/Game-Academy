@@ -57,7 +57,10 @@ class Player(models.Model):
 
     def display_name(self):
         if self.is_team_player:
-            return self.represented_team.name
+            try:
+                return self.represented_team.name
+            except Team.DoesNotExist:
+                pass
         return self.name
 
     class Meta:

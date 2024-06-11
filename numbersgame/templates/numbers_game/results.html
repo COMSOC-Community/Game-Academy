@@ -76,13 +76,19 @@
                         <td>{{ game.result_ng.corrected_average|float_formatter:5 }}</td>
                     </tr>
                     <tr>
-                        <th>Winning answer{{ winning_answers|length|pluralize:',s' }}</th>
-                        <td>{{ winning_answers_formatted|float_formatter:5 }}</td>
+                        <th>Winning answer{{ winning_numbers|pluralize:',s' }}</th>
+                        <td>
+                            {% if winning_numbers|length == 2 %}
+                                {{ winning_numbers.0|float_formatter:5 }} and {{ winning_numbers.1|float_formatter:5 }}
+                            {% else %}
+                                {{ winning_numbers.first|float_formatter:5 }}
+                            {% endif %}
+                        </td>
                     </tr>
                     {% if user_is_session_admin %}
                         <tr>
-                            <th>Winner{{ winners|length|pluralize:',s' }}</th>
-                            <td>{{ winners_formatted }}</td>
+                            <th>Winner{{ winning_answers|pluralize:',s' }}</th>
+                            <td>{% for answer in winning_answers %}{% if not forloop.first %}{% if forloop.last %} and {% else %}, {% endif %}{% endif %}{{ answer.player.display_name}}{% endfor %}</td>
                         </tr>
                     {% endif %}
                 </table>

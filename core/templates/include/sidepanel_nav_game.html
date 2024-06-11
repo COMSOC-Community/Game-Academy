@@ -17,8 +17,7 @@
             <li><a class="button navigation-button" href="{% include 'include/game_navigation_url.html' with url_name='global_results' %}">Result</a></li>
         {% endif %}
         {% if user_is_session_admin %}
-            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#modify_{{ game.id }}">Settings Admin</a></li>
-            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}">Answers Admin</a></li>
+            <li><a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}">Admin Pages</a></li>
         {% endif %}
     </ul>
 </div>

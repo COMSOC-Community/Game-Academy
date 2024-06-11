@@ -46,6 +46,7 @@ class Setting(models.Model):
     num_displayed_questions = models.PositiveIntegerField(default=10)
 
 
+# This ensures population of tha questions after save
 @receiver(post_save, sender=Setting, dispatch_uid='set_default_questions')
 def SetDefaulQuestions(**kwargs):
     setting = kwargs['instance']

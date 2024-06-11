@@ -28,4 +28,8 @@ class NumbersGameConfig(GameConfig):
 
         self.register_models(Setting, SettingForm, Answer)
 
+        from numbersgame.views import export_answers
+
+        self.export_answer_view = export_answers
+
         super(NumbersGameConfig, self).ready()

@@ -1,6 +1,8 @@
+import csv
 import os
 import random
 
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from core.game_views import GameResultsView, GameSubmitAnswerView, GameIndexView
@@ -96,3 +98,34 @@ class Results(GameResultsView):
             global_winners_formatted = ", ".join(global_winners_formatted)
             context["global_winners_formatted"] = global_winners_formatted
         return render(request, os.path.join("auctiongame", "results.html"), context)
+
+
+def export_answers(session, game):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(
+        [
+            "player_name",
+            "is_team_player",
+            "auction_id",
+            "bid",
+            "utility",
+            "winning_auction",
+            "winning_global",
+            "motivation"
+        ]
+    )
+    for answer in Answer.objects.filter(game=game):
+        writer.writerow([
+            answer.player.name,
+            answer.player.is_team_player,
+            answer.auction_id,
+            answer.bid,
+            answer.utility,
+            answer.winning_auction,
+            answer.winning_global,
+            answer.motivation
+        ])
+    return response

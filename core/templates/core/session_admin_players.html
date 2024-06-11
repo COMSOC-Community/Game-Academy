@@ -24,6 +24,16 @@
         {% include "include/session_admin_navigation.html" %}
     </section>
 
+    <section id="export">
+        <h2>Export Players</h2>
+
+        <p>Use the following to export the details of the players of this session into a CSV file.</p>
+
+        <p class="center-align">
+            <a class="button process-button" href="{% url 'core:session_admin_players_export' session.url_tag %}">Export Players</a>
+        </p>
+    </section>
+
     <section id="add_player">
         <h2>Add Players</h2>
             {% if new_player %}
