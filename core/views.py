@@ -21,6 +21,7 @@ from .authorisations import (
 )
 from .constants import guest_password, TEAM_USER_USERNAME, team_player_name
 from .decorators import session_admin_decorator
+from .exportdata import team_to_csv, player_to_csv
 from .forms import (
     LoginForm,
     PlayerLoginForm,
@@ -728,22 +729,8 @@ def session_admin_players_export(request, session_url_tag):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{session.name}_players.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(
-        [
-            "player_name",
-            "is_guest",
-            "is_team_player",
-        ]
-    )
-    for p in Player.objects.filter(session=session):
-        writer.writerow(
-            [
-                p.name,
-                p.is_guest,
-                p.is_team_player
-            ]
-        )
+    player_to_csv(response, session)
+
     return response
 
 
@@ -952,8 +939,16 @@ def session_admin_games_answers_export(request, session_url_tag, game_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
-    if game.game_config().export_answer_view is not None:
-        return game.game_config().export_answer_view(session, game)
+    export_function = game.game_config().export_answer_view
+    if export_function is not None:
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="' \
+                                          f'{session.name}_{game.name}_answers.csv"'
+
+        export_function(response, game)
+
+        return response
+    raise Http404("This game has no answer export function configured.")
 
 
 @session_admin_decorator
@@ -985,25 +980,8 @@ def session_admin_games_teams_export(request, session_url_tag, game_url_tag):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_teams.csv"'
 
-    writer = csv.writer(response)
-    writer.writerow(
-        [
-            "name",
-            "team_player_name",
-            "player",
-            "is_creator",
-        ]
-    )
-    for team in Team.objects.filter(game=game):
-        for player in team.players.all():
-            writer.writerow(
-                [
-                    team.name,
-                    team.team_player.name,
-                    player.name,
-                    player == team.creator
-                ]
-            )
+    team_to_csv(response, game)
+
     return response
 
 
