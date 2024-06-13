@@ -25,7 +25,8 @@ class GameConfig(AppConfig):
         setting_form=None,
         answer_model=None,
         answer_model_fields=None,
-        export_answer_view=None,
+        answer_to_csv_func=None,
+        settings_to_csv_func=None,
         home_view=None,
         management_commands=None,
         update_management_commands=None,
@@ -60,7 +61,8 @@ class GameConfig(AppConfig):
                     "string."
             )
         self.answer_model_fields = answer_model_fields
-        self.export_answer_view = export_answer_view
+        self.answer_to_csv_func = answer_to_csv_func
+        self.settings_to_csv_func = settings_to_csv_func
 
         if home_view is not None and not isinstance(home_view, str):
             raise TypeError("The home_view parameter of a GameConfig needs to be a string.")
@@ -176,10 +178,13 @@ class GameConfig(AppConfig):
                 raise ValueError(f"The home_view value {self.home_view} does not seem to be a view "
                                  f"for the app {self.name}")
 
-        # Check that the export view is callable
-        if self.export_answer_view is not None:
-            if not isinstance(self.export_answer_view, Callable):
-                raise ValueError(f"The export answer view for the app {self.name} is not callable.")
+        # Check that the export functions are callable
+        if self.answer_to_csv_func is not None:
+            if not isinstance(self.answer_to_csv_func, Callable):
+                raise ValueError(f"The export answer function for the app {self.name} is not callable.")
+        if self.settings_to_csv_func is not None:
+            if not isinstance(self.settings_to_csv_func, Callable):
+                raise ValueError(f"The export settings function for the app {self.name} is not callable.")
 
 
 INSTALLED_GAMES = []

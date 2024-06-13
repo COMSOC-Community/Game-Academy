@@ -61,30 +61,3 @@ class Results(GameResultsView):
                 context["winning_answers"] = winning_answers
                 context["winning_numbers"] = winning_answers.order_by('answer').values_list('answer', flat=True).distinct()
         return render(request, os.path.join("numbers_game", "results.html"), context)
-
-
-def export_answers(session, game):
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(
-        [
-            "player_name",
-            "is_team_player",
-            "answer",
-            "motivation",
-            "gap",
-            "winner"
-        ]
-    )
-    for answer in Answer.objects.filter(game=game):
-        writer.writerow([
-            answer.player.name,
-            answer.player.is_team_player,
-            answer.answer,
-            answer.motivation,
-            answer.gap,
-            answer.winner
-        ])
-    return response

@@ -43,6 +43,7 @@ class Answer(models.Model):
     motivation = models.TextField()
     gap = models.FloatField(null=True)
     winner = models.BooleanField(null=True, default=False)
+    submission_time = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["game", "winner", "player"]

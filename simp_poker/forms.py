@@ -1,12 +1,6 @@
 from django import forms
 
-from simp_poker.models import Answer, Setting
-
-
-# class SettingForm(forms.ModelForm):
-#     class Meta:
-#         model = Setting
-#         exclude = ["game"]
+from simp_poker.models import Answer
 
 
 class SubmitAnswerForm(forms.Form):

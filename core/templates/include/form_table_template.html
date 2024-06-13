@@ -41,6 +41,6 @@
         </tr>
     {% endfor %}
     <tr class="form-field-row">
-        <td colspan="2"><input class="button" type="submit" name="{{ form_type }}" value="{{ submit_button_label }}"></td>
+        <td colspan="2"><input class="button" type="submit" name="{{ form_type }}" value="{{ submit_button_label }}" {% if submit_button_onclick %}onclick="{{ submit_button_onclick|safe }}"{% endif %}></td>
     </tr>
 </table>

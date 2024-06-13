@@ -19,6 +19,22 @@
         {% include "include/session_admin_navigation.html" %}
     </section>
 
+    <section id="export">
+        <h2>Export Session</h2>
+
+        <p>Use the following to export the details of the parameters of this session into a CSV file.</p>
+
+        <p class="center-align">
+            <a class="button process-button" href="{% url 'core:session_admin_export' session.url_tag %}">Export Parameters</a>
+        </p>
+
+        <p>You can also generate a ZIP archive of the whole session:</p>
+
+        <p class="center-align">
+            <a class="button process-button" href="{% url 'core:session_admin_export_full' session.url_tag %}">Export Full Session</a>
+        </p>
+    </section>
+
     <section>
         <h2>General Parameters</h2>
         <p>

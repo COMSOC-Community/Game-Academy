@@ -29,8 +29,8 @@ class AuctionGameConfig(GameConfig):
         # from auctiongame.forms import SettingForm
         self.register_models(answer_model=Answer)
 
-        from auctiongame.views import export_answers
+        from auctiongame.exportdata import answers_to_csv
 
-        self.export_answer_view = export_answers
+        self.answer_to_csv_func = answers_to_csv
 
         super(AuctionGameConfig, self).ready()

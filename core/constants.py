@@ -20,5 +20,5 @@ def guest_password(username):
     return GUEST_PASSWORD_PREFIX + str(username)
 
 
-def team_player_name(team_name):
-    return "TeamPlayer_" + team_name
+def team_player_name(game_name, team_name):
+    return game_name + "_TeamPlayer_" + team_name

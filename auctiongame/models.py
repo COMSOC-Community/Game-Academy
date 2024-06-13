@@ -16,6 +16,7 @@ class Answer(models.Model):
     winning_auction = models.BooleanField(default=False)
     winning_global = models.BooleanField(default=False)
     motivation = models.TextField()
+    submission_time = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["game", "player"]

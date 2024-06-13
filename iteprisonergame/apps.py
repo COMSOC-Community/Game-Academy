@@ -28,8 +28,9 @@ class ItePrisonerGameConfig(GameConfig):
 
         self.register_models(Setting, SettingForm, Answer)
 
-        from iteprisonergame.views import export_answers
+        from iteprisonergame.exportdata import answers_to_csv, settings_to_csv
 
-        self.export_answer_view = export_answers
+        self.answer_to_csv_func = answers_to_csv
+        self.settings_to_csv_func = settings_to_csv
 
         super(ItePrisonerGameConfig, self).ready()

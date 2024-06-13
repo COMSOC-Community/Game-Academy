@@ -4,12 +4,6 @@ from core.models import Player, Game
 from core.utils import float_formatter
 
 
-class Setting(models.Model):
-    game = models.ForeignKey(
-        Game, on_delete=models.CASCADE, related_name="simp_poker_setting"
-    )
-
-
 class Answer(models.Model):
     game = models.ForeignKey(
         Game, on_delete=models.CASCADE, related_name="simp_poker_answers"
@@ -32,6 +26,7 @@ class Answer(models.Model):
     winner_against_optimum = models.BooleanField(null=True, default=False)
     best_response = models.CharField(max_length=100, null=True, blank=True, default='')
     score_against_best_response = models.FloatField(null=True, blank=True, default=0)
+    submission_time = models.DateTimeField(auto_now=True)
 
     @property
     def probabilities_as_tuple(self):

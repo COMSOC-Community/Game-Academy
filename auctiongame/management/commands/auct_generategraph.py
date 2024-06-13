@@ -61,12 +61,15 @@ class Command(BaseCommand):
             game.result_auct = result
             game.save()
 
+        all_answers = Answer.objects.filter(game=game)
+        for answer in all_answers:
+            answer.utility = 10 + answer.auction_id - answer.bid
+        Answer.objects.bulk_update(all_answers, ["utility"])
+
         global_highest_utility = None
         global_winner = None
         for auction_id in range(1, 6):
-            answers = Answer.objects.filter(
-                game=game, auction_id=auction_id, bid__isnull=False
-            )
+            answers = all_answers.filter(auction_id=auction_id, bid__isnull=False)
             if answers:
                 bids = [answer.bid for answer in answers]
                 if bids:

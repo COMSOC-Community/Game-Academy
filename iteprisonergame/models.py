@@ -52,6 +52,7 @@ class Answer(models.Model):
     avg_score = models.FloatField(default=0.0, blank=True, null=True)
     winner = models.BooleanField(blank=True, null=True, default=False)
     graph_json_data = models.TextField(blank=True, null=True)
+    submission_time = models.DateTimeField(auto_now=True)
 
     def formatted_avg_score(self):
         if int(self.avg_score) == self.avg_score:

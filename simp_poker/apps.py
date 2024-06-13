@@ -23,13 +23,13 @@ class SimpPokerConfig(GameConfig):
         )
 
     def ready(self):
-        from simp_poker.models import Setting, Answer
+        from simp_poker.models import Answer
 
         # from simp_poker.forms import SettingForm
-        self.register_models(Setting, None, Answer)
+        self.register_models(None, None, Answer)
 
-        from simp_poker.views import export_answers
+        from simp_poker.exportdata import answers_to_csv
 
-        self.export_answer_view = export_answers
+        self.answer_to_csv_func = answers_to_csv
 
         super(SimpPokerConfig, self).ready()

@@ -19,6 +19,16 @@
         {% include "include/session_admin_navigation.html" %}
     </section>
 
+    <section id="export">
+        <h2>Export Games</h2>
+
+        <p>Use the following to export the details of the games of this session into a CSV file.</p>
+
+        <p class="center-align">
+            <a class="button process-button" href="{% url 'core:session_admin_games_export' session.url_tag %}">Export Games</a>
+        </p>
+    </section>
+
     <section id="add_game">
         <h2>Add a Game</h2>
 

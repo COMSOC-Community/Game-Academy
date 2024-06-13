@@ -19,6 +19,21 @@
         {% include "include/game_admin_navigation.html" %}
     </section>
 
+    <section id="export">
+        <h2>Export Settings</h2>
+
+        {% if export_settings_configured %}
+            <p>Use the following to export the settings of the game into a CSV file.</p>
+
+            <p class="center-align">
+                <a class="button process-button" href="{% url 'core:session_admin_games_settings_export' session.url_tag game.url_tag %}">Export Settings</a>
+            </p>
+        {% else %}
+            <p>This game is not configured to export the settings. Contact the system administrator if this is not normal.</p>
+        {% endif %}
+    </section>
+
+
     {% if modify_game_form %}
         <section id="general_settings">
             <h2>General Settings</h2>
@@ -42,7 +57,11 @@
                     </div>
                 {% endif %}
                 <form action="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}#game_specific_settings" method="post">
-                    {% include "include/form_table_template.html" with form=modify_game_setting_form form_type="modify_game_setting_form" submit_button_label='Update Settings' %}
+                    {% if answers_exist %}
+                        {% include "include/form_table_template.html" with form=modify_game_setting_form form_type="modify_game_setting_form" submit_button_label='Update Settings' submit_button_onclick="return confirm('This game already has answers, they may not be valid after changing the settings.')"%}
+                    {% else %}
+                        {% include "include/form_table_template.html" with form=modify_game_setting_form form_type="modify_game_setting_form" submit_button_label='Update Settings' %}
+                    {% endif %}
                 </form>
         </section>
     {% endif %}

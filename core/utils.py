@@ -1,3 +1,6 @@
+import re
+
+
 def float_formatter(value, num_digits=3):
     value = float(value)
     if num_digits is None:
@@ -9,3 +12,7 @@ def float_formatter(value, num_digits=3):
         if "." in formatted_value
         else formatted_value
     )
+
+
+def sanitise_filename(s):
+    return "".join(c for c in s if re.match(r'\w', c)).rstrip()

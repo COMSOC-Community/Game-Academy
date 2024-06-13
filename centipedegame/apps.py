@@ -30,8 +30,9 @@ class CentipedeGameConfig(GameConfig):
             setting_model=Setting, setting_form=SettingForm, answer_model=Answer
         )
 
-        from centipedegame.views import export_answers
+        from centipedegame.exportdata import answers_to_csv, settings_to_csv
 
-        self.export_answer_view = export_answers
+        self.answer_to_csv_func = answers_to_csv
+        self.settings_to_csv_func = settings_to_csv
 
         super(CentipedeGameConfig, self).ready()

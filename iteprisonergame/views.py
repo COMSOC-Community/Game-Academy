@@ -56,34 +56,3 @@ class Results(GameResultsView):
         context["answers"] = all_answers.order_by("name")
         context["answers_sorted_score"] = all_answers.order_by("-avg_score")
         return render(request, os.path.join("iteprisonergame", "results.html"), context)
-
-
-def export_answers(session, game):
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="{session.name}_{game.name}_answers.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(
-        [
-            "player_name",
-            "is_team_player",
-            "answer_name",
-            "automata",
-            "initial_state",
-            "motivation",
-            "avg_score",
-            "winner"
-        ]
-    )
-    for answer in Answer.objects.filter(game=game):
-        writer.writerow([
-            answer.player.name,
-            answer.player.is_team_player,
-            answer.name,
-            answer.automata,
-            answer.initial_state,
-            answer.motivation,
-            answer.avg_score,
-            answer.winner
-        ])
-    return response

@@ -14,7 +14,8 @@ def answers_to_csv(writer, game):
             "utility",
             "winning_auction",
             "winning_global",
-            "motivation"
+            "motivation",
+            "submission_time"
         ]
     )
     for answer in Answer.objects.filter(game=game):
@@ -26,5 +27,6 @@ def answers_to_csv(writer, game):
             answer.utility,
             answer.winning_auction,
             answer.winning_global,
-            answer.motivation
+            answer.motivation,
+            answer.submission_time
         ])

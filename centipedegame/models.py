@@ -57,6 +57,7 @@ class Answer(models.Model):
     avg_score = models.FloatField(default=0.0, null=True, blank=True)
     winning = models.BooleanField(default=False)
     motivation = models.TextField()
+    submission_time = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["game", "player"]
