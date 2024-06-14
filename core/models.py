@@ -2,6 +2,8 @@ import importlib
 
 from django.db import models
 from django.contrib.auth.models import Group, AbstractUser
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from core.games import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES
 
@@ -69,6 +71,14 @@ class Player(models.Model):
 
     def __str__(self):
         return "[{}] {}".format(self.session, self.name)
+
+
+@receiver(post_delete, sender=Player)
+def signal_function_name(sender, instance, using, **kwargs):
+    if not instance.is_team_player:
+        user = instance.user
+        if user.is_player:
+            user.delete()
 
 
 class Game(models.Model):

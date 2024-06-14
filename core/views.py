@@ -750,9 +750,6 @@ def session_admin_players(request, session_url_tag):
                 raise e
     context["import_player_csv_form"] = import_player_csv_form
 
-    players = Player.objects.filter(session=session, is_guest=False)
-    guests = Player.objects.filter(session=session, is_guest=True)
-
     # Delete player form
     if request.method == "POST" and (
         "delete_player_form" in request.POST or "delete_guest_form" in request.POST
@@ -765,6 +762,10 @@ def session_admin_players(request, session_url_tag):
             context["deleted_guest_name"] = player.name
         player.user.delete()
         player.delete()
+
+    if request.method == "POST" and "delete_all_players_form" in request.POST:
+        Player.objects.filter(session=session, is_guest=False).delete()
+        context["all_players_deleted"] = True
 
     if is_session_super_admin(session, request.user):
         # Make admin form
@@ -791,8 +792,8 @@ def session_admin_players(request, session_url_tag):
     super_admins = session.super_admins.all()
     context["super_admins"] = super_admins
     context["admins"] = session.admins.exclude(id__in=super_admins)
-    context["players"] = players
-    context["guests"] = guests
+    context["players"] = Player.objects.filter(session=session, is_guest=False)
+    context["guests"] = Player.objects.filter(session=session, is_guest=True)
 
     return render(request, "core/session_admin_players.html", context)
 

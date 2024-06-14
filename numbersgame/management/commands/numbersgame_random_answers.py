@@ -60,7 +60,7 @@ class Command(BaseCommand):
         lower_bound = game.numbers_setting.lower_bound
         upper_bound = game.numbers_setting.upper_bound
         for _ in range(num_answers):
-            player_name_prefix = "RANDOM_PLAYER_AUCT_"
+            player_name_prefix = "RANDOM_PLAYER_NUMBERS_"
             player_name = player_name_prefix + "a"
             while CustomUser.objects.filter(username=player_name).exists() or Player.objects.filter(name=player_name).exists():
                 player_name = player_name_prefix + ''.join(random.choices(string.ascii_letters + string.digits, k=15))

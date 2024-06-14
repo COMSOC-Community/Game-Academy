@@ -48,7 +48,7 @@ class Setting(models.Model):
 
 # This ensures population of tha questions after save
 @receiver(post_save, sender=Setting, dispatch_uid='set_default_questions')
-def SetDefaulQuestions(**kwargs):
+def set_default_questions(**kwargs):
     setting = kwargs['instance']
 
     if not setting.questions.all():
