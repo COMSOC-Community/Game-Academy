@@ -2,6 +2,7 @@ GUEST_PASSWORD_PREFIX = "GuestPass_"
 TEAM_USER_USERNAME = "TeamUser"
 TEAM_USER_PASSWORD = "TeamUserPassword"
 TEAM_PLAYERNAME_PREFIX = "TeamPlayer_"
+RANDOM_PLAYERNAME_PREFIX = "RandomPlayer"
 
 FORBIDDEN_SESSION_URL_TAGS = ("", "admin", "user", "logout", "message", "createsession")
 FORBIDDEN_APP_URL_TAGS = ("forcedlogout", "home", "admin")
