@@ -35,7 +35,7 @@
     </section>
 
     <section id="add_player">
-        <h2>Add Players</h2>
+        <h2>Manually add a Player</h2>
             {% if new_player %}
                 <div class="form-success-message">
                     <p>The player {{ new_player.name }} has been successfully added to the session.</p>
@@ -47,6 +47,27 @@
                {% include "include/form_table_template.html" with form=add_player_form form_type="add_player_form" submit_button_label='Add Player' %}
             </form>
         {% endif %}
+    </section>
+
+    <section id="random_players">
+        <h2>Populate with Random Players</h2>
+
+        <p>You can use the following form to add random players to the session.</p>
+
+        {% if random_players_error %}
+            <div class="form-error-message">
+                <p>An error occurred while generating random players: {{ random_players_error }}.</p>
+            </div>
+        {% endif %}
+        {% if random_players_log %}
+            <div class="form-success-message">
+                <p style="margin-bottom: 20px;">Random players successfully generated. Here is the log.</p>
+                {{ random_players_log|linebreaks }}
+            </div>
+        {% endif %}
+        <form action="{% url 'core:session_admin_players' session.url_tag %}#random_players" method="post">
+            {% include 'include/form_table_template.html' with form=random_players_form form_type='random_players_form' submit_button_label='Generate Random Players' %}
+        </form>
     </section>
 
     <section id="import_players">
@@ -219,7 +240,7 @@
 
             <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
                 {% csrf_token %}
-                <p class="center-align">
+                <p class="center-align" style="margin-top: 20px">
                     <input class="button color-error" type="submit" name="delete_all_players_form" value="Delete All Players" onclick="return confirm('Deleting all the players is irreversible.')"/>
                 </p>
             </form>
@@ -231,48 +252,61 @@
     <section id="guests">
         <h2>Guests of the Session</h2>
 
-        {% if session.show_guest_login %}
-            {% if deleted_guest_name %}
-                <div class="form-success-message">
-                    <p>The guest {{ deleted_guest_name }} has been successfully removed from the session.</p>
-                </div>
-            {% endif %}
+        {% if not session.show_guest_login %}
+            <p>
+                This session does not allow for guests to play. If you want to enable this, you can change that on the
+                on <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin' session.url_tag %}">parameters page</a>.
+            </p>
+        {% endif %}
 
-            {% if guests %}
-                <div class="filtered-collection-wrapper">
-                    <div class="filtered-collection-filter">
-                    <div class="side-by-side-pushed-wrapper" style="flex-wrap: nowrap;">
-                        <input type="text" placeholder="Filter by guest name...">
-                        <span class="result-count"></span>
-                    </div>
-                    </div>
-                    <div class="filtered-collection-content">
-                        {% for guest in guests %}
-                            <div class="filtered-collection-item" data-value="{{ guest.name }}">
-                                <div class="side-by-side-pushed-wrapper">
-                                    <div>
-                                        <span>{{ guest.name }}</span>
-                                    </div>
-                                    <div>
-                                        <form action="{% url 'core:session_admin_players' session.url_tag %}#guests" method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name='remove_player_id' value={{ guest.id }} />
-                                        <input class="button color-error" type="submit" name="delete_guest_form" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
-                                    </form>
-                                    </div>
+        {% if deleted_guest_name %}
+            <div class="form-success-message">
+                <p>The guest {{ deleted_guest_name }} has been successfully removed from the session.</p>
+            </div>
+        {% endif %}
+
+        {% if all_guests_deleted %}
+            <div class="form-success-message">
+                <p>All the guests have been deleted from this session.</p>
+            </div>
+        {% endif %}
+
+        {% if guests %}
+            <div class="filtered-collection-wrapper">
+                <div class="filtered-collection-filter">
+                <div class="side-by-side-pushed-wrapper" style="flex-wrap: nowrap;">
+                    <input type="text" placeholder="Filter by guest name...">
+                    <span class="result-count"></span>
+                </div>
+                </div>
+                <div class="filtered-collection-content">
+                    {% for guest in guests %}
+                        <div class="filtered-collection-item" data-value="{{ guest.name }}">
+                            <div class="side-by-side-pushed-wrapper">
+                                <div>
+                                    <span>{{ guest.name }}</span>
+                                </div>
+                                <div>
+                                    <form action="{% url 'core:session_admin_players' session.url_tag %}#guests" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name='remove_player_id' value={{ guest.id }} />
+                                    <input class="button color-error" type="submit" name="delete_guest_form" value="Delete Guest" onclick="return confirm('Deleting a guest is irreversible.')"/>
+                                </form>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% else %}
-                <p>There are no guest users yet.</p>
-            {% endif %}
+            </div>
+
+            <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
+                {% csrf_token %}
+                <p class="center-align" style="margin-top: 20px">
+                    <input class="button color-error" type="submit" name="delete_all_guests_form" value="Delete All Guests" onclick="return confirm('Deleting all the guests is irreversible.')"/>
+                </p>
+            </form>
         {% else %}
-            <p>
-                This session does not allow for guests to play. If you want to enable this, you can change the settings
-                on <a class="button navigation-button" href="{% url 'core:session_admin' session.url_tag %}">this page</a>.
-            </p>
+            <p>There are no guest users yet.</p>
         {% endif %}
     </section>
 {% endblock %}

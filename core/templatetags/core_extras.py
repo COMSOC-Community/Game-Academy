@@ -19,7 +19,7 @@ def float_formatter(x, num_digits=3):
     try:
         float(x)
     except (ValueError, TypeError):
-        return ''
+        return ""
     return core.utils.float_formatter(x, num_digits=num_digits)
 
 
@@ -28,7 +28,7 @@ def percentage(x, num_digits=None):
     try:
         float(x)
     except (ValueError, TypeError):
-        return ''
+        return ""
     return core.utils.float_formatter(100 * x, num_digits=num_digits)
 
 

@@ -11,14 +11,20 @@ from .models import Answer
 
 class Index(GameIndexView):
     def get(self, request, session_url_tag, game_url_tag):
-        return render(request, os.path.join("centipedegame", "index.html"), self.context)
+        return render(
+            request, os.path.join("centipedegame", "index.html"), self.context
+        )
 
 
 class SubmitAnswer(GameSubmitAnswerView):
     def get(self, request, session_url_tag, game_url_tag):
         if self.context["submitting_player"] and not self.context["answer"]:
-            self.context["submit_answer_form"] = SubmitAnswerForm(game=self.game, player=self.context["submitting_player"])
-        return render(request, os.path.join("centipedegame", "submit_answer.html"), self.context)
+            self.context["submit_answer_form"] = SubmitAnswerForm(
+                game=self.game, player=self.context["submitting_player"]
+            )
+        return render(
+            request, os.path.join("centipedegame", "submit_answer.html"), self.context
+        )
 
     def post_validated_form(self, request):
         submit_answer_form = SubmitAnswerForm(
@@ -43,11 +49,12 @@ class SubmitAnswer(GameSubmitAnswerView):
         self.context["submit_answer_form"] = form_object
 
     def post_code_render(self, request):
-        return render(request, os.path.join("centipedegame", "submit_answer.html"), self.context)
+        return render(
+            request, os.path.join("centipedegame", "submit_answer.html"), self.context
+        )
 
 
 class Results(GameResultsView):
-
     def get(self, request, session_url_tag, game_url_tag):
         context = self.context
         answers = Answer.objects.filter(game=self.game).order_by("-avg_score")
@@ -64,7 +71,9 @@ class Results(GameResultsView):
                         winning_answers_formatted[0], winning_answers_formatted[1]
                     )
                 else:
-                    winning_answers_formatted = "{}".format(winning_answers_formatted[0])
+                    winning_answers_formatted = "{}".format(
+                        winning_answers_formatted[0]
+                    )
                 context["winning_answers_formatted"] = winning_answers_formatted
                 winners_formatted = sorted(
                     list(answer.player.name for answer in winning_answers)

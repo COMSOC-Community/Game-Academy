@@ -16,22 +16,24 @@ def answers_to_csv(writer, game):
             "avg_score",
             "winning",
             "motivation",
-            "submission_time"
+            "submission_time",
         ]
     )
     for answer in Answer.objects.filter(game=game):
-        writer.writerow([
-            answer.player.name,
-            answer.player.is_team_player,
-            answer.strategy_as_p1,
-            answer.strategy_as_p2,
-            answer.avg_score_as_p1,
-            answer.avg_score_as_p2,
-            answer.avg_score,
-            answer.winning,
-            answer.motivation,
-            answer.submission_time
-        ])
+        writer.writerow(
+            [
+                answer.player.name,
+                answer.player.is_team_player,
+                answer.strategy_as_p1,
+                answer.strategy_as_p2,
+                answer.avg_score_as_p1,
+                answer.avg_score_as_p2,
+                answer.avg_score,
+                answer.winning,
+                answer.motivation,
+                answer.submission_time,
+            ]
+        )
 
 
 def settings_to_csv(writer, game):
@@ -53,18 +55,20 @@ def settings_to_csv(writer, game):
                 "payoff_rrrd_p1",
                 "payoff_rrrd_p2",
                 "payoff_rrrr_p1",
-                "payoff_rrrr_p2"
+                "payoff_rrrr_p2",
             ]
         )
-        writer.writerow([
-            setting.payoff_d_p1,
-            setting.payoff_d_p2,
-            setting.payoff_rd_p1,
-            setting.payoff_rd_p2,
-            setting.payoff_rrd_p1,
-            setting.payoff_rrd_p2,
-            setting.payoff_rrrd_p1,
-            setting.payoff_rrrd_p2,
-            setting.payoff_rrrr_p1,
-            setting.payoff_rrrr_p2,
-        ])
+        writer.writerow(
+            [
+                setting.payoff_d_p1,
+                setting.payoff_d_p2,
+                setting.payoff_rd_p1,
+                setting.payoff_rd_p2,
+                setting.payoff_rrd_p1,
+                setting.payoff_rrd_p2,
+                setting.payoff_rrrd_p1,
+                setting.payoff_rrrd_p2,
+                setting.payoff_rrrr_p1,
+                setting.payoff_rrrr_p2,
+            ]
+        )

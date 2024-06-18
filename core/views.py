@@ -1,4 +1,3 @@
-import csv
 import io
 import logging
 import os
@@ -37,6 +36,8 @@ from .forms import (
     DeleteSessionForm,
     MakeAdminForm,
     ImportCSVFileForm,
+    RandomPlayersForm,
+    RandomAnswersForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 from .utils import sanitise_filename
@@ -128,14 +129,14 @@ def message(request):
 def redirect_to_session_main(session):
     if session.game_after_logging is not None:
         return redirect_to_game_main(session.game_after_logging)
-    return redirect(
-        "core:session_home", session_url_tag=session.url_tag
-    )
+    return redirect("core:session_home", session_url_tag=session.url_tag)
 
 
 def redirect_to_game_main(game):
     return redirect(
-        f"{game.game_config().url_namespace}:{game.initial_view}", session_url_tag=game.session.url_tag, game_url_tag=game.url_tag
+        f"{game.game_config().url_namespace}:{game.initial_view}",
+        session_url_tag=game.session.url_tag,
+        game_url_tag=game.url_tag,
     )
 
 
@@ -222,12 +223,16 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
             num_teams = game.teams.count()
             context["num_teams"] = num_teams
             if num_teams > 0:
-                context["percent_answer_received"] = 100 * num_answer_received / num_teams
+                context["percent_answer_received"] = (
+                    100 * num_answer_received / num_teams
+                )
             else:
                 context["percent_answer_received"] = 0
         else:
             if num_players > 0:
-                context["percent_answer_received"] = 100 * num_answer_received / num_players
+                context["percent_answer_received"] = (
+                    100 * num_answer_received / num_players
+                )
             else:
                 context["percent_answer_received"] = 0
 
@@ -354,9 +359,13 @@ def create_session(request):
                     url_tag=create_session_form.cleaned_data["url_tag"],
                     name=create_session_form.cleaned_data["name"],
                     long_name=create_session_form.cleaned_data["long_name"],
-                    show_guest_login=create_session_form.cleaned_data["show_guest_login"],
+                    show_guest_login=create_session_form.cleaned_data[
+                        "show_guest_login"
+                    ],
                     show_user_login=create_session_form.cleaned_data["show_user_login"],
-                    show_create_account=create_session_form.cleaned_data["show_create_account"],
+                    show_create_account=create_session_form.cleaned_data[
+                        "show_create_account"
+                    ],
                     visible=create_session_form.cleaned_data["visible"],
                 )
                 session_obj.admins.add(request.user)
@@ -534,10 +543,13 @@ def session_admin(request, session_url_tag):
                     "show_guest_login"
                 ]
                 session.show_create_account = modify_session_form.cleaned_data[
-                    "show_create_account"]
+                    "show_create_account"
+                ]
                 session.visible = modify_session_form.cleaned_data["visible"]
                 if "game_after_logging" in modify_session_form.cleaned_data:
-                    session.game_after_logging = modify_session_form.cleaned_data["game_after_logging"]
+                    session.game_after_logging = modify_session_form.cleaned_data[
+                        "game_after_logging"
+                    ]
                 session.save()
 
                 context["session_modified"] = True
@@ -578,40 +590,56 @@ def session_admin_export_full(request, session_url_tag):
 
     zip_buffer = io.BytesIO()
 
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         session_buffer = io.StringIO()
         session_to_csv(session_buffer, session)
-        zip_file.writestr(sanitise_filename(f'{session.name}_parameters') + '.csv', session_buffer.getvalue())
+        zip_file.writestr(
+            sanitise_filename(f"{session.name}_parameters") + ".csv",
+            session_buffer.getvalue(),
+        )
 
         player_buffer = io.StringIO()
         player_to_csv(player_buffer, session)
-        zip_file.writestr(sanitise_filename(f'{session.name}_players') + '.csv', player_buffer.getvalue())
+        zip_file.writestr(
+            sanitise_filename(f"{session.name}_players") + ".csv",
+            player_buffer.getvalue(),
+        )
 
         games_buffer = io.StringIO()
         games_to_csv(games_buffer, session)
-        zip_file.writestr(sanitise_filename(f'{session.name}_games') + '.csv', games_buffer.getvalue())
+        zip_file.writestr(
+            sanitise_filename(f"{session.name}_games") + ".csv", games_buffer.getvalue()
+        )
 
         for game in Game.objects.filter(session=session):
             settings_export_function = game.game_config().settings_to_csv_func
             if settings_export_function is not None:
                 settings_buffer = io.StringIO()
                 settings_export_function(settings_buffer, game)
-                zip_file.writestr(sanitise_filename(f'{session.name}_{game.name}_settings') + '.csv', settings_buffer.getvalue())
+                zip_file.writestr(
+                    sanitise_filename(f"{session.name}_{game.name}_settings") + ".csv",
+                    settings_buffer.getvalue(),
+                )
 
             answers_export_function = game.game_config().answer_to_csv_func
             if answers_export_function is not None:
                 answers_buffer = io.StringIO()
                 answers_export_function(answers_buffer, game)
-                zip_file.writestr(sanitise_filename(f'{session.name}_{game.name}_answers') + '.csv',
-                                  answers_buffer.getvalue())
+                zip_file.writestr(
+                    sanitise_filename(f"{session.name}_{game.name}_answers") + ".csv",
+                    answers_buffer.getvalue(),
+                )
 
             if game.needs_teams:
                 teams_buffer = io.StringIO()
                 team_to_csv(teams_buffer, game)
-                zip_file.writestr(sanitise_filename(f'{session.name}_{game.name}_teams') + '.csv', teams_buffer.getvalue())
+                zip_file.writestr(
+                    sanitise_filename(f"{session.name}_{game.name}_teams") + ".csv",
+                    teams_buffer.getvalue(),
+                )
 
     zip_buffer.seek(0)
-    response = HttpResponse(zip_buffer, content_type='application/zip')
+    response = HttpResponse(zip_buffer, content_type="application/zip")
     filename = sanitise_filename({session.name})
     response["Content-Disposition"] = f'attachment; filename="{filename}.zip"'
 
@@ -632,7 +660,12 @@ def session_admin_games(request, session_url_tag):
         if create_game_form.is_valid():
             games = session.games
             if games.exists():
-                ordering_priority = session.games.aggregate(Max('ordering_priority'))['ordering_priority__max'] + 1
+                ordering_priority = (
+                    session.games.aggregate(Max("ordering_priority"))[
+                        "ordering_priority__max"
+                    ]
+                    + 1
+                )
             else:
                 ordering_priority = 0
             new_game = Game.objects.create(
@@ -662,9 +695,13 @@ def session_admin_games(request, session_url_tag):
             context["new_game"] = new_game
 
             game_config = new_game.game_config()
-            num_games_of_type = session.games.filter(game_type=new_game.game_type).count() - 1
+            num_games_of_type = (
+                session.games.filter(game_type=new_game.game_type).count() - 1
+            )
             all_illustrations = game_config.illustration_paths
-            new_game.illustration_path = all_illustrations[num_games_of_type % len(all_illustrations)]
+            new_game.illustration_path = all_illustrations[
+                num_games_of_type % len(all_illustrations)
+            ]
             new_game.save()
             if game_config.setting_model is not None:
                 game_config.setting_model.objects.create(game=new_game)
@@ -675,6 +712,10 @@ def session_admin_games(request, session_url_tag):
         deleted_game = Game.objects.get(id=deleted_game_id)
         context["deleted_game_name"] = deleted_game.name
         deleted_game.delete()
+
+    if request.method == "POST" and "delete_all_games_form" in request.POST:
+        Game.objects.filter(session=session).delete()
+        context["all_games_deleted"] = True
 
     context["create_game_form"] = create_game_form
     context["games"] = Game.objects.filter(session=session)
@@ -726,6 +767,29 @@ def session_admin_players(request, session_url_tag):
                 context["player_creation_error"] = True
     context["add_player_form"] = add_player_form
 
+    # Random players form
+    random_players_form = RandomPlayersForm()
+    if request.method == "POST" and "random_players_form" in request.POST:
+        random_players_form = RandomPlayersForm(request.POST)
+        if random_players_form.is_valid():
+            num_players = random_players_form.cleaned_data["num_players"]
+
+            try:
+                out = StringIO()
+                params = {"stdout": out}
+                management.call_command(
+                    "generate_random_players",
+                    num_players,
+                    session=session.url_tag,
+                    **params,
+                )
+                context["random_players_log"] = out.getvalue()
+                random_players_form = RandomPlayersForm()
+            except Exception as e:
+                context["random_players_error"] = e.__repr__()
+                raise e
+    context["random_players_form"] = random_players_form
+
     # Import player CSV form
     import_player_csv_form = ImportCSVFileForm()
     if request.method == "POST" and "import_player_csv_form" in request.POST:
@@ -766,6 +830,10 @@ def session_admin_players(request, session_url_tag):
     if request.method == "POST" and "delete_all_players_form" in request.POST:
         Player.objects.filter(session=session, is_guest=False).delete()
         context["all_players_deleted"] = True
+
+    if request.method == "POST" and "delete_all_guests_form" in request.POST:
+        Player.objects.filter(session=session, is_guest=True).delete()
+        context["all_guests_deleted"] = True
 
     if is_session_super_admin(session, request.user):
         # Make admin form
@@ -900,6 +968,7 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 #    ADMIN GAME VIEWS
 # ======================
 
+
 @session_admin_decorator
 def session_admin_games_settings(request, session_url_tag, game_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
@@ -914,9 +983,7 @@ def session_admin_games_settings(request, session_url_tag, game_url_tag):
         context["answers_exist"] = answer_model.objects.filter(game=game).exists()
 
     # Modify game form
-    modify_game_form = CreateGameForm(
-        session=session, game=game, prefix=game.url_tag
-    )
+    modify_game_form = CreateGameForm(session=session, game=game, prefix=game.url_tag)
     modify_game_setting_form = None
     if game.game_config().setting_form is not None:
         setting_model = game.game_config().setting_model
@@ -941,16 +1008,22 @@ def session_admin_games_settings(request, session_url_tag, game_url_tag):
                 game.url_tag = modify_game_form.cleaned_data["url_tag"]
                 game.playable = modify_game_form.cleaned_data["playable"]
                 game.visible = modify_game_form.cleaned_data["visible"]
-                game.results_visible = modify_game_form.cleaned_data[
-                    "results_visible"
-                ]
+                game.results_visible = modify_game_form.cleaned_data["results_visible"]
                 game.needs_teams = modify_game_form.cleaned_data["needs_teams"]
                 game.description = modify_game_form.cleaned_data["description"]
-                game.illustration_path = modify_game_form.cleaned_data["illustration_path"]
-                game.ordering_priority = modify_game_form.cleaned_data["ordering_priority"]
-                game.run_management_after_submit = modify_game_form.cleaned_data["run_management_after_submit"]
+                game.illustration_path = modify_game_form.cleaned_data[
+                    "illustration_path"
+                ]
+                game.ordering_priority = modify_game_form.cleaned_data[
+                    "ordering_priority"
+                ]
+                game.run_management_after_submit = modify_game_form.cleaned_data[
+                    "run_management_after_submit"
+                ]
                 game.initial_view = modify_game_form.cleaned_data["initial_view"]
-                game.view_after_submit = modify_game_form.cleaned_data["view_after_submit"]
+                game.view_after_submit = modify_game_form.cleaned_data[
+                    "view_after_submit"
+                ]
                 game.save()
 
                 modify_game_form = CreateGameForm(
@@ -974,7 +1047,9 @@ def session_admin_games_settings(request, session_url_tag, game_url_tag):
     context["modify_game_form"] = modify_game_form
     context["modify_game_setting_form"] = modify_game_setting_form
 
-    context["export_settings_configured"] = game.game_config().settings_to_csv_func is not None
+    context["export_settings_configured"] = (
+        game.game_config().settings_to_csv_func is not None
+    )
 
     return render(request, "core/session_admin_games_settings.html", context)
 
@@ -1008,6 +1083,7 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
 
     answer_model = game.game_config().answer_model
     if answer_model is not None:
+        # Delete answer
         if request.method == "POST" and "delete_answer_form" in request.POST:
             deleted_answer_id = request.POST["remove_answer_id"]
             answer_to_delete = answer_model.objects.get(id=deleted_answer_id)
@@ -1015,6 +1091,38 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
             context["deleted_answer_player"] = answer_to_delete.player.display_name()
             answer_to_delete.delete()
 
+        # Delete all answers
+        if request.method == "POST" and "delete_all_answers_form" in request.POST:
+            answer_model.objects.filter(game=game).delete()
+            context["all_answers_deleted"] = True
+
+        # Random answers
+        if game.game_config().random_answers_func is not None:
+            random_answers_form = RandomAnswersForm()
+            if request.method == "POST" and "random_answers_form" in request.POST:
+                random_answers_form = RandomAnswersForm(request.POST)
+                if random_answers_form.is_valid():
+                    num_answers = random_answers_form.cleaned_data["num_answers"]
+                    run_management = random_answers_form.cleaned_data["run_management"]
+                    try:
+                        out = StringIO()
+                        params = {"stdout": out}
+                        management.call_command(
+                            "generate_random_answers",
+                            num_answers,
+                            session=session.url_tag,
+                            game=game.url_tag,
+                            run_management=run_management,
+                            **params,
+                        )
+                        context["random_answers_log"] = out.getvalue()
+                        random_answers_form = RandomAnswersForm()
+                    except Exception as e:
+                        context["random_answers_error"] = e.__repr__()
+                        raise e
+            context["random_answers_form"] = random_answers_form
+
+        # Name of the fields of the answer model
         answer_model_fields = game.game_config().answer_model_fields
         if answer_model_fields is None:
             omitted_fields = ("id", "game", "player")
@@ -1028,7 +1136,9 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
     else:
         context["no_answer_model"] = True
 
-    context["export_answers_configured"] = game.game_config().answer_to_csv_func is not None
+    context["export_answers_configured"] = (
+        game.game_config().answer_to_csv_func is not None
+    )
 
     return render(request, "core/session_admin_games_answers.html", context)
 
@@ -1058,15 +1168,19 @@ def session_admin_games_teams(request, session_url_tag, game_url_tag):
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
 
-    context["game"] = game
-    context["teams"] = Team.objects.filter(game=game)
-
     if request.method == "POST" and "delete_team_form" in request.POST:
         deleted_team_id = request.POST["remove_team_id"]
         team_to_delete = Team.objects.get(id=deleted_team_id)
         context["deleted_team_id"] = deleted_team_id
         context["deleted_team_name"] = team_to_delete.name
         team_to_delete.delete()
+
+    if request.method == "POST" and "delete_all_teams_form" in request.POST:
+        Team.objects.filter(game=game).delete()
+        context["all_teams_deleted"] = True
+
+    context["game"] = game
+    context["teams"] = Team.objects.filter(game=game)
 
     return render(request, "core/session_admin_games_teams.html", context)
 

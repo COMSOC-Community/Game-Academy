@@ -103,9 +103,11 @@ class SubmitAnswerForm(forms.Form):
                 for s in forbidden_strategies:
                     m = MooreMachine()
                     m.parse(s)
-                    m.initial_state = s[0].split(':')[0].strip()
+                    m.initial_state = s[0].split(":")[0].strip()
                     if m.is_isomorphic(self.moore_machine):
-                        raise forms.ValidationError("The admin of this session has forbidden this "
-                                                    "strategy, please submit another one.")
+                        raise forms.ValidationError(
+                            "The admin of this session has forbidden this "
+                            "strategy, please submit another one."
+                        )
 
         return cleaned_data

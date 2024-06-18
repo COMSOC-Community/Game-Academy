@@ -78,6 +78,9 @@ class Command(BaseCommand):
             ),
         }
 
+        Score.objects.filter(answer__game=game).delete()
+
+        all_scores = []
         total_scores = {answer: 0 for answer, _ in ans_automatas}
         for i in range(len(ans_automatas)):
             answer, ans_automata = ans_automatas[i]
@@ -97,24 +100,25 @@ class Command(BaseCommand):
                         score2 += s2
                     total_scores[answer] += score1
                     total_scores[opponent] += score2
-                    Score.objects.update_or_create(
-                        answer=answer,
-                        opponent=opponent,
-                        number_round=round_number,
-                        defaults={
-                            "answer_avg_score": score1 / round_number,
-                            "opp_avg_score": score2 / round_number,
-                        },
+                    all_scores.append(
+                        Score(
+                            answer=answer,
+                            opponent=opponent,
+                            number_round=round_number,
+                            answer_avg_score=score1 / round_number,
+                            opp_avg_score=score2 / round_number,
+                        )
                     )
-                    Score.objects.update_or_create(
-                        answer=opponent,
-                        opponent=answer,
-                        number_round=round_number,
-                        defaults={
-                            "answer_avg_score": score2 / round_number,
-                            "opp_avg_score": score1 / round_number,
-                        },
+                    all_scores.append(
+                        Score(
+                            answer=opponent,
+                            opponent=answer,
+                            number_round=round_number,
+                            answer_avg_score=score2 / round_number,
+                            opp_avg_score=score1 / round_number,
+                        )
                     )
+        Score.objects.bulk_create(all_scores)
         best_answer = None
         best_score = None
         for answer, score in total_scores.items():

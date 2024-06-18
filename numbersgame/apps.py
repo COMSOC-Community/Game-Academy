@@ -19,7 +19,13 @@ class NumbersGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands="numbersgame_results",
             answer_model_fields=("answer", "motivation"),
-            illustration_paths=("numbersgame/img/NumbersGame1.png", "numbersgame/img/NumbersGame2.png", "numbersgame/img/NumbersGame3.png", "numbersgame/img/NumbersGame4.png", "numbersgame/img/NumbersGame5.png"),
+            illustration_paths=(
+                "numbersgame/img/NumbersGame1.png",
+                "numbersgame/img/NumbersGame2.png",
+                "numbersgame/img/NumbersGame3.png",
+                "numbersgame/img/NumbersGame4.png",
+                "numbersgame/img/NumbersGame5.png",
+            ),
         )
 
     def ready(self):
@@ -32,5 +38,9 @@ class NumbersGameConfig(GameConfig):
 
         self.answer_to_csv_func = answers_to_csv
         self.settings_to_csv_func = settings_to_csv
+
+        from numbersgame.random import create_random_answers
+
+        self.random_answers_func = create_random_answers
 
         super(NumbersGameConfig, self).ready()

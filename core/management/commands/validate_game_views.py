@@ -6,12 +6,18 @@ from core.models import Game
 
 
 class Command(BaseCommand):
-    help = "Checks whether the initial_view and view_after_submit parameter of a game are valid. " \
-           "Can fix them if needed."
+    help = (
+        "Checks whether the initial_view and view_after_submit parameter of a game are valid. "
+        "Can fix them if needed."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--session_url_tag", type=str, help="Session URL tag")
-        parser.add_argument("--auto-fix", action='store_true', help="If used, values are fixed automatically.")
+        parser.add_argument(
+            "--auto-fix",
+            action="store_true",
+            help="If used, values are fixed automatically.",
+        )
 
     def handle(self, *args, **options):
         sys.stdout.write("Checking view members of the games...")
@@ -30,11 +36,15 @@ class Command(BaseCommand):
                 else:
                     home_view = all_views[0]
             if game.initial_view not in all_views:
-                self.stderr.write(f"For the game {game.name} in session {game.session.name}, the initial view is not valid")
+                self.stderr.write(
+                    f"For the game {game.name} in session {game.session.name}, the initial view is not valid"
+                )
                 if auto_fix:
                     game.initial_view = home_view
             if game.view_after_submit not in all_views:
-                self.stderr.write(f"For the game {game.name} in session {game.session.name}, the view after submit is not valid")
+                self.stderr.write(
+                    f"For the game {game.name} in session {game.session.name}, the view after submit is not valid"
+                )
                 if auto_fix:
                     game.view_after_submit = home_view
         if auto_fix:

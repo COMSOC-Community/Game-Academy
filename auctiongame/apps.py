@@ -19,11 +19,13 @@ class AuctionGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands="auct_generategraph",
             answer_model_fields=("auction_id", "bid", "utility", "motivation"),
-            illustration_paths=("auctiongame/img/AuctionGame1.png", "auctiongame/img/AuctionGame2.png"),
+            illustration_paths=(
+                "auctiongame/img/AuctionGame1.png",
+                "auctiongame/img/AuctionGame2.png",
+            ),
         )
 
     def ready(self):
-
         from auctiongame.models import Answer
 
         # from auctiongame.forms import SettingForm
@@ -32,5 +34,9 @@ class AuctionGameConfig(GameConfig):
         from auctiongame.exportdata import answers_to_csv
 
         self.answer_to_csv_func = answers_to_csv
+
+        from auctiongame.random import create_random_answers
+
+        self.random_answers_func = create_random_answers
 
         super(AuctionGameConfig, self).ready()

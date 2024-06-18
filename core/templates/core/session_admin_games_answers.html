@@ -37,6 +37,29 @@
         {% endif %}
     </section>
 
+    {% if random_answers_form %}
+        <section id="random_answers">
+            <h2>Populate with Random Answers</h2>
+
+            <p>You can use the following form to add random answers to this game.</p>
+
+            {% if random_answers_error %}
+                <div class="form-error-message">
+                    <p>An error occurred while generating random answers: {{ random_answers_error }}.</p>
+                </div>
+            {% endif %}
+            {% if random_answers_log %}
+                <div class="form-success-message">
+                    <p style="margin-bottom: 20px;">Random players successfully generated. Here is the log.</p>
+                    {{ random_answers_log|linebreaks }}
+                </div>
+            {% endif %}
+            <form action="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}#random_answers" method="post">
+                {% include 'include/form_table_template.html' with form=random_answers_form form_type='random_answers_form' submit_button_label='Generate Random Answers' %}
+            </form>
+        </section>
+    {% endif %}
+
     <section id="answers">
         <h2>Manage Answers for Game {{ game.name }}</h2>
 
@@ -46,12 +69,17 @@
                 administrator if that is not normal.
             </p>
         {% else %}
-            {% if deleted_answer_id %}
+            {% if deleted_answer_id or all_answers_deleted %}
                 <div class="form-success-message">
-                    <p>
-                        The answer submitted by {{ deleted_answer_player }} (id was
-                        {{ deleted_answer_id }}) has been successfully deleted.
-                    </p>
+                    {% if deleted_answer_id %}
+                        <p>
+                            The answer submitted by {{ deleted_answer_player }} (id was
+                            {{ deleted_answer_id }}) has been successfully deleted.
+                        </p>
+                    {% endif %}
+                    {% if all_answers_deleted %}
+                        <p>All the answers have been deleted.</p>
+                    {% endif %}
 
                     {% if game.game_config.management_commands %}
                         <p>
@@ -69,6 +97,7 @@
                     {% endif %}
                 </div>
             {% endif %}
+
             {% if answers %}
                 <div class="filtered-collection-wrapper">
                     <div class="filtered-collection-filter">
@@ -106,6 +135,13 @@
                         </table>
                     </div>
                 </div>
+
+                <form action="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}#answers" method="post">
+                    {% csrf_token %}
+                    <p class="center-align" style="margin-top: 20px">
+                        <input class="button color-error" type="submit" name="delete_all_answers_form" value="Delete All Answers" onclick="return confirm('Deleting all the answers is irreversible.')"/>
+                    </p>
+                </form>
             {% else %}
                 <p>No answer has been submitted to this game.</p>
             {% endif %}

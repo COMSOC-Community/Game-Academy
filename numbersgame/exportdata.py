@@ -13,19 +13,21 @@ def answers_to_csv(writer, game):
             "motivation",
             "gap",
             "winner",
-            "submission_time"
+            "submission_time",
         ]
     )
     for answer in Answer.objects.filter(game=game):
-        writer.writerow([
-            answer.player.name,
-            answer.player.is_team_player,
-            answer.answer,
-            answer.motivation,
-            answer.gap,
-            answer.winner,
-            answer.submission_time
-        ])
+        writer.writerow(
+            [
+                answer.player.name,
+                answer.player.is_team_player,
+                answer.answer,
+                answer.motivation,
+                answer.gap,
+                answer.winner,
+                answer.submission_time,
+            ]
+        )
 
 
 def settings_to_csv(writer, game):
@@ -45,10 +47,12 @@ def settings_to_csv(writer, game):
                 "histogram_bin_size",
             ]
         )
-        writer.writerow([
-            setting.lower_bound,
-            setting.upper_bound,
-            setting.factor,
-            setting.factor_display,
-            setting.histogram_bin_size,
-        ])
+        writer.writerow(
+            [
+                setting.lower_bound,
+                setting.upper_bound,
+                setting.factor,
+                setting.factor_display,
+                setting.histogram_bin_size,
+            ]
+        )

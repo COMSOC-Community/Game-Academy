@@ -62,6 +62,12 @@
             </div>
         {% endif %}
 
+        {% if all_games_deleted %}
+            <div class="form-success-message">
+                <p>All the games have been deleted from this session.</p>
+            </div>
+        {% endif %}
+
         {% if games %}
 
             <table class="lined-table center-margin">
@@ -91,6 +97,13 @@
                     </tr>
                 {% endfor %}
             </table>
+
+            <form action="{% url 'core:session_admin_games' session.url_tag %}#games" method="post">
+                {% csrf_token %}
+                <p class="center-align" style="margin-top: 20px">
+                    <input class="button color-error" type="submit" name="delete_all_games_form" value="Delete All Games" onclick="return confirm('Deleting all the games is irreversible.')"/>
+                </p>
+            </form>
 
         {% else %}
             <p>There are no games yet in this session.</p>

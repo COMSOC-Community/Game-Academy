@@ -32,9 +32,9 @@ class Setting(models.Model):
         blank=True,
         null=True,
         help_text="Specify here a list of forbidden strategies. Specify the strategies by using "
-                  "the same syntax as the one used to submit an answer. Separate strategies by "
-                  "a line starting with '---'. Forbidden strategies (and isomorphic ones) cannot "
-                  "be submitted."
+        "the same syntax as the one used to submit an answer. Separate strategies by "
+        "a line starting with '---'. Forbidden strategies (and isomorphic ones) cannot "
+        "be submitted.",
     )
 
 

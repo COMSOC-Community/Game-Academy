@@ -22,15 +22,14 @@ class Command(BaseCommand):
                 "ERROR: you need to give the URL tag of a session with the --session argument"
             )
             return
-        session = Session.objects.filter(url_tag=options["session"])
-        if not session.exists():
+        session = Session.objects.filter(url_tag=options["session"]).first()
+        if not session:
             self.stderr.write(
                 "ERROR: no session with URL tag {} has been found".format(
                     options["session"]
                 )
             )
             return
-        session = session.first()
 
         if not options["game"]:
             self.stderr.write(
@@ -39,13 +38,12 @@ class Command(BaseCommand):
             return
         game = Game.objects.filter(
             session=session, url_tag=options["game"], game_type=NAME
-        )
-        if not game.exists():
+        ).first()
+        if not game:
             self.stderr.write(
                 "ERROR: no game with URL tag {} has been found".format(options["game"])
             )
             return
-        game = game.first()
 
         try:
             game.result_auct

@@ -18,8 +18,14 @@ class GoodBadGameConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands=["goodbad_computeresults"],
-            answer_model_fields=("score", ),
-            illustration_paths=("goodbad/img/goodbad1.png", "goodbad/img/goodbad2.png", "goodbad/img/goodbad3.png", "goodbad/img/goodbad4.png"),
+            update_management_commands=["goodbad_updateresults"],
+            answer_model_fields=("score",),
+            illustration_paths=(
+                "goodbad/img/goodbad1.png",
+                "goodbad/img/goodbad2.png",
+                "goodbad/img/goodbad3.png",
+                "goodbad/img/goodbad4.png",
+            ),
         )
 
     def ready(self):
@@ -32,5 +38,9 @@ class GoodBadGameConfig(GameConfig):
 
         self.answer_to_csv_func = answers_to_csv
         self.settings_to_csv_func = settings_to_csv
+
+        from goodbadgame.random import create_random_answers
+
+        self.random_answers_func = create_random_answers
 
         super(GoodBadGameConfig, self).ready()

@@ -6,12 +6,14 @@ from goodbadgame.models import Answer, Result, QuestionResult
 
 
 class Command(BaseCommand):
-    help = "Updates the result data for the good/bad game based on the latest submission"
+    help = (
+        "Updates the result data for the good/bad game based on the latest submission"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)
         parser.add_argument("--game", type=str, required=True)
-        parser.add_argument('--player', type=str, required=True)
+        parser.add_argument("--player", type=str, required=True)
 
     def handle(self, *args, **options):
         if not options["session"]:
@@ -50,9 +52,11 @@ class Command(BaseCommand):
         except Result.DoesNotExist:
             game_result = Result.objects.create(game=game)
 
-        player = Player.objects.filter(name=options['player'], session=session)
+        player = Player.objects.filter(name=options["player"], session=session)
         if not player.exists():
-            self.stderr.write('ERROR: no player with name {} has been found'.format(options['player']))
+            self.stderr.write(
+                "ERROR: no player with name {} has been found".format(options["player"])
+            )
             return
         player = player.first()
 
@@ -68,20 +72,25 @@ class Command(BaseCommand):
         player_num_ans = player_num_correct + player_num_wrong
         if player_num_ans > 0:
             player_acc = player_num_correct / player_num_ans
-            Answer.objects.update_or_create(game=game, player=player,
-                                            defaults={'score': player_num_correct,
-                                                      'accuracy': player_acc})
+            Answer.objects.update_or_create(
+                game=game,
+                player=player,
+                defaults={"score": player_num_correct, "accuracy": player_acc},
+            )
 
             # Updating average accuracy
-            num_answers = Answer.objects.filter(game=game).exclude(score__isnull=True).count()
+            num_answers = (
+                Answer.objects.filter(game=game).exclude(score__isnull=True).count()
+            )
             new_avg_acc = old_avg_acc + (player_acc - old_avg_acc) / num_answers
             game_result.average_accuracy = new_avg_acc
 
             # Updating question result
             crowd_improvement = 0
             for question_answer in player_question_answers.all():
-                question_result, _ = QuestionResult.objects.get_or_create(result=game_result,
-                                                                          question=question_answer.question)
+                question_result, _ = QuestionResult.objects.get_or_create(
+                    result=game_result, question=question_answer.question
+                )
                 # If it is the first answer we initialise
                 if question_result.graph_js_data is None:
                     if question_answer.is_correct:
@@ -111,8 +120,9 @@ class Command(BaseCommand):
                     question_num_answers = question_num_correct + question_num_wrong
                     question_accuracy = question_num_correct / question_num_answers
                     question_result.accuracy = question_accuracy
-                    question_result.graph_js_data += f"['{question_num_answers}', " \
-                                                     f"'{question_accuracy}'],\n"
+                    question_result.graph_js_data += (
+                        f"['{question_num_answers}', " f"'{question_accuracy}'],\n"
+                    )
                 question_result.save()
 
             # Updating crowd accuracy
@@ -125,9 +135,11 @@ class Command(BaseCommand):
                 old_accuracy_js_data = ""
             else:
                 old_accuracy_js_data = game_result.accuracy_js_data
-            old_accuracy_js_data += f"['{num_answers}', " \
-                                    f"'{game_num_correct / game_num_answers}', " \
-                                    f"'{new_avg_acc}'],\n"
+            old_accuracy_js_data += (
+                f"['{num_answers}', "
+                f"'{game_num_correct / game_num_answers}', "
+                f"'{new_avg_acc}'],\n"
+            )
             game_result.accuracy_js_data = old_accuracy_js_data
             game_result.crowd_num_correct = game_num_correct
             game_result.crowd_accuracy = game_num_correct / game_num_answers

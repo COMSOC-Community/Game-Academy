@@ -33,8 +33,12 @@ class SubmitAnswer(GameSubmitAnswerView):
                 self.context["answer"] = answer
 
             if not self.context["answer"].bid:
-                self.context["submit_answer_form"] = SubmitAnswerForm(game=self.game, player=self.context["submitting_player"])
-        return render(request, os.path.join("auctiongame", "submit_answer.html"), self.context)
+                self.context["submit_answer_form"] = SubmitAnswerForm(
+                    game=self.game, player=self.context["submitting_player"]
+                )
+        return render(
+            request, os.path.join("auctiongame", "submit_answer.html"), self.context
+        )
 
     def post_validated_form(self, request):
         submit_answer_form = SubmitAnswerForm(
@@ -48,9 +52,7 @@ class SubmitAnswer(GameSubmitAnswerView):
     def post_code_if_form_valid(self, request, form_object):
         answer = self.context["answer"]
         answer.bid = form_object.cleaned_data["bid"]
-        answer.utility = (
-                10 + answer.auction_id - form_object.cleaned_data["bid"]
-        )
+        answer.utility = 10 + answer.auction_id - form_object.cleaned_data["bid"]
         answer.motivation = form_object.cleaned_data["motivation"]
         answer.save()
         self.context["submitted_answer"] = answer
@@ -59,11 +61,12 @@ class SubmitAnswer(GameSubmitAnswerView):
         self.context["submit_answer_form"] = form_object
 
     def post_code_render(self, request):
-        return render(request, os.path.join("auctiongame", "submit_answer.html"), self.context)
+        return render(
+            request, os.path.join("auctiongame", "submit_answer.html"), self.context
+        )
 
 
 class Results(GameResultsView):
-
     def get(self, request, session_url_tag, game_url_tag):
         context = self.context
 
@@ -98,5 +101,3 @@ class Results(GameResultsView):
             global_winners_formatted = ", ".join(global_winners_formatted)
             context["global_winners_formatted"] = global_winners_formatted
         return render(request, os.path.join("auctiongame", "results.html"), context)
-
-

@@ -33,7 +33,13 @@ class Session(models.Model):
     super_admins = models.ManyToManyField(
         CustomUser, related_name="super_administrated_sessions"
     )
-    game_after_logging = models.OneToOneField("Game", on_delete=models.CASCADE, related_name="entry_point_of", null=True, blank=True)
+    game_after_logging = models.OneToOneField(
+        "Game",
+        on_delete=models.CASCADE,
+        related_name="entry_point_of",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ["url_tag"]
@@ -74,7 +80,7 @@ class Player(models.Model):
 
 
 @receiver(post_delete, sender=Player)
-def signal_function_name(sender, instance, using, **kwargs):
+def delete_user_after_player(sender, instance, using, **kwargs):
     if not instance.is_team_player:
         user = instance.user
         if user.is_player:
@@ -96,9 +102,11 @@ class Game(models.Model):
     needs_teams = models.BooleanField(default=False)
     description = models.TextField(blank=True, null=True)
     illustration_path = models.CharField(max_length=100, blank=True, null=True)
-    ordering_priority = models.IntegerField(help_text="The value used to order the games, the "
-                                                      "higher values appear first.",
-                                            default=0)
+    ordering_priority = models.IntegerField(
+        help_text="The value used to order the games, the "
+        "higher values appear first.",
+        default=0,
+    )
     run_management_after_submit = models.BooleanField(blank=True, null=True)
     initial_view = models.CharField(max_length=50, blank=True, null=True)
     view_after_submit = models.CharField(max_length=50, blank=True, null=True)
@@ -130,7 +138,9 @@ class Game(models.Model):
         return self.inner_game_config
 
     def all_url_names(self):
-        urls = getattr(importlib.import_module(f'{self.game_config().name}.urls'), "urlpatterns")
+        urls = getattr(
+            importlib.import_module(f"{self.game_config().name}.urls"), "urlpatterns"
+        )
         return tuple(url.name for url in urls)
 
 
@@ -151,3 +161,8 @@ class Team(models.Model):
 
     def __str__(self):
         return "[{}] {} - {}".format(self.game.session, self.game.name, self.name)
+
+
+@receiver(post_delete, sender=Team)
+def delete_team_player_after_team(sender, instance, using, **kwargs):
+    instance.team_player.delete()

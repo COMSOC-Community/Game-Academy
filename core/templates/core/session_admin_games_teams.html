@@ -23,7 +23,17 @@
         {% include "include/game_admin_navigation.html" %}
     </section>
 
-    {% if game.needs_teams%}
+    {% if game.needs_teams or teams %}
+
+        {% if not game.needs_teams %}
+            <section class="warning-section">
+                <p>
+                    This game has team but the parameters do not require players to play in teams.
+                    This is inconsistent, you probably changed the settings after some teams had
+                    already been created.
+                </p>
+            </section>
+        {% endif %}
 
         <section id="export">
             <h2>Export Teams</h2>
@@ -38,12 +48,17 @@
         <section id="teams">
             <h2>Manage Teams for Game {{ game.name }}</h2>
 
-            {% if deleted_team_id %}
+            {% if deleted_team_id or all_teams_deleted%}
                 <div class="form-success-message">
-                    <p>
-                        The team {{ deleted_team_name }} (id was
-                        {{ deleted_team_id }}) has been successfully deleted.
-                    </p>
+                    {% if deleted_team_id %}
+                        <p>
+                            The team {{ deleted_team_name }} (id was
+                            {{ deleted_team_id }}) has been successfully deleted.
+                        </p>
+                    {% endif %}
+                    {% if all_teams_deleted %}
+                        <p>All the teams have been deleted.</p>
+                    {% endif %}
 
                     {% if game.game_config.management_commands %}
                         <p>
@@ -95,6 +110,13 @@
                         </table>
                     </div>
                 </div>
+
+                <form action="{% url 'core:session_admin_games_teams' session.url_tag game.url_tag %}#teams" method="post">
+                    {% csrf_token %}
+                    <p class="center-align" style="margin-top: 20px">
+                        <input class="button color-error" type="submit" name="delete_all_teams_form" value="Delete All Teams" onclick="return confirm('Deleting all the teams is irreversible.')"/>
+                    </p>
+                </form>
             {% else %}
                 <p>No teams have been created for this game yet.</p>
             {% endif %}

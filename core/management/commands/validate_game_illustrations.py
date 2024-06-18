@@ -11,7 +11,11 @@ class Command(BaseCommand):
     help = "Checks whether the illustration paths in the database exist. Can fix them if needed."
 
     def add_arguments(self, parser):
-        parser.add_argument("--auto-fix", action='store_true', help="If used, illustration paths are fixed automatically.")
+        parser.add_argument(
+            "--auto-fix",
+            action="store_true",
+            help="If used, illustration paths are fixed automatically.",
+        )
 
     def handle(self, *args, **options):
         sys.stdout.write("Checking illustration paths of the games...")
@@ -22,7 +26,9 @@ class Command(BaseCommand):
             if illustration_path is not None:
                 found = finders.find(illustration_path)
                 if found is None:
-                    self.stderr.write(f"For the game {game} of type {game.game_type}, the path has not been found in the static folder.")
+                    self.stderr.write(
+                        f"For the game {game} of type {game.game_type}, the path has not been found in the static folder."
+                    )
                     if auto_fix:
                         potential_paths = []
                         for potential_path in game.game_config().illustration_paths:
@@ -30,14 +36,16 @@ class Command(BaseCommand):
                             if found_potential is not None:
                                 potential_paths.append(potential_path)
                         if len(potential_paths) == 0:
-                            self.stderr.write(f"None of the path in the game app for {game} of type {game.game_type} have been found in the static folder.")
+                            self.stderr.write(
+                                f"None of the path in the game app for {game} of type {game.game_type} have been found in the static folder."
+                            )
                             break
-                        path_number = re.findall(r'\d+', illustration_path)
-                        new_illustration_path = ''
+                        path_number = re.findall(r"\d+", illustration_path)
+                        new_illustration_path = ""
                         if path_number:
                             path_number = path_number[-1]
                             for potential_path in potential_paths:
-                                potential_number = re.findall(r'\d+', potential_path)
+                                potential_number = re.findall(r"\d+", potential_path)
                                 if potential_number:
                                     if path_number == potential_number[-1]:
                                         new_illustration_path = potential_path
@@ -45,7 +53,9 @@ class Command(BaseCommand):
                         if not new_illustration_path:
                             new_illustration_path = potential_paths[0]
                         game.illustration_path = new_illustration_path
-                        self.stderr.write(f"\tWe changed it from {illustration_path} to {new_illustration_path}")
+                        self.stderr.write(
+                            f"\tWe changed it from {illustration_path} to {new_illustration_path}"
+                        )
         if auto_fix:
             Game.objects.bulk_update(all_games, ["illustration_path"])
         sys.stdout.write("...Finished.")

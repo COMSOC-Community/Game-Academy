@@ -138,7 +138,9 @@ class Command(BaseCommand):
                     "{{x: '{}', y: '{}', heat: {}}},".format(
                         key[1], key[0], float_formatter(value, num_digits=4)
                     )
-                    for key, value in sorted(score_heatmap_data.items(), key=lambda x: x[0])
+                    for key, value in sorted(
+                        score_heatmap_data.items(), key=lambda x: x[0]
+                    )
                 ]
             )
             game.result_centi.save()

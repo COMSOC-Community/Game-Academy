@@ -12,16 +12,12 @@ def answers_to_csv(writer, game):
             "question_title",
             "selected_alt",
             "is_correct",
-            "submission_time"
+            "submission_time",
         ]
     )
     for answer in Answer.objects.filter(game=game):
         for q in answer.questions.all():
-            row = [
-                answer.player.name,
-                answer.player.is_team_player,
-                q.title
-            ]
+            row = [answer.player.name, answer.player.is_team_player, q.title]
             question_answer = answer.question_answers.filter(question=q).first()
             if question_answer is not None:
                 row.append(question_answer.selected_alt)
@@ -44,7 +40,8 @@ def settings_to_csv(writer, game):
         writer = csv.writer(writer)
         questions = setting.questions.all()
         writer.writerow(
-            ["num_displayed_questions"] + [f"question_{k}" for k in range(questions.count())]
+            ["num_displayed_questions"]
+            + [f"question_{k}" for k in range(questions.count())]
         )
         writer.writerow(
             [setting.num_displayed_questions] + [q.title for q in questions]

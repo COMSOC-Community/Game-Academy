@@ -18,4 +18,14 @@
     <div class="admin-nav-item">
         <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}">Answers</a>
     </div>
+    {% if game.game_config.management_commands %}
+        {% with "core:"|add:game.game_config.url_tag|add:"_run_management" as url_name %}
+            <div class="admin-nav-item">
+                <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
+                    Run management commands
+                    <span class="info-span" title="Management commands usually perform computations once all the answers have been submitted (determining the winner, preparing the graphs, etc...).">&#9432;</span>
+                </a>
+            </div>
+        {% endwith %}
+    {% endif %}
 </div>

@@ -15,4 +15,4 @@ def float_formatter(value, num_digits=3):
 
 
 def sanitise_filename(s):
-    return "".join(c for c in s if re.match(r'\w', c)).rstrip()
+    return "".join(c for c in s if re.match(r"\w", c)).rstrip()

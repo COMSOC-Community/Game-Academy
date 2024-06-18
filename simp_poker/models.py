@@ -24,23 +24,25 @@ class Answer(models.Model):
     round_robin_with_opt_position = models.IntegerField(null=True, blank=True)
     score_against_optimum = models.FloatField(null=True, blank=True, default=0)
     winner_against_optimum = models.BooleanField(null=True, default=False)
-    best_response = models.CharField(max_length=100, null=True, blank=True, default='')
+    best_response = models.CharField(max_length=100, null=True, blank=True, default="")
     score_against_best_response = models.FloatField(null=True, blank=True, default=0)
     submission_time = models.DateTimeField(auto_now=True)
 
     @property
     def probabilities_as_tuple(self):
-        return f"{float_formatter(self.prob_p1_king, num_digits=5)}, " \
-               f"{float_formatter(self.prob_p1_queen, num_digits=5)}, " \
-               f"{float_formatter(self.prob_p1_jack, num_digits=5)}, " \
-               f"{float_formatter(self.prob_p2_king, num_digits=5)}, " \
-               f"{float_formatter(self.prob_p2_queen, num_digits=5)}, " \
-               f"{float_formatter(self.prob_p2_jack, num_digits=5)}"
+        return (
+            f"{float_formatter(self.prob_p1_king, num_digits=5)}, "
+            f"{float_formatter(self.prob_p1_queen, num_digits=5)}, "
+            f"{float_formatter(self.prob_p1_jack, num_digits=5)}, "
+            f"{float_formatter(self.prob_p2_king, num_digits=5)}, "
+            f"{float_formatter(self.prob_p2_queen, num_digits=5)}, "
+            f"{float_formatter(self.prob_p2_jack, num_digits=5)}"
+        )
 
     @property
     def best_response_as_answer(self):
         if self.best_response:
-            split_best_response = self.best_response.split(',')
+            split_best_response = self.best_response.split(",")
             return Answer(
                 game=self.game,
                 player=self.player,
@@ -68,13 +70,15 @@ class Result(models.Model):
     game = models.OneToOneField(
         Game, on_delete=models.CASCADE, related_name="simp_poker_res"
     )
-    optimal_strategy_round_robin_score = models.FloatField(null=True, blank=True, default=0)
+    optimal_strategy_round_robin_score = models.FloatField(
+        null=True, blank=True, default=0
+    )
     optimal_strategy_round_robin_position = models.IntegerField(null=True, blank=True)
     global_best_response = models.CharField(max_length=100, null=True, blank=True)
     global_best_response_rr_score = models.FloatField(null=True, blank=True, default=0)
 
     def global_best_response_as_answer(self):
-        split_best_response = self.global_best_response.split(',')
+        split_best_response = self.global_best_response.split(",")
         return Answer(
             game=self.game,
             player=self.game.session.players.first(),

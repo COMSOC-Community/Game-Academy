@@ -19,18 +19,20 @@ def session_to_csv(writer, session):
             "game_after_logging",
         ]
     )
-    writer.writerow([
-        session.url_tag,
-        session.name,
-        session.long_name,
-        session.show_create_account,
-        session.show_guest_login,
-        session.show_user_login,
-        session.visible,
-        ";".join(a.username for a in session.admins.all()),
-        ";".join(a.username for a in session.super_admins.all()),
-        session.game_after_logging
-    ])
+    writer.writerow(
+        [
+            session.url_tag,
+            session.name,
+            session.long_name,
+            session.show_create_account,
+            session.show_guest_login,
+            session.show_user_login,
+            session.visible,
+            ";".join(a.username for a in session.admins.all()),
+            ";".join(a.username for a in session.super_admins.all()),
+            session.game_after_logging,
+        ]
+    )
 
 
 def team_to_csv(writer, game):
@@ -46,12 +48,7 @@ def team_to_csv(writer, game):
     for team in Team.objects.filter(game=game):
         for player in team.players.all():
             writer.writerow(
-                [
-                    team.name,
-                    team.team_player.name,
-                    player.name,
-                    player == team.creator
-                ]
+                [team.name, team.team_player.name, player.name, player == team.creator]
             )
 
 
@@ -65,13 +62,7 @@ def player_to_csv(writer, session):
         ]
     )
     for p in Player.objects.filter(session=session):
-        writer.writerow(
-            [
-                p.name,
-                p.is_guest,
-                p.is_team_player
-            ]
-        )
+        writer.writerow([p.name, p.is_guest, p.is_team_player])
 
 
 def games_to_csv(writer, session):
@@ -106,6 +97,6 @@ def games_to_csv(writer, session):
                 g.ordering_priority,
                 g.run_management_after_submit,
                 g.initial_view,
-                g.view_after_submit
+                g.view_after_submit,
             ]
         )

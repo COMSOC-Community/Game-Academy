@@ -4,8 +4,11 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 
 from core.models import Session, Game
-from core.views import base_context_initialiser, session_context_initialiser, \
-    game_context_initialiser
+from core.views import (
+    base_context_initialiser,
+    session_context_initialiser,
+    game_context_initialiser,
+)
 
 
 class GameView(View):
@@ -17,34 +20,36 @@ class GameView(View):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        session_url_tag = kwargs.get('session_url_tag', None)
+        session_url_tag = kwargs.get("session_url_tag", None)
         if session_url_tag is None:
-            raise ValueError("The game view did not receive a session_url_tag parameter, that is weird...")
-        game_url_tag = kwargs.get('game_url_tag', None)
+            raise ValueError(
+                "The game view did not receive a session_url_tag parameter, that is weird..."
+            )
+        game_url_tag = kwargs.get("game_url_tag", None)
         if game_url_tag is None:
-            raise ValueError("The game view did not receive a game_url_tag parameter, that is weird...")
+            raise ValueError(
+                "The game view did not receive a game_url_tag parameter, that is weird..."
+            )
         session = get_object_or_404(Session, url_tag=session_url_tag)
-        game = get_object_or_404(
-            Game, session=session, url_tag=game_url_tag
-        )
+        game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
         context = base_context_initialiser(request)
         session_context_initialiser(request, session, context)
-        game_context_initialiser(request, session, game, game.game_config().answer_model, context)
+        game_context_initialiser(
+            request, session, game, game.game_config().answer_model, context
+        )
         self.session = session
         self.game = game
         self.context = context
 
 
 class GameIndexView(GameView):
-
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.context["game_nav_display_home"] = False
 
 
 class GameSubmitAnswerView(GameView):
-
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.context["game_nav_display_answer"] = False
@@ -79,11 +84,13 @@ class GameSubmitAnswerView(GameView):
             self.post_code_if_form_invalid(request, form_object)
         return self.post_code_render(request)
 
-class GameResultsView(GameView):
 
+class GameResultsView(GameView):
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.context["game_nav_display_result"] = False
 
         if not self.game.results_visible and not self.context["user_is_session_admin"]:
-            raise Http404("The global_results are not visible and the user is not an admin.")
+            raise Http404(
+                "The global_results are not visible and the user is not an admin."
+            )

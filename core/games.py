@@ -6,6 +6,7 @@ from django.apps import AppConfig
 from django.contrib.staticfiles import finders
 from django.core.management import get_commands
 from django.db.models.base import ModelBase
+from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor
 from django.forms.models import ModelFormMetaclass
 
 from core.constants import FORBIDDEN_APP_URL_TAGS
@@ -26,6 +27,7 @@ class GameConfig(AppConfig):
         answer_model=None,
         answer_model_fields=None,
         answer_to_csv_func=None,
+        random_answers_func=None,
         settings_to_csv_func=None,
         home_view=None,
         management_commands=None,
@@ -57,15 +59,18 @@ class GameConfig(AppConfig):
                 )
         elif answer_model_fields is not None:
             raise TypeError(
-                    "The answer_model_fields parameter of a GameConfig needs to be a collection of "
-                    "string."
+                "The answer_model_fields parameter of a GameConfig needs to be a collection of "
+                "string."
             )
         self.answer_model_fields = answer_model_fields
         self.answer_to_csv_func = answer_to_csv_func
+        self.random_answers_func = random_answers_func
         self.settings_to_csv_func = settings_to_csv_func
 
         if home_view is not None and not isinstance(home_view, str):
-            raise TypeError("The home_view parameter of a GameConfig needs to be a string.")
+            raise TypeError(
+                "The home_view parameter of a GameConfig needs to be a string."
+            )
         self.home_view = home_view
 
         # Management commands
@@ -109,8 +114,8 @@ class GameConfig(AppConfig):
                 )
         elif illustration_paths is not None:
             raise TypeError(
-                    "The illustration_paths parameter of a GameConfig needs to be a collection of "
-                    "string."
+                "The illustration_paths parameter of a GameConfig needs to be a collection of "
+                "string."
             )
         self.illustration_paths = illustration_paths
 
@@ -129,62 +134,112 @@ class GameConfig(AppConfig):
 
     def validate_app(self):
         # Check that management commands exist
-        if self.management_commands is not None or self.update_management_commands is not None:
+        if (
+            self.management_commands is not None
+            or self.update_management_commands is not None
+        ):
             all_commands = {c[0] for c in get_commands().items() if c[1] == self.name}
             for commands in [self.management_commands, self.update_management_commands]:
                 if commands is not None:
                     for c in self.management_commands:
                         if c not in all_commands:
-                            raise ValueError(f"For the app {self.name}, the management command "
-                                             f"{c} does not seem to exist.")
-            if self.update_management_commands is not None and self.management_commands is None:
-                warnings.warn(f"WARNING: For the app {self.name}, you have update management "
-                              f"commands but no management commands. This is counter-intuitive "
-                              f"(but shall not lead to errors).")
+                            raise ValueError(
+                                f"For the app {self.name}, the management command "
+                                f"{c} does not seem to exist."
+                            )
+            if (
+                self.update_management_commands is not None
+                and self.management_commands is None
+            ):
+                warnings.warn(
+                    f"WARNING: For the app {self.name}, you have update management "
+                    f"commands but no management commands. This is counter-intuitive "
+                    f"(but shall not lead to errors)."
+                )
 
         # Check that the illustration paths corresponds to static files
         if self.illustration_paths is not None:
             for illustration_path in self.illustration_paths:
                 found = finders.find(illustration_path)
                 if found is None:
-                    raise ValueError(f"For the app {self.name}, the illustration path "
-                                     f"{illustration_path} cannot be found in the static folder.")
+                    raise ValueError(
+                        f"For the app {self.name}, the illustration path "
+                        f"{illustration_path} cannot be found in the static folder."
+                    )
 
         # Check that the models and forms are indeed models and forms
-        if self.setting_model is not None and not isinstance(self.setting_model, ModelBase):
-            raise TypeError("The setting_model attribute of a GameConfig needs to be a "
-                            "Django Model object.")
-        if self.setting_form is not None and not isinstance(self.setting_form, ModelFormMetaclass):
-            raise TypeError("The setting_form attribute of a GameConfig needs to be a "
-                            "Django Form object.")
-        if self.answer_model is not None and not isinstance(self.answer_model, ModelBase):
-            print(self.answer_model)
-            print(type(self.answer_model))
-            raise TypeError("The answer_model attribute of a GameConfig needs to be a "
-                            "Django Model object.")
+        if self.setting_model is not None and not isinstance(
+            self.setting_model, ModelBase
+        ):
+            raise TypeError(
+                "The setting_model attribute of a GameConfig needs to be a "
+                "Django Model object."
+            )
+        if self.setting_form is not None and not isinstance(
+            self.setting_form, ModelFormMetaclass
+        ):
+            raise TypeError(
+                "The setting_form attribute of a GameConfig needs to be a "
+                "Django Form object."
+            )
+        if self.answer_model is not None:
+            if not isinstance(self.answer_model, ModelBase):
+                raise TypeError(
+                    "The answer_model attribute of a GameConfig needs to be a "
+                    "Django Model object."
+                )
+            if not hasattr(self.answer_model, "game"):
+                raise ValueError(
+                    "The answer_model attribute of a GameConfig needs to have a "
+                    "'game' attribute that is a ForeignKey to a Game object."
+                )
+            if not isinstance(
+                getattr(self.answer_model, "game"), ForwardManyToOneDescriptor
+            ):
+                raise ValueError(
+                    "The answer_model attribute of a GameConfig needs to have a "
+                    "'game' attribute that is a ForeignKey to a Game object."
+                )
         if self.answer_model_fields is not None:
             if self.answer_model is None:
-                raise ValueError("You have specified an field for the answer model but not the "
-                                 "answer model itself.")
+                raise ValueError(
+                    "You have specified an field for the answer model but not the "
+                    "answer model itself."
+                )
             for field in self.answer_model_fields:
                 if not hasattr(self.answer_model, field):
-                    raise ValueError(f"The answer model you provided does not seem to have "
-                                     f"{field} as a field.")
+                    raise ValueError(
+                        f"The answer model you provided does not seem to have "
+                        f"{field} as a field."
+                    )
 
         # Check that home view is a view
         if self.home_view is not None:
-            urls = getattr(importlib.import_module(f'{self.name}.urls'), "urlpatterns")
+            urls = getattr(importlib.import_module(f"{self.name}.urls"), "urlpatterns")
             if self.home_view not in set(url.name for url in urls):
-                raise ValueError(f"The home_view value {self.home_view} does not seem to be a view "
-                                 f"for the app {self.name}")
+                raise ValueError(
+                    f"The home_view value {self.home_view} does not seem to be a view "
+                    f"for the app {self.name}"
+                )
 
         # Check that the export functions are callable
         if self.answer_to_csv_func is not None:
             if not isinstance(self.answer_to_csv_func, Callable):
-                raise ValueError(f"The export answer function for the app {self.name} is not callable.")
+                raise ValueError(
+                    f"The export answer function for the app {self.name} is not callable."
+                )
         if self.settings_to_csv_func is not None:
             if not isinstance(self.settings_to_csv_func, Callable):
-                raise ValueError(f"The export settings function for the app {self.name} is not callable.")
+                raise ValueError(
+                    f"The export settings function for the app {self.name} is not callable."
+                )
+
+        # Check that random generators are callable
+        if self.random_answers_func is not None:
+            if not isinstance(self.random_answers_func, Callable):
+                raise ValueError(
+                    f"The random answers generator for the app {self.name} is not callable."
+                )
 
 
 INSTALLED_GAMES = []

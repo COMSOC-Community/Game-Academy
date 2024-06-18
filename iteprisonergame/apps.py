@@ -19,7 +19,11 @@ class ItePrisonerGameConfig(GameConfig):
             URL_NAMESPACE,
             management_commands=["ipd_computeresults", "ipd_generategraphdata"],
             answer_model_fields=("name", "avg_score", "motivation"),
-            illustration_paths=("iteprisonergame/img/IPD1.png", "iteprisonergame/img/IPD2.png", "iteprisonergame/img/IPD3.png"),
+            illustration_paths=(
+                "iteprisonergame/img/IPD1.png",
+                "iteprisonergame/img/IPD2.png",
+                "iteprisonergame/img/IPD3.png",
+            ),
         )
 
     def ready(self):
@@ -32,5 +36,9 @@ class ItePrisonerGameConfig(GameConfig):
 
         self.answer_to_csv_func = answers_to_csv
         self.settings_to_csv_func = settings_to_csv
+
+        from iteprisonergame.random import create_random_answers
+
+        self.random_answers_func = create_random_answers
 
         super(ItePrisonerGameConfig, self).ready()

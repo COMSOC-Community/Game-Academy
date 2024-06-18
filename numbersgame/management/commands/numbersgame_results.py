@@ -75,7 +75,8 @@ class Command(BaseCommand):
             for answer in answers:
                 current_value = game.numbers_setting.lower_bound
                 while (
-                    current_value + game.numbers_setting.histogram_bin_size <= answer.answer
+                    current_value + game.numbers_setting.histogram_bin_size
+                    <= answer.answer
                     and current_value + game.numbers_setting.histogram_bin_size
                     < game.numbers_setting.upper_bound
                 ):
@@ -117,5 +118,7 @@ class Command(BaseCommand):
             game.save()
 
         self.stdout.write(
-            "The global_results for the Numbers Game {} have been updated.".format(game.name)
+            "The global_results for the Numbers Game {} have been updated.".format(
+                game.name
+            )
         )

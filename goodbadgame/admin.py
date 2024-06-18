@@ -1,7 +1,14 @@
 from django.contrib import admin
 
-from goodbadgame.models import Alternative, Question, Answer, Result, QuestionResult, \
-    QuestionAnswer, Setting
+from goodbadgame.models import (
+    Alternative,
+    Question,
+    Answer,
+    Result,
+    QuestionResult,
+    QuestionAnswer,
+    Setting,
+)
 
 admin.site.register(Alternative)
 admin.site.register(Question)

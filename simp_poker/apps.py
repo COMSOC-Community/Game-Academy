@@ -18,8 +18,16 @@ class SimpPokerConfig(GameConfig):
             URL_TAG,
             URL_NAMESPACE,
             management_commands="simppoker_computeresults",
-            answer_model_fields=("probabilities_as_tuple", "round_robin_position", "best_response", "motivation"),
-            illustration_paths=("simp_poker/img/SimpPoker1.png", "simp_poker/img/SimpPoker2.png"),
+            answer_model_fields=(
+                "probabilities_as_tuple",
+                "round_robin_position",
+                "best_response",
+                "motivation",
+            ),
+            illustration_paths=(
+                "simp_poker/img/SimpPoker1.png",
+                "simp_poker/img/SimpPoker2.png",
+            ),
         )
 
     def ready(self):
@@ -31,5 +39,9 @@ class SimpPokerConfig(GameConfig):
         from simp_poker.exportdata import answers_to_csv
 
         self.answer_to_csv_func = answers_to_csv
+
+        from simp_poker.random import create_random_answers
+
+        self.random_answers_func = create_random_answers
 
         super(SimpPokerConfig, self).ready()

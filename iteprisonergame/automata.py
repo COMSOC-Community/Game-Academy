@@ -108,10 +108,13 @@ class MooreMachine:
                 # print(self_state, other_state, input_symbol, self_next_state, other_next_state)
                 if self_next_state in state_renaming:
                     if state_renaming[self_next_state] != other_next_state:
-                        raise AutomataNotIsomorphicError("The automatas are not isomorphic")
+                        raise AutomataNotIsomorphicError(
+                            "The automatas are not isomorphic"
+                        )
                 else:
                     state_renaming[self_next_state] = other_next_state
                     aux(self_next_state, other_next_state)
+
         if len(self.transitions) != len(other_automata.transitions):
             return False
 
@@ -131,11 +134,11 @@ class MooreMachine:
             if state not in seen_states:
                 state_list.append(state)
                 seen_states.add(state)
-            next_state_coop = transition['C']
+            next_state_coop = transition["C"]
             if next_state_coop not in seen_states:
                 state_list.append(next_state_coop)
                 seen_states.add(next_state_coop)
-            next_state_def = transition['D']
+            next_state_def = transition["D"]
             if next_state_def not in seen_states:
                 state_list.append(next_state_def)
                 seen_states.add(next_state_def)

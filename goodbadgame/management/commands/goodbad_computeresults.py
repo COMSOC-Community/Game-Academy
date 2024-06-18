@@ -8,8 +8,9 @@ from goodbadgame.models import Question, QuestionResult, Result, Answer, Questio
 
 
 class Command(BaseCommand):
-
-    help = "Updates the result data for the good/bad game based on the latest submission"
+    help = (
+        "Updates the result data for the good/bad game based on the latest submission"
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)
@@ -57,8 +58,12 @@ class Command(BaseCommand):
         for question in game.goodbad_setting.questions.all():
             answers = question.answers.filter(answer__game=game)
             if answers.exists():
-                timestamps = answers.order_by('submission_time').values_list('submission_time', flat=True).distinct()
-                graph_js_data = ''
+                timestamps = (
+                    answers.order_by("submission_time")
+                    .values_list("submission_time", flat=True)
+                    .distinct()
+                )
+                graph_js_data = ""
                 num_correct = 0
                 num_wrong = 0
                 accuracy = 0
@@ -67,7 +72,9 @@ class Command(BaseCommand):
                     num_correct = tmp_answers.filter(is_correct=True).count()
                     num_wrong = tmp_answers.filter(is_correct=False).count()
                     accuracy = num_correct / (num_correct + num_wrong)
-                    graph_js_data += "['{}', '{}'],\n".format(tmp_answers.count(), accuracy)
+                    graph_js_data += "['{}', '{}'],\n".format(
+                        tmp_answers.count(), accuracy
+                    )
                 QuestionResult.objects.update_or_create(
                     result=game_result,
                     question=question,
@@ -75,13 +82,15 @@ class Command(BaseCommand):
                         "num_correct_answers": num_correct,
                         "num_wrong_answers": num_wrong,
                         "accuracy": accuracy,
-                        "graph_js_data": graph_js_data
-                    }
+                        "graph_js_data": graph_js_data,
+                    },
                 )
 
         # Creating the overall accuracy graph
-        answers = sorted(Answer.objects.filter(game=game).exclude(question_answers=None),
-                         key=lambda ans: ans.question_answers.first().submission_time)
+        answers = sorted(
+            Answer.objects.filter(game=game).exclude(question_answers=None),
+            key=lambda ans: ans.question_answers.first().submission_time,
+        )
         for answer in answers:
             question_answers = answer.question_answers.all()
             for question_answer in question_answers:
@@ -93,7 +102,7 @@ class Command(BaseCommand):
             answer.score = answer.question_answers.filter(is_correct=True).count()
             answer.accuracy = answer.score / answer.question_answers.count()
         Answer.objects.bulk_update(answers, ["score", "accuracy"])
-        accuracy_js_data = ''
+        accuracy_js_data = ""
         current_answers = []
         questions_count = defaultdict(lambda: 0)
         crowd_num_correct = 0
@@ -116,11 +125,15 @@ class Command(BaseCommand):
                 else:
                     crowd_num_wrong += 1
             if crowd_num_correct + crowd_num_wrong > 0:
-                crowd_accuracy = crowd_num_correct / (crowd_num_correct + crowd_num_wrong)
+                crowd_accuracy = crowd_num_correct / (
+                    crowd_num_correct + crowd_num_wrong
+                )
             else:
                 crowd_accuracy = 0
             total_accuracy += new_answer.accuracy
-            accuracy_js_data += "['{}', '{}', '{}'],\n".format(num_answers + 1, crowd_accuracy, total_accuracy / (num_answers + 1))
+            accuracy_js_data += "['{}', '{}', '{}'],\n".format(
+                num_answers + 1, crowd_accuracy, total_accuracy / (num_answers + 1)
+            )
 
         game_result.accuracy_js_data = accuracy_js_data
         game_result.average_accuracy = total_accuracy / (num_answers + 1)

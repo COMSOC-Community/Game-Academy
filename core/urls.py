@@ -30,8 +30,16 @@ urlpatterns = [
         name="session_home",
     ),
     path("<slug:session_url_tag>/admin/", views.session_admin, name="session_admin"),
-    path("<slug:session_url_tag>/admin/export", views.session_admin_export, name="session_admin_export"),
-    path("<slug:session_url_tag>/admin/export_full", views.session_admin_export_full, name="session_admin_export_full"),
+    path(
+        "<slug:session_url_tag>/admin/export",
+        views.session_admin_export,
+        name="session_admin_export",
+    ),
+    path(
+        "<slug:session_url_tag>/admin/export_full",
+        views.session_admin_export_full,
+        name="session_admin_export_full",
+    ),
     path(
         "<slug:session_url_tag>/admin/games/",
         views.session_admin_games,

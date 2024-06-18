@@ -5,11 +5,16 @@ from io import TextIOWrapper
 
 from django import forms
 from django.contrib.auth import authenticate
+from django.core.validators import MinValueValidator
 
 from core.games import INSTALLED_GAMES_CHOICES
 from core.models import Session, Player, Game, Team, CustomUser
-from core.constants import player_username, guest_username, FORBIDDEN_SESSION_URL_TAGS, \
-    FORBIDDEN_USERNAMES
+from core.constants import (
+    player_username,
+    guest_username,
+    FORBIDDEN_SESSION_URL_TAGS,
+    FORBIDDEN_USERNAMES,
+)
 
 
 class SessionFinderForm(forms.Form):
@@ -158,7 +163,7 @@ class CreateSessionForm(forms.Form):
         initial=True,
         required=False,
         help_text="If the guest login is available users have the possibility to join the session "
-                  "as guests, i.e., they do not need to have an account.",
+        "as guests, i.e., they do not need to have an account.",
     )
     show_user_login = forms.BooleanField(
         label="User login available",
@@ -166,7 +171,7 @@ class CreateSessionForm(forms.Form):
         initial=True,
         required=False,
         help_text="If the user login is available users have the possibility to join the session by"
-                  " logging in to their user account.",
+        " logging in to their user account.",
     )
     show_create_account = forms.BooleanField(
         label="Registration open",
@@ -189,8 +194,8 @@ class CreateSessionForm(forms.Form):
         queryset=None,
         required=False,
         help_text="If a value is set, the users are directly brought to the main page of the "
-                  "selected game after logging in. This means that the session home page is "
-                  "skipped."
+        "selected game after logging in. This means that the session home page is "
+        "skipped.",
     )
 
     def __init__(self, *args, **kwargs):
@@ -480,7 +485,7 @@ class CreateGameForm(forms.Form):
         label_suffix="",
         required=False,
         help_text="A brief description of the game displayed on the home page of the session. "
-                  "It is typically either empty or a short sentence.",
+        "It is typically either empty or a short sentence.",
         widget=forms.Textarea(),
     )
     illustration_path = forms.ChoiceField(
@@ -488,40 +493,40 @@ class CreateGameForm(forms.Form):
         label_suffix="",
         required=False,
         help_text="The image used to illustrate the game. Unfortunately there is no nice display "
-                  "for you to see them before updating the game.",
+        "for you to see them before updating the game.",
     )
     ordering_priority = forms.IntegerField(
         label="Ordering Priority",
         label_suffix="",
         required=False,
         help_text="The value used to order the games, the higher values appear first. If no value "
-                  "is provided when creating a game, the new game is given the highest priority "
-                  "plus 1."
+        "is provided when creating a game, the new game is given the highest priority "
+        "plus 1.",
     )
     run_management_after_submit = forms.BooleanField(
         label="Automatic Management Commands",
         label_suffix="",
         required=False,
         help_text="If selected the management commands will be run each time an answer is "
-                  "submitted. This means that the administrator will not have to run them manually."
-                  "Selecting this can induce delays for the users of the website."
+        "submitted. This means that the administrator will not have to run them manually."
+        "Selecting this can induce delays for the users of the website.",
     )
     initial_view = forms.ChoiceField(
         label="Main Page",
         label_suffix="",
         required=False,
         help_text="The first page accessed by a user when clicking on a link to the game. The "
-                  "default is the home page of the game. You can use this setting to directly "
-                  "bring the users to the answer page for instance."
+        "default is the home page of the game. You can use this setting to directly "
+        "bring the users to the answer page for instance.",
     )
     view_after_submit = forms.ChoiceField(
         label="Page After Submit",
         label_suffix="",
         required=False,
         help_text="The page that the user is redirected to after having submitted an answer. The "
-                  "default is the main page of the game (see the main page setting). You can use "
-                  "this setting to bring the users to the results page directly after submitting "
-                  "for instance."
+        "default is the main page of the game (see the main page setting). You can use "
+        "this setting to bring the users to the results page directly after submitting "
+        "for instance.",
     )
 
     def __init__(self, *args, **kwargs):
@@ -549,23 +554,24 @@ class CreateGameForm(forms.Form):
         super(CreateGameForm, self).__init__(*args, **kwargs)
 
         # Needed here because of the apps are only registered after their ready method.
-        self.fields['game_type'].choices = INSTALLED_GAMES_CHOICES
+        self.fields["game_type"].choices = INSTALLED_GAMES_CHOICES
 
         if self.game:
             illustration_choices = [
-                (i, os.path.splitext(os.path.basename(i))[0]) for i in self.game.game_config().illustration_paths
+                (i, os.path.splitext(os.path.basename(i))[0])
+                for i in self.game.game_config().illustration_paths
             ]
-            self.fields['illustration_path'].choices = illustration_choices
+            self.fields["illustration_path"].choices = illustration_choices
             all_views = [(u, u) for u in self.game.all_url_names()]
-            self.fields['initial_view'].choices = all_views
-            self.fields['view_after_submit'].choices = all_views
+            self.fields["initial_view"].choices = all_views
+            self.fields["view_after_submit"].choices = all_views
             self.fields["game_type"].disabled = True
         else:
-            self.fields.pop('illustration_path')
-            self.fields.pop('ordering_priority')
-            self.fields.pop('run_management_after_submit')
-            self.fields.pop('initial_view')
-            self.fields.pop('view_after_submit')
+            self.fields.pop("illustration_path")
+            self.fields.pop("ordering_priority")
+            self.fields.pop("run_management_after_submit")
+            self.fields.pop("initial_view")
+            self.fields.pop("view_after_submit")
 
     def clean_name(self):
         name = self.cleaned_data["name"]
@@ -630,27 +636,47 @@ class ImportCSVFileForm(forms.Form):
         return uploaded_file
 
 
+class RandomPlayersForm(forms.Form):
+    num_players = forms.IntegerField(
+        label="Number of players", label_suffix="", validators=[MinValueValidator(1)]
+    )
+
+
+class RandomAnswersForm(forms.Form):
+    num_answers = forms.IntegerField(
+        label="Number of answers", label_suffix="", validators=[MinValueValidator(1)]
+    )
+    run_management = forms.BooleanField(
+        label="Run management commands",
+        label_suffix="",
+        help_text="If selected, the management commands are executed after the answers have been generated.",
+        required=False,
+    )
+
+
 class MakeAdminForm(forms.Form):
     username = forms.CharField(
         label="Username",
         max_length=CustomUser._meta.get_field("username").max_length,
         required=False,
         help_text="The username of the user you want to make admin. be mindful of the difference "
-                  "between a player and a user. Only one fo the 'username' and the 'player name' "
-                  "field should be filled in."
+        "between a player and a user. Only one fo the 'username' and the 'player name' "
+        "field should be filled in.",
     )
     playername = forms.CharField(
         label="Player name",
         max_length=CustomUser._meta.get_field("username").max_length,
         required=False,
         help_text="The player name of the user you want to make admin. be mindful of the "
-                  "difference between a player and a user. Only one fo the 'username' and the "
-                  "'player name' field should be filled in."
+        "difference between a player and a user. Only one fo the 'username' and the "
+        "'player name' field should be filled in.",
     )
     super_admin = forms.BooleanField(
-        label="Super admin", label_suffix="", required=False,
+        label="Super admin",
+        label_suffix="",
+        required=False,
         help_text="If ticked, the user will be made super-admin, meaning, among others, that they "
-                  "will be able to manage admins."
+        "will be able to manage admins.",
     )
 
     def __init__(self, *args, **kwargs):
