@@ -63,5 +63,5 @@ class Results(GameResultsView):
         all_answers = Answer.objects.filter(game=self.game)
         context["answers"] = all_answers.order_by("name")
         context["answers_sorted_score"] = all_answers.order_by("-avg_score")
-        context["display_pairwise_scores"] = context["game"].itepris_setting.store_scores
+        context["display_pairwise_scores"] = self.game.itepris_setting.store_scores
         return render(request, os.path.join("iteprisonergame", "results.html"), context)

@@ -75,7 +75,7 @@ class Results(GameResultsView):
         context = self.context
         game_result = Result.objects.filter(game=self.game).first()
 
-        if game_result:
+        if Answer.objects.filter(game=self.game).exists() and game_result:
             context["global_results"] = True
             context["game_result"] = game_result
 
@@ -85,7 +85,6 @@ class Results(GameResultsView):
                 questions_answer_result.append((question, None, question_result))
             context["questions_answer_result"] = questions_answer_result
 
-        context["global_results"] = True
         return render(request, os.path.join("goodbad", "results.html"), context)
 
 
