@@ -173,6 +173,9 @@ def session_context_initialiser(request, session, context=None):
         context["user_is_session_super_admin"] = is_session_super_admin(
             session, request.user
         )
+    if not session.show_side_panel and not context.get("user_is_session_admin", False):
+        context["show_side_panel"] = False
+        context["session_portal_url"] = reverse("core:session_portal", kwargs={"session_url_tag": session.url_tag})
     return context
 
 
@@ -549,6 +552,10 @@ def session_admin(request, session_url_tag):
                 if "game_after_logging" in modify_session_form.cleaned_data:
                     session.game_after_logging = modify_session_form.cleaned_data[
                         "game_after_logging"
+                    ]
+                if "show_side_panel" in modify_session_form.cleaned_data:
+                    session.show_side_panel = modify_session_form.cleaned_data[
+                        "show_side_panel"
                     ]
                 session.save()
 

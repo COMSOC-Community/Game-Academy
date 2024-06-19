@@ -31,8 +31,9 @@ class SubmitAnswer(GameSubmitAnswerView):
         submit_answer_form = SubmitAnswerForm(
             request.POST, game=self.game, player=self.context["submitting_player"]
         )
-        submit_answer_form.is_valid()
-        return submit_answer_form
+        if submit_answer_form.is_valid():
+            return True, submit_answer_form
+        return False, submit_answer_form
 
     def post_code_if_form_valid(self, request, form_object):
         new_answer = Answer.objects.create(

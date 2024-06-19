@@ -40,6 +40,7 @@ class Session(models.Model):
         null=True,
         blank=True,
     )
+    show_side_panel = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["url_tag"]

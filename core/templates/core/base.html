@@ -18,11 +18,12 @@
 
 
     <main>
-        {% if show_side_panel %}
-            <div id="main-panel" class="truncated-main">
-        {% else %}
-            <div id="main-panel" class="full-main">
-        {% endif %}
+        <div id="main-panel" class="{% if show_side_panel %}truncated-main{% else %}full-main{% endif %}">
+            {% if not show_side_panel and user_is_authenticated %}
+                <p class="center-align">
+                    <a class="button" href="{% url 'core:logout' %}?next={{ session_portal_url }}">Logout</a>
+                </p>
+            {% endif %}
             {% block content %}{% endblock %}
         </div>
 

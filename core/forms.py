@@ -197,6 +197,12 @@ class CreateSessionForm(forms.Form):
         "selected game after logging in. This means that the session home page is "
         "skipped.",
     )
+    show_side_panel = forms.BooleanField(
+        label="Show Side Panel",
+        label_suffix="",
+        required=False,
+        help_text="If unselected, the players will not see the side panel, on admins will."
+    )
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop(
@@ -213,6 +219,7 @@ class CreateSessionForm(forms.Form):
                     "show_create_account": self.session.show_create_account,
                     "visible": self.session.visible,
                     "game_after_logging": self.session.game_after_logging,
+                    "show_side_panel": self.session.show_side_panel,
                 }
             )
         super(CreateSessionForm, self).__init__(*args, **kwargs)
@@ -225,6 +232,7 @@ class CreateSessionForm(forms.Form):
                 self.fields.pop("game_after_logging")
         else:
             self.fields.pop("game_after_logging")
+            self.fields.pop("show_side_panel")
 
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]
