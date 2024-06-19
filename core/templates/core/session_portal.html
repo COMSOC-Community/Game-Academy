@@ -80,6 +80,13 @@
     {% if not user_is_authenticated and registration_form %}
         <section id="registration">
             <h2>Create a Player Profile</h2>
+            {% if created_player %}
+                <div class="form-success-message">
+                    <p>
+                        Your player profile has been created, you can now log in.
+                    </p>
+                </div>
+            {% endif %}
             {% if player_creation_error %}
                 <p class="form-error">There was a general problem here: {{ player_creation_error }}. Please report that to the admin.</p>
             {% endif %}
