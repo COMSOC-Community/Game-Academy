@@ -93,30 +93,32 @@
 
                 <p>{{ answer.motivation }}</p>
 
-                <p class="next-collapsible"><a>See the detail of the scores.</a></p>
+                {% if display_pairwise_scores %}
+                    <p class="next-collapsible"><a>See the detail of the scores.</a></p>
 
-                <div class="collapsed-content hidden">
-                    <table class="lined-table center-margin">
-                        <thead>
-                            <tr>
-                                <th>Opponent</th>
-                                <th>#Rounds</th>
-                                <th>Average Score</th>
-                                <th>Average Score Opponent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for score in answer.scores.all %}
+                    <div class="collapsed-content hidden">
+                        <table class="lined-table center-margin">
+                            <thead>
                                 <tr>
-                                    <td>{{ score.opponent.name }}</td>
-                                    <td>{{ score.number_round }}</td>
-                                    <td>{{ score.answer_avg_score|float_formatter:4 }}</td>
-                                    <td>{{ score.opp_avg_score|float_formatter:4 }}</td>
+                                    <th>Opponent</th>
+                                    <th>#Rounds</th>
+                                    <th>Average Score</th>
+                                    <th>Average Score Opponent</th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {% for score in answer.scores.all %}
+                                    <tr>
+                                        <td>{{ score.opponent.name }}</td>
+                                        <td>{{ score.number_round }}</td>
+                                        <td>{{ score.answer_avg_score|float_formatter:4 }}</td>
+                                        <td>{{ score.opp_avg_score|float_formatter:4 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             </section>
         {% endfor %}
     {% else %}

@@ -52,8 +52,19 @@
         {% if answer.graph_json_data %} Below is a visualisation of your answer.{% endif %}
     </p>
 
-    {% if answer.graph_json_data %}
-        {% include 'iteprisonergame_include/ipd_automata.html' with width=600 height=400 answer=answer %}
-    {% endif %}
+    <div class="side-by-side-centered-wrapper">
+        <div>
+            {% if answer.number_states < 100 %}
+                {% include 'iteprisonergame_include/ipd_automata.html' with width=600 height=400 answer=answer %}
+            {% else %}
+                <p>This answer has {{ answer.number_states }} states. It will not be displayed.</p>
+            {% endif %}
+        </div>
+        <div class="automata-text-display">
+            <p>
+                {{ answer.automata|linebreaksbr }}
+            </p>
+        </div>
+    </div>
 </section>
 {% endblock %}

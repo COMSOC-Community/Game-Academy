@@ -13,6 +13,12 @@ class Setting(models.Model):
         "comma.",
         max_length=50,
     )
+    store_scores = models.BooleanField(
+        default=True,
+        help_text="If selected, the non-aggregated scores are stored (for every pair of answer "
+                  "and every round). For large number of answers there will be many such scores, "
+                  "it can then be good to de-activate this."
+    )
     payoff_high = models.FloatField(
         default=0,
         help_text="Payoff of the defecting player when one player defects and the other cooperates.",
