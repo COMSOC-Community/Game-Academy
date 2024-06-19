@@ -33,6 +33,20 @@ class SettingForm(forms.ModelForm):
                 )
         return num_repetitions
 
+    def clean_forbidden_strategies(self):
+        forbidden_strategies = self.cleaned_data.get("forbidden_strategies")
+        for strategy in forbidden_strategies.split("---"):
+            automata = MooreMachine()
+            lines = strategy.strip().split("\n")
+            errors = automata.parse(lines)
+            if errors:
+                raise forms.ValidationError(errors)
+            else:
+                validity_errors = automata.test_validity(["C", "D"])
+                if validity_errors:
+                    raise forms.ValidationError(validity_errors)
+        return forbidden_strategies
+
 
 class SubmitAnswerForm(forms.Form):
     name = forms.CharField(label="Name of the Strategy", label_suffix="")

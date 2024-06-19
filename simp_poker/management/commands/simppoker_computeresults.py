@@ -104,92 +104,94 @@ class Command(BaseCommand):
         game = game.first()
         answers = list(Answer.objects.filter(game=game))
 
-        # Compute all the scores for the answers
-        optimal_strategy = get_optimal_strategy()
-        rr_scores = {a: 0 for a in answers}
-        rr_with_opt_scores = {}
-        scores_against_opt = {}
-        best_responses = {}
-        score_against_best_response = {}
-        optimal_strategy_score = 0
-        for i in range(len(answers)):
-            answer = answers[i]
+        if len(answers) > 0:
 
-            # Round Robin tournament
-            for j in range(i + 1, len(answers)):
-                opponent = answers[j]
-                total_expected_u_answer = expected_utility(answer, opponent)
-                rr_scores[answer] += total_expected_u_answer
-                rr_scores[opponent] -= total_expected_u_answer
+            # Compute all the scores for the answers
+            optimal_strategy = get_optimal_strategy()
+            rr_scores = {a: 0 for a in answers}
+            rr_with_opt_scores = {}
+            scores_against_opt = {}
+            best_responses = {}
+            score_against_best_response = {}
+            optimal_strategy_score = 0
+            for i in range(len(answers)):
+                answer = answers[i]
 
-            # Performance against optimum
-            score_against_opt = expected_utility(answer, optimal_strategy)
-            optimal_strategy_score -= score_against_opt
-            scores_against_opt[answer] = score_against_opt
-            rr_with_opt_scores[answer] = rr_scores[answer] + score_against_opt
+                # Round Robin tournament
+                for j in range(i + 1, len(answers)):
+                    opponent = answers[j]
+                    total_expected_u_answer = expected_utility(answer, opponent)
+                    rr_scores[answer] += total_expected_u_answer
+                    rr_scores[opponent] -= total_expected_u_answer
 
-            # Best response against the strategy
-            best_response = compute_best_response(answer)
-            best_response_strat = Answer(
-                prob_p1_king=best_response[0],
-                prob_p1_queen=best_response[1],
-                prob_p1_jack=best_response[2],
-                prob_p2_king=best_response[3],
-                prob_p2_queen=best_response[4],
-                prob_p2_jack=best_response[5],
-            )
-            best_responses[answer] = best_response
-            score_against_best_response[answer] = expected_utility(
-                answer, best_response_strat
-            )
-        ordered_rr_scores = sorted(rr_scores.values(), reverse=True)
-        ordered_rr_with_opt_scores = list(rr_with_opt_scores.values())
-        ordered_rr_with_opt_scores.append(optimal_strategy_score)
-        ordered_rr_with_opt_scores.sort(reverse=True)
+                # Performance against optimum
+                score_against_opt = expected_utility(answer, optimal_strategy)
+                optimal_strategy_score -= score_against_opt
+                scores_against_opt[answer] = score_against_opt
+                rr_with_opt_scores[answer] = rr_scores[answer] + score_against_opt
 
-        num_players = len(rr_scores)
-        for answer in answers:
-            rr_score = rr_scores[answer]
-            answer.round_robin_score = rr_score / (max(1, num_players - 1))
-            answer.round_robin_position = ordered_rr_scores.index(rr_score) + 1
-            rr_score_with_opt = rr_with_opt_scores[answer]
-            answer.round_robin_with_opt_score = rr_score_with_opt / num_players
-            answer.round_robin_with_opt_position = (
-                ordered_rr_with_opt_scores.index(rr_score_with_opt) + 1
-            )
-            score_against_opt = scores_against_opt[answer]
-            answer.score_against_optimum = score_against_opt
-            answer.winner_against_optimum = score_against_opt >= 0
-            answer.best_response = ",".join(
-                float_formatter(v, num_digits=5) for v in best_responses[answer]
-            )
-            answer.score_against_best_response = score_against_best_response[answer]
-            answer.save()
-
-        global_best_response = compute_global_best_response(answers)
-        global_best_response_answer = Answer(
-            prob_p1_king=global_best_response[0],
-            prob_p1_queen=global_best_response[1],
-            prob_p1_jack=global_best_response[2],
-            prob_p2_king=global_best_response[3],
-            prob_p2_queen=global_best_response[4],
-            prob_p2_jack=global_best_response[5],
-        )
-        global_best_response_score = sum(
-            expected_utility(global_best_response_answer, a) for a in answers
-        ) / len(answers)
-        Result.objects.update_or_create(
-            game=game,
-            defaults={
-                "optimal_strategy_round_robin_score": optimal_strategy_score
-                / max(1, num_players),
-                "optimal_strategy_round_robin_position": ordered_rr_with_opt_scores.index(
-                    optimal_strategy_score
+                # Best response against the strategy
+                best_response = compute_best_response(answer)
+                best_response_strat = Answer(
+                    prob_p1_king=best_response[0],
+                    prob_p1_queen=best_response[1],
+                    prob_p1_jack=best_response[2],
+                    prob_p2_king=best_response[3],
+                    prob_p2_queen=best_response[4],
+                    prob_p2_jack=best_response[5],
                 )
-                + 1,
-                "global_best_response": ",".join(
-                    float_formatter(v, num_digits=5) for v in global_best_response
-                ),
-                "global_best_response_rr_score": global_best_response_score,
-            },
-        )
+                best_responses[answer] = best_response
+                score_against_best_response[answer] = expected_utility(
+                    answer, best_response_strat
+                )
+            ordered_rr_scores = sorted(rr_scores.values(), reverse=True)
+            ordered_rr_with_opt_scores = list(rr_with_opt_scores.values())
+            ordered_rr_with_opt_scores.append(optimal_strategy_score)
+            ordered_rr_with_opt_scores.sort(reverse=True)
+
+            num_players = len(rr_scores)
+            for answer in answers:
+                rr_score = rr_scores[answer]
+                answer.round_robin_score = rr_score / (max(1, num_players - 1))
+                answer.round_robin_position = ordered_rr_scores.index(rr_score) + 1
+                rr_score_with_opt = rr_with_opt_scores[answer]
+                answer.round_robin_with_opt_score = rr_score_with_opt / num_players
+                answer.round_robin_with_opt_position = (
+                    ordered_rr_with_opt_scores.index(rr_score_with_opt) + 1
+                )
+                score_against_opt = scores_against_opt[answer]
+                answer.score_against_optimum = score_against_opt
+                answer.winner_against_optimum = score_against_opt >= 0
+                answer.best_response = ",".join(
+                    float_formatter(v, num_digits=5) for v in best_responses[answer]
+                )
+                answer.score_against_best_response = score_against_best_response[answer]
+                answer.save()
+
+            global_best_response = compute_global_best_response(answers)
+            global_best_response_answer = Answer(
+                prob_p1_king=global_best_response[0],
+                prob_p1_queen=global_best_response[1],
+                prob_p1_jack=global_best_response[2],
+                prob_p2_king=global_best_response[3],
+                prob_p2_queen=global_best_response[4],
+                prob_p2_jack=global_best_response[5],
+            )
+            global_best_response_score = sum(
+                expected_utility(global_best_response_answer, a) for a in answers
+            ) / len(answers)
+            Result.objects.update_or_create(
+                game=game,
+                defaults={
+                    "optimal_strategy_round_robin_score": optimal_strategy_score
+                    / max(1, num_players),
+                    "optimal_strategy_round_robin_position": ordered_rr_with_opt_scores.index(
+                        optimal_strategy_score
+                    )
+                    + 1,
+                    "global_best_response": ",".join(
+                        float_formatter(v, num_digits=5) for v in global_best_response
+                    ),
+                    "global_best_response_rr_score": global_best_response_score,
+                },
+            )

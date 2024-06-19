@@ -101,6 +101,8 @@ class MooreMachine:
 
     def is_isomorphic(self, other_automata):
         def aux(self_state, other_state):
+            if self.outcome[self_state] != other_automata.outcome[other_state]:
+                raise AutomataNotIsomorphicError("The automatas are not isomorphic")
             state_renaming[self_state] = other_state
             for input_symbol in ("C", "D"):
                 self_next_state = self.transitions[self_state][input_symbol]
