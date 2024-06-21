@@ -657,7 +657,8 @@ class RandomAnswersForm(forms.Form):
     run_management = forms.BooleanField(
         label="Run management commands",
         label_suffix="",
-        help_text="If selected, the management commands are executed after the answers have been generated.",
+        help_text="If selected, the management commands are executed after the answers "
+                  "have been generated.",
         required=False,
     )
 
@@ -729,7 +730,18 @@ class MakeAdminForm(forms.Form):
 
 
 class CreateTeamForm(forms.Form):
-    name = forms.CharField(max_length=Team._meta.get_field("name").max_length)
+    name = forms.CharField(
+        label_suffix="",
+        label="Team name",
+        max_length=Team._meta.get_field("name").max_length
+    )
+    is_public = forms.BooleanField(
+        label_suffix="",
+        label="Public",
+        help_text="If public, anyone can join this team, otherwise other players will need to know "
+                  "the name of the team to join it.",
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
         self.game = kwargs.pop("game")
@@ -743,3 +755,45 @@ class CreateTeamForm(forms.Form):
             )
         else:
             return name
+
+
+class JoinPrivateTeamForm(forms.Form):
+    name = forms.CharField(
+        label_suffix="",
+        label="Team name",
+        max_length=Team._meta.get_field("name").max_length
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.game = kwargs.pop("game")
+        super(JoinPrivateTeamForm, self).__init__(*args, **kwargs)
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        team = Team.objects.filter(game=self.game, name=name).first()
+        if not team:
+            raise forms.ValidationError(
+                "No team with this name has been found"
+            )
+        self.cleaned_data["team"] = team
+        return name
+
+
+class JoinPublicTeamForm(forms.Form):
+    team = forms.ModelChoiceField(
+        label="Public teams",
+        label_suffix="",
+        queryset=None,
+        widget=forms.RadioSelect(attrs={"style": "width: auto;"}),
+        empty_label=None
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.game = kwargs.pop("game")
+        super(JoinPublicTeamForm, self).__init__(*args, **kwargs)
+        self.fields["team"].queryset = Team.objects.filter(game=self.game, is_public=True)
+        self.fields["team"].label_from_instance = self.team_to_label
+
+    @staticmethod
+    def team_to_label(team):
+        return f"{team.name} — by {team.creator.display_name()}"

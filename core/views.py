@@ -37,7 +37,7 @@ from .forms import (
     MakeAdminForm,
     ImportCSVFileForm,
     RandomPlayersForm,
-    RandomAnswersForm,
+    RandomAnswersForm, JoinPrivateTeamForm, JoinPublicTeamForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 from .utils import sanitise_filename
@@ -934,39 +934,53 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
         raise Http404("The game is not playable and the user is not an admin.")
 
     player = context["player"]
-    context["teams"] = Team.objects.filter(game=game)
-    if player:
-        if context["team"] is None:
-            create_team_form = CreateTeamForm(game=game)
-            if request.method == "POST":
-                if "create_team_form" in request.POST:
-                    create_team_form = CreateTeamForm(request.POST, game=game)
-                    if create_team_form.is_valid():
-                        team_name = create_team_form.cleaned_data["name"]
-                        team_player_user = CustomUser.objects.get(
-                            username=TEAM_USER_USERNAME
-                        )
-                        team_player = Player.objects.create(
-                            user=team_player_user,
-                            name=team_player_name(game.name, team_name),
-                            session=session,
-                            is_team_player=True,
-                        )
-                        new_team = Team.objects.create(
-                            name=create_team_form.cleaned_data["name"],
-                            game=game,
-                            creator=player,
-                            team_player=team_player,
-                        )
-                        new_team.players.add(player)
-                        new_team.save()
-                        context["created_team"] = new_team
-                elif "join_team_form" in request.POST:
-                    joined_team = Team.objects.get(pk=request.POST["join_team_input"])
+    if player and context["team"] is None:
+        create_team_form = CreateTeamForm(game=game)
+        join_public_team_form = JoinPublicTeamForm(game=game)
+        join_private_team_form = JoinPrivateTeamForm(game=game)
+        if request.method == "POST":
+            if "create_team_form" in request.POST:
+                create_team_form = CreateTeamForm(request.POST, game=game)
+                if create_team_form.is_valid():
+                    team_name = create_team_form.cleaned_data["name"]
+                    team_player_user = CustomUser.objects.get(
+                        username=TEAM_USER_USERNAME
+                    )
+                    team_player = Player.objects.create(
+                        user=team_player_user,
+                        name=team_player_name(game.name, team_name),
+                        session=session,
+                        is_team_player=True,
+                    )
+                    new_team = Team.objects.create(
+                        name=create_team_form.cleaned_data["name"],
+                        is_public=create_team_form.cleaned_data["is_public"],
+                        game=game,
+                        creator=player,
+                        team_player=team_player,
+                    )
+                    new_team.players.add(player)
+                    new_team.save()
+                    context["created_team"] = new_team
+            elif "join_public_team_form" in request.POST:
+                join_public_team_form = JoinPublicTeamForm(request.POST, game=game)
+                if join_public_team_form.is_valid():
+                    joined_team = join_public_team_form.cleaned_data["team"]
                     joined_team.players.add(player)
                     joined_team.save()
-                    context["team_joined"] = True
-            context["create_team_form"] = create_team_form
+                    context["joined_team_name"] = joined_team.name
+            elif "join_private_team_form" in request.POST:
+                join_private_team_form = JoinPrivateTeamForm(request.POST, game=game)
+                if join_private_team_form.is_valid():
+                    joined_team = join_private_team_form.cleaned_data["team"]
+                    joined_team.players.add(player)
+                    context["joined_team_name"] = joined_team.name
+            else:
+                raise Http404("Form type unknown...")
+
+        context["create_team_form"] = create_team_form
+        context["join_private_team_form"] = join_private_team_form
+        context["join_public_team_form"] = join_public_team_form
 
     return render(request, "core/team.html", context)
 

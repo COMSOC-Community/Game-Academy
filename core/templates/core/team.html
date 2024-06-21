@@ -1,66 +1,91 @@
 {% extends 'core/base_game.html' %}
 
 {% block game_content %}
-    <section>
-        {% if created_team %}
+    {% if created_team %}
+        <section class="form-success-message">
             <p>
                 Your team {{ created_team.name }} has now been registered. You can start playing for
                 the team.
+            </p>
+            <p class="center-align">
                 {% with game.game_config.url_namespace|add:':'|add:game.initial_view as url_name %}
                     <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">To the game</a>
                 {% endwith %}
             </p>
-        {% else %}
-            {% if team_joined %}
+    </section>
+    {% else %}
+        {% if joined_team_name %}
+            <section class="form-success-message">
                 <p>
-                    You have joined the team {{ joined_team.name }}. You can now play for the team.
+                    You have joined the team {{ joined_team_name }}. You can now play for the team.
+                </p>
+                <p class="center-align">
                     {% with game.game_config.url_namespace|add:':'|add:game.initial_view as url_name %}
-                        Go to the <a href="{% url url_name session.url_tag game.url_tag %}">game page</a>.
+                        <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">To the game</a>
                     {% endwith %}
                 </p>
-            {% else %}
-                {% if team %}
+            </section>
+        {% else %}
+            {% if team %}
+                <section>
                     <p> You are already a member the team <em>{{ team.name }}</em>, this page is not for you!</p>
-                {% else %}
-                    <h2>Register a team</h2>
-
-                    <p>
-                        To register a team, just enter its name in the field below.
-                        You will be automatically added to the team. Other players will then be able to join the team.
-                    </p>
-
-                    {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
-                        <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
-                            {% include "include/form_table_template.html" with form=create_team_form form_type='create_team_form' submit_button_label='Create Team' %}
-                        </form>
+                <p class="center-align">
+                    {% with game.game_config.url_namespace|add:':'|add:game.initial_view as url_name %}
+                        <a class="button navigation-button" href="{% url url_name session.url_tag game.url_tag %}">Back to the game</a>
                     {% endwith %}
-
-                    <h2>Join a team</h2>
-
-                    {% if teams %}
+                </p>
+                </section>
+            {% else %}
+                {% if create_team_form %}
+                    <section id="register">
+                    <h2>Register a team</h2>
                         <p>
-                            If the team you want to be part of has already been created by another player, you can join
-                            it here. Please do not join a team before having discussed it with its creator.
+                            To register a team, just enter its name in the field below.
+                            You will be automatically added to the team. Other players will then be able to join the team.
                         </p>
 
                         {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
                             <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
+                                {% include "include/form_table_template.html" with form=create_team_form form_type='create_team_form' submit_button_label='Create Team' %}
+                            </form>
                         {% endwith %}
-                            {% csrf_token %}
-                            {% for team in teams %}
-                                <input type="radio" name="join_team_input" value="{{ team.id }}" id="join_team_{{ team.id }}">
-                                <label for="join_team_{{ team.id }}">{{ team.name }} - created by {{ team.creator.name }}</label><br>
-                            {% endfor %}
+                    </section>
+                {% endif %}
 
-                            <p class="center-align">
-                                <input class="green-button" type="submit" name="join_team_form" value="Join Team">
-                            </p>
-                        </form>
-                    {% else %}
-                        <p>No team has been created yet.</p>
-                    {% endif %}
+                {% if join_private_team_form %}
+                    <section id="join_private">
+                        <h2>Join a Private Team</h2>
+
+                        <p>
+                            To join a private team, you need to know its name. Fill in the name in
+                            the form below to join the team.
+                        </p>
+
+                        {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
+                            <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
+                                {% include "include/form_table_template.html" with form=join_private_team_form form_type='join_private_team_form' submit_button_label='Join Team' %}
+                            </form>
+                        {% endwith %}
+                    </section>
+                {% endif %}
+
+                {% if join_public_team_form %}
+                    <section id="join_public">
+                        <h2>Join a Public Team</h2>
+
+                        <p>
+                            Some teams are public, meaning that anyone can join them. If you want to
+                            join such team, just select it in the list below.
+                        </p>
+
+                        {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
+                            <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
+                                {% include "include/form_table_template.html" with form=join_public_team_form form_type='join_public_team_form' submit_button_label='Join Team' %}
+                            </form>
+                        {% endwith %}
+                    </section>
                 {% endif %}
             {% endif %}
         {% endif %}
-    </section>
+    {% endif %}
 {% endblock %}

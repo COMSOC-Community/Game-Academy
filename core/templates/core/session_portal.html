@@ -44,40 +44,38 @@
                         session.
                     {% endif %}
                 </p>
-            {% else %}
-                {% if login_form and guest_form %}
-                    <div class="side-by-side-two-columns-wrapper">
-                {% endif %}
-                {% if login_form %}
-                    <div>
-                        <h3>Log in to an Existing Account</h3>
+            {% endif %}
+            {% if login_form and guest_form %}
+                <div class="side-by-side-two-columns-wrapper">
+            {% endif %}
+            {% if login_form %}
+                <div>
+                    <h3>Log in to an Existing Account</h3>
 
-                        <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
-                            {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
-                        </form>
-                    </div>
-                {% endif %}
+                    <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
+                        {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
+                    </form>
+                </div>
+            {% endif %}
+            {% if guest_form %}
+                <div>
+                    <h3>Continue as a Guest</h3>
 
-                {% if guest_form %}
-                    <div>
-                        <h3>Continue as a Guest</h3>
-
-                        <p class="center-align" style="margin-bottom: 0">
-                            <button onclick="generateRandomName()">Generate random name</button>
-                        </p>
-                        <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
-                            {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
-                        </form>
-                    </div>
-                {% endif %}
-                {% if login_form and guest_form %}
-                    </div>
-                {% endif %}
+                    <p class="center-align" style="margin-bottom: 0">
+                        <button onclick="generateRandomName()">Generate random name</button>
+                    </p>
+                    <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
+                        {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
+                    </form>
+                </div>
+            {% endif %}
+            {% if login_form and guest_form %}
+                </div>
             {% endif %}
         {% endif %}
     </section>
 
-    {% if not user_is_authenticated and registration_form %}
+    {% if not player_profile and registration_form %}
         <section id="registration">
             <h2>Create a Player Profile</h2>
             {% if created_player %}
