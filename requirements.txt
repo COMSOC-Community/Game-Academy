@@ -1,2 +1,4 @@
 django
 numpy
+gunicorn
+mysqlclient

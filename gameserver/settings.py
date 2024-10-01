@@ -108,4 +108,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-from gameserver.local_settings import *
+try:
+    from gameserver.local_settings import *
+except ImportError:
+    pass
