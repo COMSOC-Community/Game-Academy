@@ -115,6 +115,8 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 DEBUG = os.environ.get('DJANGO_DEBUG', '')
 
+print(os.environ)
+print('DJANGO_DB_NAME' in os.environ)
 if 'DJANGO_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
