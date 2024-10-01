@@ -115,6 +115,18 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 DEBUG = os.environ.get('DJANGO_DEBUG', '')
 
+if 'DJANGO_DB_NAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ.get('DJANGO_DB_NAME'),
+            'USER': os.environ.get('DJANGO_DB_USER'),
+            'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD'),
+            'HOST': os.environ.get('DJANGO_DB_HOST'),
+            'PORT': os.environ.get('DJANGO_DB_PORT', '3306'),
+        }
+    }
+
 try:
     from gameserver.local_settings import *
 except ImportError:

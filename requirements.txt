@@ -3,3 +3,4 @@ numpy
 gunicorn
 mysqlclient
 whitenoise
+psycopg2
