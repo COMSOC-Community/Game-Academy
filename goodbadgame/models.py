@@ -55,7 +55,6 @@ def set_default_questions(**kwargs):
 
     if not setting.questions.all():
         setting.questions.add(*Question.objects.all())
-        setting.save()
 
 
 class Answer(models.Model):
