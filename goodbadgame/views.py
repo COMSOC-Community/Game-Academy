@@ -62,7 +62,7 @@ class SubmitAnswer(GameSubmitAnswerView):
                     )
                     == question.correct_alt,
                 )
-                self.context["submitted_answer"] = True
+        self.context["submitted_answer"] = True
 
     def post_code_render(self, request):
         return render(
