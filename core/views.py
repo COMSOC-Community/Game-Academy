@@ -85,9 +85,11 @@ def validate_next_url(request, next_url):
 
 def force_player_logout(request, session_url_tag):
     session = get_object_or_404(Session, url_tag=session_url_tag)
+    next_url = request.GET.get("next")
     if request.method == "POST":
         if "logout_and_continue" in request.POST:
             logout(request)
+            print(request.GET)
             if "next" in request.GET:
                 next_url = request.GET["next"]
                 if validate_next_url(request, next_url):
@@ -108,7 +110,7 @@ def force_player_logout(request, session_url_tag):
     return render(
         request,
         "core/force_player_logout.html",
-        {"session": session, "url_back": url_back},
+        {"session": session, "url_back": url_back, "next_url": next_url},
     )
 
 

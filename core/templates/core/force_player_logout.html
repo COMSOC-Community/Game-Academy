@@ -17,7 +17,7 @@
 
 <div class="side-by-side-centered-wrapper">
     <div>
-        <form action="{% url 'core:force_player_logout' session.url_tag %}" method="post">
+        <form action="{% url 'core:force_player_logout' session.url_tag %}?next={{ next_url }}" method="post">
             {% csrf_token %}
         <button type="submit" class="button color-error-dark" name="logout_and_continue">Logout and Continue</button>
     </form>
