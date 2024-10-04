@@ -479,7 +479,11 @@ Side panel
 	padding: 5px 10px 10px;
 }
 
-
+@media screen and (max-width: 480px) {
+	#main-panel.full-main {
+		margin: 5px;
+	}
+}
 
 @media (max-width: 1400px) {
     main {
@@ -488,7 +492,7 @@ Side panel
     }
 
 	#main-panel.truncated-main {
-		margin: 40px 20px;
+		margin: 5px;
 		padding-left: 0;
 	}
 
