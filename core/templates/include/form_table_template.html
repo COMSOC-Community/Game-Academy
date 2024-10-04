@@ -31,7 +31,7 @@
                 <label for="{{ field.auto_id }}">
                     <span>{{ field.label }}</span>
                     {% if field.help_text %}
-                        <span class="info-span" title="{{ field.help_text }}">&#9432;</span>
+                        <span class="info-span" title="{{ field.help_text }}" onclick="showHelpText(event, '{{ field.help_text|escapejs }}', '{{ field.auto_id|escapejs }}')">&#9432;</span>
                     {% endif %}
                 </label>
             </td>
@@ -44,3 +44,35 @@
         <td colspan="2"><input class="button" type="submit" name="{{ form_type }}" value="{{ submit_button_label }}" {% if submit_button_onclick %}onclick="{{ submit_button_onclick|safe }}"{% endif %}></td>
     </tr>
 </table>
+
+<div id="form-info-bubble" class="form-info-bubble" style="display: none;"></div>
+
+<script>
+    function showHelpText(event, helpText, forId) {
+        console.log("qsd");
+        event.stopPropagation(); // Prevents event bubbling
+
+        const bubble = document.getElementById('form-info-bubble');
+        bubble.innerText = helpText; // Set the bubble text
+        bubble.setAttribute('data-for', forId);
+
+        // Position the bubble near the clicked icon
+        const rect = event.target.getBoundingClientRect();
+        bubble.style.top = `${rect.bottom + window.scrollY}px`;
+        bubble.style.left = `${rect.left}px`;
+        bubble.style.display = 'block'; // Show the bubble
+    }
+
+    // Hide the bubble when clicking elsewhere
+    document.addEventListener('click', function(event) {
+        console.log("aze");
+        const bubble = document.getElementById('form-info-bubble');
+        const inputId = bubble.getAttribute('data-for');
+        const inputElement = document.getElementById(inputId);
+        console.log(event.target);
+        console.log(event.target.closest('.info-span'));
+        if (!bubble.contains(event.target) && !(inputElement && event.target === inputElement)) {
+            bubble.style.display = 'none';
+        }
+    });
+</script>
