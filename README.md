@@ -43,10 +43,14 @@ DATABASES = {
     }
 }
 
-# To silence Recaptcha errors, you need to set up 
+# Silence should be de-activated in production and RECAPTCHA_PUBLIC_KEY and RECAPTCHA_PRIVATE_KEY
+# should be used.
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 #RECAPTCHA_PUBLIC_KEY = 'your_public_key'
 #RECAPTCHA_PRIVATE_KEY = 'your_private_key'
+
+MAX_NUM_SESSION_PER_USER = 10
+MAX_NUM_GAMES_PER_SESSION = 20
 
 ```
 
@@ -100,6 +104,14 @@ python manage.py goodbad_addlogos
 ### Additional Points
 
 #### Control of the Side Panel
+
+#### Limits
+
+Max session
+
+Max players
+
+Max games
 
 ### Developing a New Game
 

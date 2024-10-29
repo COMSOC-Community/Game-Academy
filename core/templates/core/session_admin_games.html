@@ -32,8 +32,6 @@
     <section id="add_game">
         <h2>Add a Game</h2>
 
-        <p>If you want to add new games to the session, fill in this form:</p>
-
         {% if new_game %}
             <div class="form-success-message">
                 <p>The game {{ new_game.name }} has been added to the session.</p>
@@ -46,10 +44,19 @@
             </div>
         {% endif %}
 
-        {% if create_game_form %}
-            <form action="{% url 'core:session_admin_games' session.url_tag %}#add_game" method="post">
-                {% include "include/form_table_template.html" with form=create_game_form form_type='create_game_form' submit_button_label='Add Game' %}
-            </form>
+        {% if max_num_games_reached %}
+            <p>
+                A session cannot have more than {{ MAX_NUM_GAMES_PER_SESSION }} games.
+                Please delete some before adding new games.
+            </p>
+        {% else %}
+            <p>If you want to add new games to the session, fill in this form:</p>
+
+            {% if create_game_form %}
+                <form action="{% url 'core:session_admin_games' session.url_tag %}#add_game" method="post">
+                    {% include "include/form_table_template.html" with form=create_game_form form_type='create_game_form' submit_button_label='Add Game' %}
+                </form>
+            {% endif %}
         {% endif %}
     </section>
 

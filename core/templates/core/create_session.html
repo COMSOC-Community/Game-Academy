@@ -27,19 +27,26 @@
         </section>
     {% else %}
         <section>
-            <p>
-                Sessions are the main components of this website. Once created, you will be able to add games and
-                players to a session. If you are using this website for a course, a session will typically represent one
-                edition of the course.
-            </p>
+            {% if max_num_session_reached %}
+                <p>
+                    You cannot administrate more than {{ MAX_NUM_SESSION_PER_USER }} sessions.
+                    Please delete some of your sessions before creating new ones.
+                </p>
+            {% else %}
+                <p>
+                    Sessions are the main components of this website. Once created, you will be able to add games and
+                    players to a session. If you are using this website for a course, a session will typically represent one
+                    edition of the course.
+                </p>
 
-            <p>
-                Use the form below to create a session.
-            </p>
+                <p>
+                    Use the form below to create a session.
+                </p>
 
-            <form action="{% url 'core:create_session' %}" method="post">
-                {% include "include/form_table_template.html" with form=create_session_form form_type='create_session_form' submit_button_label='Create Session' %}
-            </form>
+                <form action="{% url 'core:create_session' %}" method="post">
+                    {% include "include/form_table_template.html" with form=create_session_form form_type='create_session_form' submit_button_label='Create Session' %}
+                </form>
+            {% endif %}
         </section>
     {% endif %}
 {% endblock %}

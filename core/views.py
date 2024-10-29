@@ -5,6 +5,7 @@ import tempfile
 import zipfile
 from io import StringIO
 
+from django.conf import settings
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.core import management
 from django.core.exceptions import ObjectDoesNotExist
@@ -352,31 +353,35 @@ def create_session(request):
         raise Http404("This user cannot create sessions.")
 
     context = base_context_initialiser(request)
-    create_session_form = CreateSessionForm()
-    if request.method == "POST":
-        if "create_session_form" in request.POST:
-            create_session_form = CreateSessionForm(request.POST)
-            if create_session_form.is_valid():
-                session_obj = Session.objects.create(
-                    url_tag=create_session_form.cleaned_data["url_tag"],
-                    name=create_session_form.cleaned_data["name"],
-                    long_name=create_session_form.cleaned_data["long_name"],
-                    show_guest_login=create_session_form.cleaned_data[
-                        "show_guest_login"
-                    ],
-                    show_user_login=create_session_form.cleaned_data["show_user_login"],
-                    show_create_account=create_session_form.cleaned_data[
-                        "show_create_account"
-                    ],
-                    visible=create_session_form.cleaned_data["visible"],
-                )
-                session_obj.admins.add(request.user)
-                session_obj.super_admins.add(request.user)
-                create_session_form = CreateSessionForm()
-                context["created_session"] = session_obj
-        else:
-            raise Http404("POST request received but form type unknown.")
-    context["create_session_form"] = create_session_form
+    if len(context["user_administrated_sessions"]) >= settings.MAX_NUM_SESSION_PER_USER:
+        context["MAX_NUM_SESSION_PER_USER"] = settings.MAX_NUM_SESSION_PER_USER
+        context["max_num_session_reached"] = True
+    else:
+        create_session_form = CreateSessionForm()
+        if request.method == "POST":
+            if "create_session_form" in request.POST:
+                create_session_form = CreateSessionForm(request.POST)
+                if create_session_form.is_valid():
+                    session_obj = Session.objects.create(
+                        url_tag=create_session_form.cleaned_data["url_tag"],
+                        name=create_session_form.cleaned_data["name"],
+                        long_name=create_session_form.cleaned_data["long_name"],
+                        show_guest_login=create_session_form.cleaned_data[
+                            "show_guest_login"
+                        ],
+                        show_user_login=create_session_form.cleaned_data["show_user_login"],
+                        show_create_account=create_session_form.cleaned_data[
+                            "show_create_account"
+                        ],
+                        visible=create_session_form.cleaned_data["visible"],
+                    )
+                    session_obj.admins.add(request.user)
+                    session_obj.super_admins.add(request.user)
+                    create_session_form = CreateSessionForm()
+                    context["created_session"] = session_obj
+            else:
+                raise Http404("POST request received but form type unknown.")
+        context["create_session_form"] = create_session_form
     return render(request, "core/create_session.html", context)
 
 
@@ -668,57 +673,67 @@ def session_admin_games(request, session_url_tag):
     session_context_initialiser(request, session, context)
 
     # Create game form
-    create_game_form = CreateGameForm(session=session)
-    if request.method == "POST" and "create_game_form" in request.POST:
-        create_game_form = CreateGameForm(request.POST, session=session)
-        if create_game_form.is_valid():
-            games = session.games
-            if games.exists():
-                ordering_priority = (
-                    session.games.aggregate(Max("ordering_priority"))[
-                        "ordering_priority__max"
-                    ]
-                    + 1
-                )
-            else:
-                ordering_priority = 0
-            new_game = Game.objects.create(
-                game_type=create_game_form.cleaned_data["game_type"],
-                name=create_game_form.cleaned_data["name"],
-                url_tag=create_game_form.cleaned_data["url_tag"],
-                session=session,
-                playable=create_game_form.cleaned_data["playable"],
-                visible=create_game_form.cleaned_data["visible"],
-                results_visible=create_game_form.cleaned_data["results_visible"],
-                needs_teams=create_game_form.cleaned_data["needs_teams"],
-                description=create_game_form.cleaned_data["description"],
-                ordering_priority=ordering_priority,
-            )
-            if new_game.game_config().home_view is not None:
-                home_view = new_game.game_config().home_view
-            else:
-                all_url_names = new_game.all_url_names()
-                if "index" in all_url_names:
-                    home_view = "index"
+    if len(session.games.all()) >= settings.MAX_NUM_GAMES_PER_SESSION:
+        context["max_num_games_reached"] = True
+        context["MAX_NUM_GAMES_PER_SESSION"] = settings.MAX_NUM_GAMES_PER_SESSION
+    else:
+        create_game_form = CreateGameForm(session=session)
+        if request.method == "POST" and "create_game_form" in request.POST:
+            create_game_form = CreateGameForm(request.POST, session=session)
+            if create_game_form.is_valid():
+                games = session.games
+                if games.exists():
+                    ordering_priority = (
+                        session.games.aggregate(Max("ordering_priority"))[
+                            "ordering_priority__max"
+                        ]
+                        + 1
+                    )
                 else:
-                    home_view = all_url_names[0]
-            new_game.initial_view = home_view
-            new_game.view_after_submit = home_view
-            new_game.save()
-            create_game_form = CreateGameForm(session=session)
-            context["new_game"] = new_game
+                    ordering_priority = 0
+                new_game = Game.objects.create(
+                    game_type=create_game_form.cleaned_data["game_type"],
+                    name=create_game_form.cleaned_data["name"],
+                    url_tag=create_game_form.cleaned_data["url_tag"],
+                    session=session,
+                    playable=create_game_form.cleaned_data["playable"],
+                    visible=create_game_form.cleaned_data["visible"],
+                    results_visible=create_game_form.cleaned_data["results_visible"],
+                    needs_teams=create_game_form.cleaned_data["needs_teams"],
+                    description=create_game_form.cleaned_data["description"],
+                    ordering_priority=ordering_priority,
+                )
+                if new_game.game_config().home_view is not None:
+                    home_view = new_game.game_config().home_view
+                else:
+                    all_url_names = new_game.all_url_names()
+                    if "index" in all_url_names:
+                        home_view = "index"
+                    else:
+                        home_view = all_url_names[0]
+                new_game.initial_view = home_view
+                new_game.view_after_submit = home_view
+                new_game.save()
+                create_game_form = CreateGameForm(session=session)
+                context["new_game"] = new_game
 
-            game_config = new_game.game_config()
-            num_games_of_type = (
-                session.games.filter(game_type=new_game.game_type).count() - 1
-            )
-            all_illustrations = game_config.illustration_paths
-            new_game.illustration_path = all_illustrations[
-                num_games_of_type % len(all_illustrations)
-            ]
-            new_game.save()
-            if game_config.setting_model is not None:
-                game_config.setting_model.objects.create(game=new_game)
+                game_config = new_game.game_config()
+                num_games_of_type = (
+                    session.games.filter(game_type=new_game.game_type).count() - 1
+                )
+                all_illustrations = game_config.illustration_paths
+                new_game.illustration_path = all_illustrations[
+                    num_games_of_type % len(all_illustrations)
+                ]
+                new_game.save()
+                if game_config.setting_model is not None:
+                    game_config.setting_model.objects.create(game=new_game)
+
+        if "new_game" in context and len(session.games.all()) == settings.MAX_NUM_GAMES_PER_SESSION - 1:
+            context["max_num_games_reached"] = True
+            context["MAX_NUM_GAMES_PER_SESSION"] = settings.MAX_NUM_GAMES_PER_SESSION
+        else:
+            context["create_game_form"] = create_game_form
 
     # Delete game form
     if request.method == "POST" and "delete_game_form" in request.POST:
@@ -731,7 +746,6 @@ def session_admin_games(request, session_url_tag):
         Game.objects.filter(session=session).delete()
         context["all_games_deleted"] = True
 
-    context["create_game_form"] = create_game_form
     context["games"] = Game.objects.filter(session=session)
     return render(request, "core/session_admin_games.html", context)
 
@@ -844,6 +858,10 @@ def session_admin_players(request, session_url_tag):
     if request.method == "POST" and "delete_all_players_form" in request.POST:
         Player.objects.filter(session=session, is_guest=False).delete()
         context["all_players_deleted"] = True
+
+    if request.method == "POST" and "delete_all_random_players_form" in request.POST:
+        Player.objects.filter(session=session, is_guest=False, name__startswith='RandomPlayer_').delete()
+        context["all_random_players_deleted"] = True
 
     if request.method == "POST" and "delete_all_guests_form" in request.POST:
         Player.objects.filter(session=session, is_guest=True).delete()
@@ -1124,6 +1142,9 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
         # Delete all answers
         if request.method == "POST" and "delete_all_answers_form" in request.POST:
             answer_model.objects.filter(game=game).delete()
+            context["all_answers_deleted"] = True
+        if request.method == "POST" and "delete_all_random_answers_form" in request.POST:
+            answer_model.objects.filter(game=game, player__name__startswith='RandomPlayer_').delete()
             context["all_answers_deleted"] = True
 
         # Random answers

@@ -203,6 +203,12 @@
             </div>
         {% endif %}
 
+        {% if all_random_players_deleted %}
+            <div class="form-success-message">
+                <p>All the players whose name starts with 'RandomPlayer_' have been deleted from this session.</p>
+            </div>
+        {% endif %}
+
         {% if password_updated_player_name %}
             <div class="form-success-message">
                 <p>The password of player {{ password_updated_player_name }} has been successfully updated.</p>
@@ -244,6 +250,7 @@
                 {% csrf_token %}
                 <p class="center-align" style="margin-top: 20px">
                     <input class="button color-error" type="submit" name="delete_all_players_form" value="Delete All Players" onclick="return confirm('Deleting all the players is irreversible.')"/>
+                    <input class="button color-error" type="submit" name="delete_all_random_players_form" value="Delete All Random Players" onclick="return confirm('Deleting all the players is irreversible.')"/>
                 </p>
             </form>
         {% else %}

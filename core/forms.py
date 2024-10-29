@@ -5,7 +5,7 @@ from io import TextIOWrapper
 
 from django import forms
 from django.contrib.auth import authenticate
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django_recaptcha.fields import ReCaptchaField
 
 from core.games import INSTALLED_GAMES_CHOICES
@@ -675,7 +675,7 @@ class RandomPlayersForm(forms.Form):
 
 class RandomAnswersForm(forms.Form):
     num_answers = forms.IntegerField(
-        label="Number of answers", label_suffix="", validators=[MinValueValidator(1)]
+        label="Number of answers", label_suffix="", validators=[MinValueValidator(1), MaxValueValidator(50)]
     )
     run_management = forms.BooleanField(
         label="Run management commands",

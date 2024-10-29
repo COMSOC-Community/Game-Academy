@@ -140,6 +140,7 @@
                     {% csrf_token %}
                     <p class="center-align" style="margin-top: 20px">
                         <input class="button color-error" type="submit" name="delete_all_answers_form" value="Delete All Answers" onclick="return confirm('Deleting all the answers is irreversible.')"/>
+                        <input class="button color-error" type="submit" name="delete_all_random_answers_form" value="Delete All Random Answers" onclick="return confirm('Deleting all the random answers is irreversible.')"/>
                     </p>
                 </form>
             {% else %}
