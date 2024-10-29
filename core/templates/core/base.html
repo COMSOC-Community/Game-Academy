@@ -32,19 +32,18 @@
             <div id="side-panel-toggle-out" class="side-panel-toggle">&#9654;</div>
             <div id="side-panel" class="side-panel">
 
-                <h3>
-                    {{ user.display_name }}
-                    <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
+            <div id="side-panel-header">
+                    <div id="side-panel-username-wrap">
+                        <span>{{ user.display_name }}</span>
+                        <span class="logout-button"><a class="button" href="{% url 'core:logout' %}{% block logout_next %}{% endblock %}">Logout</a></span>
+                    </div>
                     <div id="side-panel-toggle-in" class="side-panel-toggle"><span>&#9664;</span></div>
-                </h3>
+                </div>
 
             {% if not user_is_only_guest %}
                 <div class="side-panel-content">
                     {% if not user_is_only_guest %}
                         <p class="center-align"><a class="button process-button" href="{% url 'core:change_password' user.id %}">Change your Password</a></p>
-                    {% endif %}
-                    {% if not user_is_only_player %}
-                        <p class="center-align"><a class="button process-button" href="{% url 'core:user_profile' user.id %}">View/Edit your profile</a></p>
                     {% endif %}
                 </div>
             {% endif %}
@@ -68,7 +67,13 @@
     </main>
 
     <footer id="main-footer">
-        <p>&copy; 2024 Simon Rey</p>
+        <div class="footer-wrap">
+            <div class="footer-element button navigation-button"><a href="{% url 'core:index' %}">Main page</a></div>
+            <div class="footer-element button navigation-button"><a href="{% url 'core:about' %}">About</a></div>
+        </div>
+        <div class="footer-wrap">
+            <div class="footer-element">&copy; 2024 Simon Rey</div>
+        </div>
     </footer>
 
     {% block extra_scripts %}{% endblock %}

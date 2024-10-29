@@ -1,13 +1,12 @@
-import csv
 import os
 import random
 
-from django.http import HttpResponse
 from django.shortcuts import render
 
 from core.game_views import GameResultsView, GameSubmitAnswerView, GameIndexView
 from .forms import SubmitAnswerForm
-from .models import Answer
+from .models import Answer, Result
+from .samplers import ALL_SAMPLERS
 
 
 class Index(GameIndexView):
@@ -22,10 +21,12 @@ class SubmitAnswer(GameSubmitAnswerView):
         submitting_player = self.context["submitting_player"]
         if submitting_player:
             if not self.context["answer"]:
+                auction_id = random.randint(1, self.game.auction_setting.number_auctions)
                 answer = Answer.objects.create(
                     game=self.game,
                     player=submitting_player,
-                    auction_id=random.randint(1, 5),
+                    auction_id=auction_id,
+                    valuation=ALL_SAMPLERS[self.game.auction_setting.valuation_sampler].sample(auction_id),
                     bid=None,
                     utility=None,
                     motivation="",
@@ -71,12 +72,11 @@ class Results(GameResultsView):
         context = self.context
 
         answers = Answer.objects.filter(game=self.game).order_by("auction_id", "-bid")
+        unique_auction_ids = answers.values_list('auction_id', flat=True).distinct()
         context["answers"] = answers
         answers_per_auction = {
-            str(auction_id): answers.filter(
-                auction_id=auction_id, bid__isnull=False
-            ).order_by("-bid")
-            for auction_id in range(1, 6)
+            auction_id: Answer.objects.filter(auction_id=auction_id).order_by('-bid')
+            for auction_id in unique_auction_ids
         }
         context["answers_per_auction"] = answers_per_auction
         formatted_winners = {str(auction_id): "" for auction_id in range(1, 6)}
@@ -90,6 +90,10 @@ class Results(GameResultsView):
                     if len(winners_formatted) > 1:
                         winners_formatted[-1] = "and " + winners_formatted[-1]
                     formatted_winners[auction_id] = ", ".join(winners_formatted)
+        all_results = Result.objects.filter(game=self.game)
+        context["result_per_auction"] = {
+            auction_id: all_results.filter(auction_id=auction_id).first() for auction_id in unique_auction_ids
+        }
         context["formatted_winners"] = formatted_winners
         global_winning_answers = answers.filter(winning_global=True)
         if global_winning_answers:

@@ -212,12 +212,12 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
     else:
         context["submitting_player"] = player
 
-    context["game_nav_display_home"] = True
+    context["game_nav_display_home"] = session.show_game_nav_home
     context["game_nav_display_team"] = game.needs_teams and game.playable and not team
     context["game_nav_display_answer"] = (
         game.playable and not answer and not context["game_nav_display_team"]
     )
-    context["game_nav_display_result"] = game.results_visible
+    context["game_nav_display_result"] = game.results_visible and session.show_game_nav_home
 
     if context["user_is_session_admin"]:
         num_players = game.session.players.filter(is_team_player=False).count()
@@ -296,6 +296,10 @@ def index(request):
     return render(request, "core/index.html", context=context)
 
 
+def about(request):
+    context = base_context_initialiser(request)
+    return render(request, "core/about.html", context=context)
+
 # ================
 #    USER VIEWS
 # ================
@@ -308,13 +312,6 @@ def logout_user(request):
         if validate_next_url(request, next_url):
             return redirect(next_url)
     return redirect("core:index")
-
-
-def user_profile(request, user_id):
-    user = get_object_or_404(CustomUser, id=user_id)
-    if request.user != user:
-        raise Http404("This page is not the business of the logged-in user.")
-    return render(request, "core/user_profile.html")
 
 
 def change_password(request, user_id):
@@ -558,6 +555,14 @@ def session_admin(request, session_url_tag):
                 if "show_side_panel" in modify_session_form.cleaned_data:
                     session.show_side_panel = modify_session_form.cleaned_data[
                         "show_side_panel"
+                    ]
+                if "show_game_nav_home" in modify_session_form.cleaned_data:
+                    session.show_game_nav_home = modify_session_form.cleaned_data[
+                        "show_game_nav_home"
+                    ]
+                if "show_game_nav_result" in modify_session_form.cleaned_data:
+                    session.show_game_nav_result = modify_session_form.cleaned_data[
+                        "show_game_nav_result"
                     ]
                 session.save()
 
@@ -982,6 +987,8 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 
         context["create_team_form"] = create_team_form
         context["join_private_team_form"] = join_private_team_form
+        if join_public_team_form.team_count == 0:
+            join_public_team_form = None
         context["join_public_team_form"] = join_public_team_form
 
     return render(request, "core/team.html", context)

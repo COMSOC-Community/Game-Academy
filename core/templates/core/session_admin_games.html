@@ -76,14 +76,14 @@
                 {% for game in games %}
                     <tr>
                         <td>{{ game.name }}</td>
-                        <td>{{ game.game_type }}</td>
+                        <td>{{ game.game_config.long_name }}</td>
                         <td>
                             {% with game.game_config.url_namespace|add:':'|add:game.initial_view as index_url_shortcut %}
                                 <a class="button navigation-button" href="{% url index_url_shortcut session.url_tag game.url_tag %}">Game Home</a>
                             {% endwith %}
                         </td>
                         <td>
-                            <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}">Admin Pages</a>
+                            <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag game.url_tag %}">Game Admin Pages</a>
                         </td>
                         <td>
                             <form action="{% url 'core:session_admin_games' session.url_tag %}#games" method="post">

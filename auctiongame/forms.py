@@ -1,6 +1,12 @@
 from django import forms
 
-from auctiongame.models import Answer
+from auctiongame.models import Answer, Setting
+
+
+class SettingForm(forms.ModelForm):
+    class Meta:
+        model = Setting
+        exclude = ["game"]
 
 
 class SubmitAnswerForm(forms.Form):

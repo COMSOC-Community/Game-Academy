@@ -2,5 +2,4 @@ django
 numpy
 gunicorn
 mysqlclient
-whitenoise
-psycopg2
+django-recaptcha

@@ -41,6 +41,8 @@ class Session(models.Model):
         blank=True,
     )
     show_side_panel = models.BooleanField(default=True)
+    show_game_nav_home = models.BooleanField(default=True)
+    show_game_nav_result = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["url_tag"]

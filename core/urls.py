@@ -9,10 +9,10 @@ from . import views
 app_name = "core"
 urlpatterns = [
     path("", views.index, name="index"),
+    path("about/", views.about, name="about"),
     path("createsession/", views.create_session, name="create_session"),
     path("message/", views.message, name="message"),
     path("logout/", views.logout_user, name="logout"),
-    path("user/<int:user_id>/", views.user_profile, name="user_profile"),
     path("user/<int:user_id>/password/", views.change_password, name="change_password"),
     path(
         "<slug:session_url_tag>/",

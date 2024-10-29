@@ -6,6 +6,7 @@ from io import TextIOWrapper
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import MinValueValidator
+from django_recaptcha.fields import ReCaptchaField
 
 from core.games import INSTALLED_GAMES_CHOICES
 from core.models import Session, Player, Game, Team, CustomUser
@@ -203,6 +204,21 @@ class CreateSessionForm(forms.Form):
         required=False,
         help_text="If unselected, the players will not see the side panel, on admins will."
     )
+    show_game_nav_home = forms.BooleanField(
+        label="Show Game Home Navigation",
+        label_suffix="",
+        required=False,
+        help_text="If unselected, the home navigation buttons at the bottom of a game page content "
+                  "will not be displayed."
+    )
+    show_game_nav_result = forms.BooleanField(
+        label="Show Game Result Navigation",
+        label_suffix="",
+        required=False,
+        help_text="If unselected, the result navigation buttons at the bottom of a game page content "
+                  "will not be displayed."
+    )
+    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop(
@@ -220,6 +236,8 @@ class CreateSessionForm(forms.Form):
                     "visible": self.session.visible,
                     "game_after_logging": self.session.game_after_logging,
                     "show_side_panel": self.session.show_side_panel,
+                    "show_game_nav_home": self.session.show_game_nav_home,
+                    "show_game_nav_result": self.session.show_game_nav_result,
                 }
             )
         super(CreateSessionForm, self).__init__(*args, **kwargs)
@@ -230,6 +248,7 @@ class CreateSessionForm(forms.Form):
                 self.fields["game_after_logging"].queryset = games
             else:
                 self.fields.pop("game_after_logging")
+            self.fields.pop("captcha")
         else:
             self.fields.pop("game_after_logging")
             self.fields.pop("show_side_panel")
@@ -793,6 +812,10 @@ class JoinPublicTeamForm(forms.Form):
         super(JoinPublicTeamForm, self).__init__(*args, **kwargs)
         self.fields["team"].queryset = Team.objects.filter(game=self.game, is_public=True)
         self.fields["team"].label_from_instance = self.team_to_label
+
+    @property
+    def team_count(self):
+        return self.fields["team"].queryset.count()
 
     @staticmethod
     def team_to_label(team):

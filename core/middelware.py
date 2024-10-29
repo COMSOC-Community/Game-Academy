@@ -11,6 +11,7 @@ from core.models import Session, Game
 # Views that do not require authenticated users
 OPEN_VIEWS = {
     "core:index",
+    "core:about",
     "core:logout",
     "core:message",
     "core:session_portal",

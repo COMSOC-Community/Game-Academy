@@ -1,26 +1,36 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Welcome to Game Server{% endblock %}
+{% block title %}Welcome to Game Academy{% endblock %}
 
 {% block header %}
-    <h1>Welcome to the Game Server</h1>
+    <h1>Welcome to the Game Academy</h1>
     <p>Learn while playing, and play while learning!</p>
 {% endblock %}
 
 {% block content %}
 
     <section>
-        <h2>The Game Server</h2>
+        <h2>The Game Academy</h2>
         <p>
-            Welcome to the Game Server! This platform allows anyone to organize game sessions in which anyone can play
-            games inspired from game theory to learn while playing, and to play while learning.
+            Explore, play, and learn at the game academy—a platform where education meets entertainment
+            through interactive games designed to introduce concepts in Game Theory, Theoretical
+            Computer Science, and beyond. Created for curious minds and designed to make complex
+            theories accessible, the game academy is ideal for university classrooms, workshops, and
+            public outreach events.
+        </p>
+
+        <p>
+            Games have been designed to help you delve into strategic decision-making, competition,
+            cooperation, and the core principles that shape fields like economics, computing, and
+            social sciences. Dive into the games, experiment with strategies, and gain insights that
+            go beyond the classroom.
         </p>
     </section>
 
     <section>
         <h2>Get Started</h2>
 
-        <p>Ready to play? Find your session!</p>
+        <p>Ready to play? If you already are part of a session, access it now:</p>
 
         <form action="{% url 'core:index' %}" method="post">
             {% include "include/form_top_template.html" with form=session_finder_form form_type='session_finder' submit_button_label='Go to session' %}
@@ -38,6 +48,18 @@
             </table>
         </form>
     </section>
+
+    {% if user_is_authenticated %}
+        <section>
+            <h2>Create a Session</h2>
+
+            <p>Want to organise a session? Then, start by creating one.</p>
+
+            <div class="center-align">
+                <a class="button navigation-button" href="{% url 'core:create_session' %}">Create a session</a>
+            </div>
+        </section>
+    {% endif %}
 
     {% if not user_is_authenticated %}
         <section>
@@ -58,6 +80,7 @@
                         <div class="form-success-message">User <em>{{ created_user.username }}</em> has been created. You can now log in.</div>
                     {% else %}
                         <form action="{% url 'core:index' %}" method="post">
+                            <div class="g-recaptcha" data-sitekey="KEY_ID" data-action="REGISTER"></div>
                             {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register' %}
                         </form>
                     {% endif %}

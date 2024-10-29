@@ -11,7 +11,7 @@ def get_key_dict(d, key):
 
 @register.filter
 def get_attr(obj, attr):
-    return getattr(obj, attr)
+    return getattr(obj, str(attr))
 
 
 @register.filter

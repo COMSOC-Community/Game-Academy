@@ -69,22 +69,26 @@
                     </section>
                 {% endif %}
 
-                {% if join_public_team_form %}
-                    <section id="join_public">
-                        <h2>Join a Public Team</h2>
+                <section id="join_public">
+                    <h2>Join a Public Team</h2>
 
-                        <p>
-                            Some teams are public, meaning that anyone can join them. If you want to
-                            join such team, just select it in the list below.
-                        </p>
+                    <p>
+                        Some teams are public, meaning that anyone can join them.
+                        {% if join_public_team_form %}
+                            If you want to join such team, just select it in the list below.
+                        {% else %}
+                            There is so far no such team.
+                        {% endif %}
+                    </p>
 
+                    {% if join_public_team_form %}
                         {% with 'core:'|add:game.game_config.url_tag|add:'_team' as url_name %}
                             <form action="{% url url_name session.url_tag game.url_tag %}" method="post">
                                 {% include "include/form_table_template.html" with form=join_public_team_form form_type='join_public_team_form' submit_button_label='Join Team' %}
                             </form>
                         {% endwith %}
-                    </section>
-                {% endif %}
+                    {% endif %}
+                </section>
             {% endif %}
         {% endif %}
     {% endif %}

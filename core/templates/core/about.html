@@ -1,0 +1,19 @@
+{% extends 'core/base.html' %}
+
+{% block title %}About to Game Academy{% endblock %}
+
+{% block header %}
+    <h1>About to the Game Academy</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="center-align">
+        <a class="button navigation-button" href="{% url 'core:index' %}">To the main page</a>
+    </div>
+    <section>
+        <p>
+            The game academy has been developed at the <a href="https://www.uva.nl/">University of Amsterdam</a>
+            in the Computational Social Choice Group led by <a href="https://staff.science.uva.nl/u.endriss/">Ulle Endriss</a>.
+        </p>
+    </section>
+{% endblock %}

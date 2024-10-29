@@ -1,6 +1,6 @@
 import csv
 
-from auctiongame.models import Answer
+from auctiongame.models import Answer, Setting
 
 
 def answers_to_csv(writer, game):
@@ -30,5 +30,25 @@ def answers_to_csv(writer, game):
                 answer.winning_global,
                 answer.motivation,
                 answer.submission_time,
+            ]
+        )
+
+
+def settings_to_csv(writer, game):
+    setting = None
+    try:
+        setting = game.auction_setting
+    except Setting.DoesNotExist:
+        pass
+    if setting:
+        writer = csv.writer(writer)
+        writer.writerow(
+            [
+                "number_auctions",
+            ]
+        )
+        writer.writerow(
+            [
+                setting.number_auctions,
             ]
         )
