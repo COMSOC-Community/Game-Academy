@@ -81,6 +81,7 @@ class UserRegistrationForm(forms.Form):
         label="Repeat Password",
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
     )
+    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
@@ -93,6 +94,7 @@ class UserRegistrationForm(forms.Form):
                 self.fields["username"].initial = self.user.players.first().name
             else:
                 self.fields["username"].initial = self.user.username
+            self.fields.pop("captcha")
 
     def clean_username(self):
         username = self.cleaned_data["username"]
@@ -380,6 +382,7 @@ class PlayerRegistrationForm(forms.Form):
     password2 = forms.CharField(
         label="Repeat password", label_suffix="", widget=forms.PasswordInput()
     )
+    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session")
@@ -392,6 +395,7 @@ class PlayerRegistrationForm(forms.Form):
         if self.player:
             self.fields["player_name"].initial = self.player.name
             self.fields["player_name"].disabled = True
+            self.fields.pop("captcha")
 
     def clean_password1(self):
         password1 = self.cleaned_data["password1"]
