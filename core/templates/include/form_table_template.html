@@ -49,7 +49,6 @@
 
 <script>
     function showHelpText(event, helpText, forId) {
-        console.log("qsd");
         event.stopPropagation(); // Prevents event bubbling
 
         const bubble = document.getElementById('form-info-bubble');
@@ -65,12 +64,9 @@
 
     // Hide the bubble when clicking elsewhere
     document.addEventListener('click', function(event) {
-        console.log("aze");
         const bubble = document.getElementById('form-info-bubble');
         const inputId = bubble.getAttribute('data-for');
         const inputElement = document.getElementById(inputId);
-        console.log(event.target);
-        console.log(event.target.closest('.info-span'));
         if (!bubble.contains(event.target) && !(inputElement && event.target === inputElement)) {
             bubble.style.display = 'none';
         }
