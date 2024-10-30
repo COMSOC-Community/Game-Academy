@@ -52,22 +52,30 @@
     <section id="random_players">
         <h2>Populate with Random Players</h2>
 
-        <p>You can use the following form to add random players to the session.</p>
+        {% if max_num_random_players_reached %}
+            <p>
+                This session already has {{ num_random_players }} randomly generated player{{ num_random_players|pluralize }}
+                which is above the limit ({{ MAX_NUM_RANDOM_PER_SESSION }} player{{ num_random_players|pluralize }}).
+                Remove some randomly generated players to be able to add new ones.
+            </p>
+        {% else %}
+            <p>You can use the following form to add random players to the session.</p>
 
-        {% if random_players_error %}
-            <div class="form-error-message">
-                <p>An error occurred while generating random players: {{ random_players_error }}.</p>
-            </div>
+            {% if random_players_error %}
+                <div class="form-error-message">
+                    <p>An error occurred while generating random players: {{ random_players_error }}.</p>
+                </div>
+            {% endif %}
+            {% if random_players_log %}
+                <div class="form-success-message">
+                    <p style="margin-bottom: 20px;">Random players successfully generated. Here is the log.</p>
+                    {{ random_players_log|linebreaks }}
+                </div>
+            {% endif %}
+            <form action="{% url 'core:session_admin_players' session.url_tag %}#random_players" method="post">
+                {% include 'include/form_table_template.html' with form=random_players_form form_type='random_players_form' submit_button_label='Generate Random Players' %}
+            </form>
         {% endif %}
-        {% if random_players_log %}
-            <div class="form-success-message">
-                <p style="margin-bottom: 20px;">Random players successfully generated. Here is the log.</p>
-                {{ random_players_log|linebreaks }}
-            </div>
-        {% endif %}
-        <form action="{% url 'core:session_admin_players' session.url_tag %}#random_players" method="post">
-            {% include 'include/form_table_template.html' with form=random_players_form form_type='random_players_form' submit_button_label='Generate Random Players' %}
-        </form>
     </section>
 
     <section id="import_players">
@@ -169,7 +177,7 @@
         </div>
 
         <p style="margin-bottom: 0;"><i class="fas fa-crown"></i> : super admin</p>
-        <p><i class="fas fa-user"></i> : user limited to this session</p>
+        <p><i class="fas fa-user"></i> : user is restricted to this session</p>
 
         {% if new_admin %}
             <div class="form-success-message">
@@ -249,7 +257,7 @@
             </div>
 
             <p style="margin-bottom: 0;"><i class="fa-solid fa-dice"></i> : randomly generated</p>
-            <p><i class="fas fa-user"></i> : user limited to this session</p>
+            <p><i class="fas fa-user"></i> : user is restricted to this session</p>
 
             <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
                 {% csrf_token %}

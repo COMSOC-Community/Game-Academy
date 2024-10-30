@@ -1,136 +1,97 @@
-from copy import deepcopy
-from numpy import linspace
-
+import numpy as np
+from django.db import models, transaction
 from django.core.management.base import BaseCommand
-
 from auctiongame.models import Answer, Result
 from core.models import Session, Game
-
 from auctiongame.apps import NAME
 
 
 class Command(BaseCommand):
-    help = "Updates the values required for the global_results page, to be run each time a new answer is submitted."
+    help = "Updates values for the global_results page. Run each time a new answer is submitted."
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)
         parser.add_argument("--game", type=str, required=True)
 
     def handle(self, *args, **options):
-        if not options["session"]:
-            self.stderr.write(
-                "ERROR: you need to give the URL tag of a session with the --session argument"
-            )
-            return
+        # Retrieve session and game
         session = Session.objects.filter(url_tag=options["session"]).first()
         if not session:
-            self.stderr.write(
-                "ERROR: no session with URL tag {} has been found".format(
-                    options["session"]
-                )
-            )
+            self.stderr.write(f"ERROR: No session found with URL tag {options['session']}")
             return
 
-        if not options["game"]:
-            self.stderr.write(
-                "ERROR: you need to give the URL tag of a game with the --game argument"
-            )
-            return
-        game = Game.objects.filter(
-            session=session, url_tag=options["game"], game_type=NAME
-        ).first()
+        game = Game.objects.filter(session=session, url_tag=options["game"], game_type=NAME).first()
         if not game:
-            self.stderr.write(
-                "ERROR: no game with URL tag {} has been found".format(options["game"])
-            )
+            self.stderr.write(f"ERROR: No game found with URL tag {options['game']}")
             return
 
+        # Retrieve all answers and compute initial utilities
         all_answers = Answer.objects.filter(game=game)
-        for answer in all_answers:
-            answer.utility = answer.valuation - answer.bid
-        Answer.objects.bulk_update(all_answers, ["utility"])
+        all_answers.update(utility=models.F('valuation') - models.F('bid'))  # Utility bulk update
 
         global_highest_utility = None
-        global_winner = None
-        unique_auction_ids = all_answers.values_list('auction_id', flat=True).distinct()
+        global_winner = []
+
+        results_to_update = []
+        results_to_create = []
+        answers_to_update = []
+
+        unique_auction_ids = all_answers.values_list("auction_id", flat=True).distinct()
         for auction_id in unique_auction_ids:
+            # Get or initialize Result object
+            result, created = Result.objects.get_or_create(game=game, auction_id=auction_id)
+
             answers = all_answers.filter(auction_id=auction_id, bid__isnull=False)
-            if answers:
-                bids = answers.values_list('bid', flat=True)
-                bids_category_labels = linspace(
-                    int(min(bids)),
-                    int(max(bids)) + 1,
-                    (int(max(bids)) + 1 - int(min(bids))) * 4 + 1,
-                )
-                bids_categories = {i: 0 for i in bids_category_labels}
-                for bid in bids:
-                    previous_label = bids_category_labels[0]
-                    for label in bids_category_labels:
-                        if label > bid:
-                            break
-                        previous_label = label
-                    if previous_label is not None:
-                        bids_categories[previous_label] += 1
 
-                valuations = answers.values_list('valuation', flat=True)
-                val_category_labels = range(min(valuations), max(valuations) + 1)
-                val_categories = {i: 0 for i in val_category_labels}
-                for val in valuations:
-                    previous_label = bids_category_labels[0]
-                    for label in bids_category_labels:
-                        if label > val:
-                            break
-                        previous_label = label
-                    if previous_label is not None:
-                        val_categories[previous_label] += 1
-                Result.objects.update_or_create(
-                    game=game,
-                    auction_id=auction_id,
-                    defaults={
-                        "histo_bids_js_data": "\n".join(["['{}', {}],".format(key, val)for key, val in bids_categories.items()]),
-                        "histo_val_js_data": "\n".join(["['{}', {}],".format(key, val)for key, val in val_categories.items()])
-                    }
-                )
+            if not answers:
+                continue
 
-                highest_bid = None
-                local_winners = None
-                for answer in answers:
-                    if highest_bid is None or answer.bid > highest_bid:
-                        highest_bid = answer.bid
-                        local_winners = [answer]
-                    elif answer.bid == highest_bid:
-                        local_winners.append(answer)
-                    answer.winning_auction = False
-                    answer.winning_global = False
-                    answer.save()
-                for answer in answers:
-                    if answer not in local_winners:
-                        answer.utility = 0
-                        answer.save()
-                winning_utility = local_winners[0].utility
-                if winning_utility < 0:
-                    new_local_winners = [
-                        answer for answer in answers if answer not in local_winners
-                    ]
-                elif winning_utility == 0:
-                    new_local_winners = list(answers)
-                else:
-                    new_local_winners = local_winners
-                for answer in new_local_winners:
-                    answer.winning_auction = True
-                    answer.save()
-                if new_local_winners:
-                    new_winning_utility = new_local_winners[0].utility
-                    if (
-                        global_highest_utility is None
-                        or new_winning_utility > global_highest_utility
-                    ):
-                        global_highest_utility = new_winning_utility
-                        global_winner = deepcopy(new_local_winners)
-                    elif new_winning_utility == global_highest_utility:
-                        for answer in new_local_winners:
-                            global_winner.append(answer)
-        if global_winner is not None:
-            for answer in global_winner:
-                answer.winning_global = True
-                answer.save()
+            # Process histogram data for bids
+            bids = np.array(answers.filter(auction_id=auction_id).values_list("bid", flat=True))
+            bid_lb, bid_up = int(bids.min()), int(bids.max()) + 1
+            bid_bins, bid_counts = np.histogram(bids, bins=np.linspace(bid_lb, bid_up,
+                                                                       (bid_up - bid_lb) * 4 + 1))
+            result.histo_bids_js_data = "\n".join(
+                [f"['{count}', {bin}]," for bin, count in zip(bid_bins, bid_counts)])
+
+            # Process histogram data for valuations
+            valuations = np.array(
+                answers.filter(auction_id=auction_id).values_list("valuation", flat=True))
+            val_min, val_max = valuations.min(), valuations.max()
+            val_bins, val_counts = np.histogram(valuations, bins=np.arange(val_min, val_max + 2))
+            result.histo_val_js_data = "\n".join(
+                [f"['{count}', {bin}]," for bin, count in zip(val_bins, val_counts)])
+
+            if created:
+                results_to_create.append(result)
+            else:
+                results_to_update.append(result)
+
+            # Determine auction winners
+            highest_bid = bids.max()
+            local_winners = [a for a in answers if a.bid == highest_bid]
+            for answer in answers:
+                answer.winning_auction = answer in local_winners
+                answer.utility = answer.utility if answer in local_winners else 0
+                answers_to_update.append(answer)
+
+            # Global winner selection
+            winning_utility = local_winners[0].utility
+            if global_highest_utility is None or winning_utility > global_highest_utility:
+                global_highest_utility = winning_utility
+                global_winner = local_winners
+            elif winning_utility == global_highest_utility:
+                global_winner.extend(local_winners)
+
+            # Update all global winner flags and save updates in bulk
+        for answer in global_winner:
+            answer.winning_global = True
+            answers_to_update.append(answer)
+
+        # Save all results in a single transaction
+        with transaction.atomic():
+            Result.objects.bulk_create(results_to_create, ignore_conflicts=True)
+            Result.objects.bulk_update(results_to_update,
+                                       ["histo_bids_js_data", "histo_val_js_data"])
+            Answer.objects.bulk_update(answers_to_update,
+                                       ["utility", "winning_auction", "winning_global"])

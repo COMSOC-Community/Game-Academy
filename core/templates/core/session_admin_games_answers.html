@@ -37,26 +37,37 @@
         {% endif %}
     </section>
 
-    {% if random_answers_form %}
+    {% if random_answers_form or max_num_random_players_reached %}
         <section id="random_answers">
             <h2>Populate with Random Answers</h2>
 
-            <p>You can use the following form to add random answers to this game.</p>
+            {% if max_num_random_players_reached %}
+                <p>
+                    This session already has {{ num_random_players }} randomly generated player{{ num_random_players|pluralize }}
+                    which is above the limit ({{ MAX_NUM_RANDOM_PER_SESSION }} player{{ num_random_players|pluralize }}).
+                    Remove some randomly generated players to be able to add new ones.
+                </p>
+                <p>
+                    Note that count operates across games, not just for this specific one.
+                </p>
+            {% else %}
+                <p>You can use the following form to add random answers to this game.</p>
 
-            {% if random_answers_error %}
-                <div class="form-error-message">
-                    <p>An error occurred while generating random answers: {{ random_answers_error }}.</p>
-                </div>
+                {% if random_answers_error %}
+                    <div class="form-error-message">
+                        <p>An error occurred while generating random answers: {{ random_answers_error }}.</p>
+                    </div>
+                {% endif %}
+                {% if random_answers_log %}
+                    <div class="form-success-message">
+                        <p style="margin-bottom: 20px;">Random players successfully generated. Here is the log.</p>
+                        {{ random_answers_log|linebreaks }}
+                    </div>
+                {% endif %}
+                <form action="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}#random_answers" method="post">
+                    {% include 'include/form_table_template.html' with form=random_answers_form form_type='random_answers_form' submit_button_label='Generate Random Answers' %}
+                </form>
             {% endif %}
-            {% if random_answers_log %}
-                <div class="form-success-message">
-                    <p style="margin-bottom: 20px;">Random players successfully generated. Here is the log.</p>
-                    {{ random_answers_log|linebreaks }}
-                </div>
-            {% endif %}
-            <form action="{% url 'core:session_admin_games_answers' session.url_tag game.url_tag %}#random_answers" method="post">
-                {% include 'include/form_table_template.html' with form=random_answers_form form_type='random_answers_form' submit_button_label='Generate Random Answers' %}
-            </form>
         </section>
     {% endif %}
 

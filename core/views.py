@@ -16,6 +16,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from gameserver.local_settings import MAX_NUM_RANDOM_PER_SESSION
 from .authorisations import (
     can_create_sessions,
     is_session_admin,
@@ -795,27 +796,33 @@ def session_admin_players(request, session_url_tag):
     context["add_player_form"] = add_player_form
 
     # Random players form
-    random_players_form = RandomPlayersForm()
-    if request.method == "POST" and "random_players_form" in request.POST:
-        random_players_form = RandomPlayersForm(request.POST)
-        if random_players_form.is_valid():
-            num_players = random_players_form.cleaned_data["num_players"]
+    num_random_players = Player.objects.filter(session=session, user__is_random_player=True).count()
+    if num_random_players >= MAX_NUM_RANDOM_PER_SESSION:
+        context["max_num_random_players_reached"] = True
+        context["MAX_NUM_RANDOM_PER_SESSION"] = MAX_NUM_RANDOM_PER_SESSION
+        context["num_random_players"] = num_random_players
+    else:
+        random_players_form = RandomPlayersForm()
+        if request.method == "POST" and "random_players_form" in request.POST:
+            random_players_form = RandomPlayersForm(request.POST)
+            if random_players_form.is_valid():
+                num_players = random_players_form.cleaned_data["num_players"]
 
-            try:
-                out = StringIO()
-                params = {"stdout": out}
-                management.call_command(
-                    "generate_random_players",
-                    num_players,
-                    session=session.url_tag,
-                    **params,
-                )
-                context["random_players_log"] = out.getvalue()
-                random_players_form = RandomPlayersForm()
-            except Exception as e:
-                context["random_players_error"] = e.__repr__()
-                raise e
-    context["random_players_form"] = random_players_form
+                try:
+                    out = StringIO()
+                    params = {"stdout": out}
+                    management.call_command(
+                        "generate_random_players",
+                        num_players,
+                        session=session.url_tag,
+                        **params,
+                    )
+                    context["random_players_log"] = out.getvalue()
+                    random_players_form = RandomPlayersForm()
+                except Exception as e:
+                    context["random_players_error"] = e.__repr__()
+                    raise e
+        context["random_players_form"] = random_players_form
 
     # Import player CSV form
     import_player_csv_form = ImportCSVFileForm()
@@ -1150,29 +1157,35 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
 
         # Random answers
         if game.game_config().random_answers_func is not None:
-            random_answers_form = RandomAnswersForm()
-            if request.method == "POST" and "random_answers_form" in request.POST:
-                random_answers_form = RandomAnswersForm(request.POST)
-                if random_answers_form.is_valid():
-                    num_answers = random_answers_form.cleaned_data["num_answers"]
-                    run_management = random_answers_form.cleaned_data["run_management"]
-                    try:
-                        out = StringIO()
-                        params = {"stdout": out}
-                        management.call_command(
-                            "generate_random_answers",
-                            num_answers,
-                            session=session.url_tag,
-                            game=game.url_tag,
-                            run_management=run_management,
-                            **params,
-                        )
-                        context["random_answers_log"] = out.getvalue()
-                        random_answers_form = RandomAnswersForm()
-                    except Exception as e:
-                        context["random_answers_error"] = e.__repr__()
-                        raise e
-            context["random_answers_form"] = random_answers_form
+            num_random_players = Player.objects.filter(session=session, user__is_random_player=True).count()
+            if num_random_players >= MAX_NUM_RANDOM_PER_SESSION:
+                context["max_num_random_players_reached"] = True
+                context["MAX_NUM_RANDOM_PER_SESSION"] = MAX_NUM_RANDOM_PER_SESSION
+                context["num_random_players"] = num_random_players
+            else:
+                random_answers_form = RandomAnswersForm()
+                if request.method == "POST" and "random_answers_form" in request.POST:
+                    random_answers_form = RandomAnswersForm(request.POST)
+                    if random_answers_form.is_valid():
+                        num_answers = random_answers_form.cleaned_data["num_answers"]
+                        run_management = random_answers_form.cleaned_data["run_management"]
+                        try:
+                            out = StringIO()
+                            params = {"stdout": out}
+                            management.call_command(
+                                "generate_random_answers",
+                                num_answers,
+                                session=session.url_tag,
+                                game=game.url_tag,
+                                run_management=run_management,
+                                **params,
+                            )
+                            context["random_answers_log"] = out.getvalue()
+                            random_answers_form = RandomAnswersForm()
+                        except Exception as e:
+                            context["random_answers_error"] = e.__repr__()
+                            raise e
+                context["random_answers_form"] = random_answers_form
 
         # Name of the fields of the answer model
         answer_model_fields = game.game_config().answer_model_fields

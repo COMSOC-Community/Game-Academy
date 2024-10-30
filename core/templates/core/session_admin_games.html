@@ -39,7 +39,7 @@
                     {% with new_game.game_config.url_namespace|add:':'|add:new_game.initial_view as index_url_shortcut %}
                         <a class="admin-nav-item button navigation-button" href="{% url index_url_shortcut session.url_tag new_game.url_tag %}">To the Game</a>
                     {% endwith %}
-                    <a class="admin-nav-item button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag new_game.url_tag %}">To the Settings</a>
+                    <a class="admin-nav-item button navigation-button color-warning-dark" href="{% url 'core:session_admin_games_settings' session.url_tag new_game.url_tag %}">To the game settings</a>
                 </div>
             </div>
         {% endif %}

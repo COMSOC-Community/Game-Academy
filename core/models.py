@@ -86,7 +86,7 @@ class Player(models.Model):
 def delete_user_after_player(sender, instance, using, **kwargs):
     if not instance.is_team_player:
         user = instance.user
-        if user.is_player:
+        if user.is_player and user.id is not None:
             user.delete()
 
 
