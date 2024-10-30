@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}{% load static %}
+
+{% load core_extras %}
+
+{% block title %}Change Password{% endblock %}
+
+{% block header %}
+    <h1>Update Password</h1>
+{% endblock %}
+
+{% block content %}
+    <section id="password">
+        <h2>Change your Password</h2>
+        {% if update_password_form %}
+            <form action="{% url 'core:user_profile' user.id %}#password" method="post">
+                {% include "include/form_table_template.html" with form=update_password_form form_type='update_password_form' submit_button_label='Update Password' %}
+            </form>
+        {% endif %}
+    </section>
+
+
+    <section class="color-error-light">
+        <h2>Danger Zone</h2>
+
+        <p>Here you can delete your account.</p>
+
+        {% if delete_account_form %}
+            <form action="{% url 'core:user_profile' user.id %}" method="post">
+                {% include "include/form_table_template.html" with form=delete_account_form form_type='delete_account_form' submit_button_label='Delete Account' %}
+            </form>
+        {% endif %}
+    </section>
+{% endblock %}

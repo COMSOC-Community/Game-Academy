@@ -39,7 +39,8 @@ from .forms import (
     MakeAdminForm,
     ImportCSVFileForm,
     RandomPlayersForm,
-    RandomAnswersForm, JoinPrivateTeamForm, JoinPublicTeamForm,
+    RandomAnswersForm, JoinPrivateTeamForm, JoinPublicTeamForm, UpdatePasswordForm,
+    DeleteAccountForm,
 )
 from .models import CustomUser, Session, Player, Game, Team
 from .utils import sanitise_filename
@@ -316,31 +317,55 @@ def logout_user(request):
     return redirect("core:index")
 
 
-def change_password(request, user_id):
+def user_profile(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     if request.user != user:
         raise Http404("This page is not the business of the logged-in user.")
 
-    update_password_form = UserRegistrationForm(user=user)
+    context = base_context_initialiser(request)
+
+    # Update Password
+    update_password_form = UpdatePasswordForm(user=user)
     if request.method == "POST" and "update_password_form" in request.POST:
-        update_password_form = UserRegistrationForm(request.POST, user=user)
+        update_password_form = UpdatePasswordForm(request.POST, user=user)
         if update_password_form.is_valid():
-            request.user.set_password(update_password_form.cleaned_data["password1"])
+            request.user.set_password(update_password_form.cleaned_data["new_password1"])
             request.user.save()
             update_session_auth_hash(request, request.user)
             request.session[
                 "_message_view_message"
             ] = f"Your password has been changed."
             if request.user.is_player:
-                return redirect(
-                    "core:session_home",
-                    session_url_tag=request.user.players.first().session.url_tag,
+                request.session["_message_view_next_url"] = reverse("core:session_home", kwargs={
+                    "session_url_tag": user.players.first().session.url_tag
+                })
+            else:
+                request.session["_message_view_next_url"] = reverse(
+                    "core:user_profile",
+                    kwargs={"user_id": user.id},
                 )
             return redirect("core:message")
-
-    context = base_context_initialiser(request)
     context["update_password_form"] = update_password_form
-    return render(request, "core/change_password.html", context)
+
+    # Delete Account
+    delete_account_form = DeleteAccountForm(user=request.user)
+    if request.method == "POST" and "delete_account_form" in request.POST:
+        delete_account_form = DeleteAccountForm(request.POST, user=request.user)
+        if delete_account_form.is_valid():
+            request.session[
+                "_message_view_message"
+            ] = f"Your account {user.username} has been deleted. Have fun under new skies!"
+            if request.user.is_player:
+                request.session["_message_view_next_url"] = reverse("core:session_portal", kwargs={
+                    "session_url_tag": user.players.first().session.url_tag
+                })
+            else:
+                request.session["_message_view_next_url"] = reverse("core:index")
+            user.delete()
+            return redirect("core:message")
+    context["delete_account_form"] = delete_account_form
+
+    return render(request, "core/user_profile.html", context)
 
 
 # ===========================

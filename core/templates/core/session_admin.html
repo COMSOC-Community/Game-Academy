@@ -56,14 +56,14 @@
     </section>
 
     <section class="color-error-light">
-    <h2>Danger Zone</h2>
+        <h2>Danger Zone</h2>
 
-    <p>Here you can delete the session.</p>
+        <p>Here you can delete the session.</p>
 
-    {% if delete_session_form %}
-        <form action="{% url 'core:session_admin' session.url_tag %}" method="post">
-            {% include "include/form_table_template.html" with form=delete_session_form form_type='delete_session_form' submit_button_label='Delete Session' %}
-        </form>
-    {% endif %}
+        {% if delete_session_form %}
+            <form action="{% url 'core:session_admin' session.url_tag %}" method="post">
+                {% include "include/form_table_template.html" with form=delete_session_form form_type='delete_session_form' submit_button_label='Delete Session' %}
+            </form>
+        {% endif %}
     </section>
 {% endblock %}

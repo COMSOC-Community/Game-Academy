@@ -138,6 +138,68 @@ class UserRegistrationForm(forms.Form):
         return password2
 
 
+class UpdatePasswordForm(forms.Form):
+    old_password = forms.CharField(
+        label="Current Password",
+        widget=forms.PasswordInput(attrs={"placeholder": "Current password"}),
+    )
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={"placeholder": "New password"}),
+    )
+    new_password2 = forms.CharField(
+        label="Repeat New Password",
+        widget=forms.PasswordInput(attrs={"placeholder": "Repeat new password"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(UpdatePasswordForm, self).__init__(*args, **kwargs)
+
+    def clean_old_password(self):
+        password = self.cleaned_data["old_password"]
+        user = authenticate(username=self.user.username, password=password)
+        if not user:
+            self.add_error(
+                "old_password", forms.ValidationError("The current password is incorrect.")
+            )
+
+    def clean_new_password1(self):
+        password1 = self.cleaned_data["new_password1"]
+        if len(password1) < 8:
+            raise forms.ValidationError("Passwords must be at least 8 characters long.")
+        return password1
+
+    def clean_new_password2(self):
+        password1 = self.cleaned_data.get("new_password1")
+        password2 = self.cleaned_data["new_password2"]
+
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("New passwords do not match. Please try again.")
+
+        return password2
+
+
+class DeleteAccountForm(forms.Form):
+    delete = forms.BooleanField(
+        label="Delete the account", label_suffix="", initial=False
+    )
+    password = forms.CharField(
+        label="Your Password",
+        widget=forms.PasswordInput(attrs={"placeholder": "Password"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(DeleteAccountForm, self).__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data["password"]
+        user = authenticate(username=self.user.username, password=password)
+        if not user:
+            raise forms.ValidationError("The password is incorrect.")
+
+
 class CreateSessionForm(forms.Form):
     url_tag = forms.SlugField(
         label="URL tag of the session",

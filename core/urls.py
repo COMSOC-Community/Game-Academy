@@ -13,7 +13,7 @@ urlpatterns = [
     path("createsession/", views.create_session, name="create_session"),
     path("message/", views.message, name="message"),
     path("logout/", views.logout_user, name="logout"),
-    path("user/<int:user_id>/password/", views.change_password, name="change_password"),
+    path("user/<int:user_id>/", views.user_profile, name="user_profile"),
     path(
         "<slug:session_url_tag>/",
         views.session_portal,
