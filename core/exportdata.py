@@ -4,6 +4,8 @@ from core.models import Team, Player, Game
 
 
 def session_to_csv(writer, session):
+    """Exports a Session to a CSV file. The buffer is passed as argument to be able to write either
+    files or request (or any buffer)."""
     writer = csv.writer(writer)
     writer.writerow(
         [
@@ -36,6 +38,8 @@ def session_to_csv(writer, session):
 
 
 def team_to_csv(writer, game):
+    """Exports the teams of a game to a CSV file. The buffer is passed as argument to be able to
+    write either files or request (or any buffer)."""
     writer = csv.writer(writer)
     writer.writerow(
         [
@@ -53,6 +57,8 @@ def team_to_csv(writer, game):
 
 
 def player_to_csv(writer, session):
+    """Exports the players of a session to a CSV file. The buffer is passed as argument to be able
+    to write either files or request (or any buffer)."""
     writer = csv.writer(writer)
     writer.writerow(
         [
@@ -66,6 +72,8 @@ def player_to_csv(writer, session):
 
 
 def games_to_csv(writer, session):
+    """Exports the games of a session to a CSV file. The buffer is passed as argument to be able to
+    write either files or request (or any buffer)."""
     writer = csv.writer(writer)
     writer.writerow(
         [

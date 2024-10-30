@@ -20,6 +20,8 @@ class SubmitAnswer(GameSubmitAnswerView):
     def get(self, request, session_url_tag, game_url_tag):
         submitting_player = self.context["submitting_player"]
         if submitting_player:
+            # The first time a player reaches the submit answer page, we assign them an auction and
+            # a valuation
             if not self.context["answer"]:
                 auction_id = random.randint(1, self.game.auction_setting.number_auctions)
                 answer = Answer.objects.create(

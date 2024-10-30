@@ -8,6 +8,7 @@ from core.authorisations import is_session_admin, is_session_super_admin
 
 
 def session_admin_decorator(view_func):
+    """Ensures that the user is a session admin before rendering the page"""
     @functools.wraps(view_func)
     def wrapper(request, session_url_tag, *args, **kwargs):
         session = get_object_or_404(Session, url_tag=session_url_tag)
@@ -19,6 +20,7 @@ def session_admin_decorator(view_func):
 
 
 def session_super_admin_decorator(view_func):
+    """Ensures that the user is a session super admin before rendering the page"""
     @functools.wraps(view_func)
     def wrapper(request, session_url_tag, *args, **kwargs):
         session = get_object_or_404(Session, url_tag=session_url_tag)

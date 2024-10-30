@@ -7,7 +7,7 @@ from auctiongame.apps import NAME
 
 
 class Command(BaseCommand):
-    help = "Updates values for the global_results page. Run each time a new answer is submitted."
+    help = "Populates the database with the graph data for the auction game. Updates answers for the winners."
 
     def add_arguments(self, parser):
         parser.add_argument("--session", type=str, required=True)

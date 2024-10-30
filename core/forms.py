@@ -20,6 +20,7 @@ from core.constants import (
 
 
 class SessionFinderForm(forms.Form):
+    """Form used on the main page to search a session by name."""
     session_name = forms.CharField(
         label="Name of the session",
         max_length=Session._meta.get_field("name").max_length,
@@ -40,6 +41,7 @@ class SessionFinderForm(forms.Form):
 
 
 class LoginForm(forms.Form):
+    """Form used to log in to a user account. For session login, PlayerLoginForm is used."""
     username = forms.CharField(
         label="Username",
         max_length=CustomUser._meta.get_field("username").max_length,
@@ -55,6 +57,7 @@ class LoginForm(forms.Form):
         username = cleaned_data.get("username")
         password = cleaned_data.get("password")
 
+        # We check if the credentials are correct
         if username and password:
             user = authenticate(username=username, password=password)
             if not user:
@@ -65,6 +68,8 @@ class LoginForm(forms.Form):
 
 
 class UserRegistrationForm(forms.Form):
+    """Form used to register as a user of the website. For players of a session,
+    PlayerRegistrationForm is used."""
     username = forms.CharField(
         label="Username",
         max_length=CustomUser._meta.get_field("username").max_length,
@@ -92,18 +97,23 @@ class UserRegistrationForm(forms.Form):
         self.user = kwargs.pop("user", None)
         super(UserRegistrationForm, self).__init__(*args, **kwargs)
 
+        # If a user is passed as kwargs argument, this is interpreted as using this form to edit
+        # the data of the user. We make adjust the fields accordingly.
         if self.user:
-            self.fields.pop("email")
-            self.fields["username"].disabled = True
+            self.fields.pop("email")  # Email cannot be edited
+            self.fields["username"].disabled = True  # Username cannot be edited
+            # Format the initial depending on whether the user is restricted to a session or not
             if self.user.is_player:
                 self.fields["username"].initial = self.user.players.first().name
             else:
                 self.fields["username"].initial = self.user.username
+            # Captcha only when creating an account
             self.fields.pop("captcha")
 
     def clean_username(self):
         username = self.cleaned_data["username"]
         if not self.user:
+            # Some usernames are forbidden because used for internal purposes (e.g. for teams)
             if username in FORBIDDEN_USERNAMES:
                 raise forms.ValidationError(
                     "This is a forbidden username. Please choose a different username."
@@ -139,6 +149,7 @@ class UserRegistrationForm(forms.Form):
 
 
 class UpdatePasswordForm(forms.Form):
+    """Form used to update the password of a user."""
     old_password = forms.CharField(
         label="Current Password",
         widget=forms.PasswordInput(attrs={"placeholder": "Current password"}),
@@ -153,11 +164,13 @@ class UpdatePasswordForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "user" is a mandatory kwargs of the form
         self.user = kwargs.pop("user")
         super(UpdatePasswordForm, self).__init__(*args, **kwargs)
 
     def clean_old_password(self):
         password = self.cleaned_data["old_password"]
+        # We try the credentials to ensure the password entered is correct
         user = authenticate(username=self.user.username, password=password)
         if not user:
             self.add_error(
@@ -181,6 +194,7 @@ class UpdatePasswordForm(forms.Form):
 
 
 class DeleteAccountForm(forms.Form):
+    """Form used by a user to delete their own account. Their password is used as confirmation."""
     delete = forms.BooleanField(
         label="Delete the account", label_suffix="", initial=False
     )
@@ -190,17 +204,20 @@ class DeleteAccountForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "user" is a mandatory kwargs of the form
         self.user = kwargs.pop("user")
         super(DeleteAccountForm, self).__init__(*args, **kwargs)
 
     def clean_password(self):
         password = self.cleaned_data["password"]
+        # We test authentication to ensure the password is correct
         user = authenticate(username=self.user.username, password=password)
         if not user:
             raise forms.ValidationError("The password is incorrect.")
 
 
 class CreateSessionForm(forms.Form):
+    """Form used to create sessions. Captcha protected."""
     url_tag = forms.SlugField(
         label="URL tag of the session",
         label_suffix="",
@@ -294,9 +311,9 @@ class CreateSessionForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.session = kwargs.pop(
-            "session", None
-        )  # Not none if session is passed, i.e., the form is used to modify a session
+        self.session = kwargs.pop("session", None)
+        # Not none if session is passed, i.e., the form is used to modify a session. In that case
+        # we update the field list.
         if self.session:
             kwargs.update(
                 initial={
@@ -315,23 +332,32 @@ class CreateSessionForm(forms.Form):
             )
         super(CreateSessionForm, self).__init__(*args, **kwargs)
         if self.session:
+            # url_tag cannot be edited
             self.fields["url_tag"].disabled = True
+            # We query the games of the sessions to update the value of the selector for the
+            # game_after_logging field
             games = self.session.games.all()
             if games.exists():
                 self.fields["game_after_logging"].queryset = games
             else:
                 self.fields.pop("game_after_logging")
+            # Captcha is only for session creation, not modif
             self.fields.pop("captcha")
         else:
+            # These fields are only available after creating the session, not to have too much
+            # information
             self.fields.pop("game_after_logging")
             self.fields.pop("show_side_panel")
 
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]
+        # Only check if already exists in the case of a fresh session creation, or if the value
+        # has changed (in case of modification of the session)
         if not self.session and Session.objects.filter(url_tag=url_tag).exists():
             raise forms.ValidationError(
                 "A session with this URL tag already exists. It has to be unique."
             )
+        # Some url_tag are forbidden to avoid confusing url routing
         if url_tag in FORBIDDEN_SESSION_URL_TAGS:
             raise forms.ValidationError(
                 "This url_tag cannot be used for a session. Choose another one."
@@ -340,6 +366,8 @@ class CreateSessionForm(forms.Form):
 
     def clean_name(self):
         name = self.cleaned_data["name"]
+        # Only check if already exists in the case of a fresh session creation, or if the value
+        # has changed (in case of modification of the session)
         new_name = not self.session or name != self.session.name
         if new_name and Session.objects.filter(name=name).exists():
             raise forms.ValidationError(
@@ -349,6 +377,8 @@ class CreateSessionForm(forms.Form):
 
     def clean_long_name(self):
         long_name = self.cleaned_data["long_name"]
+        # Only check if already exists in the case of a fresh session creation, or if the value
+        # has changed (in case of modification of the session)
         new_long_name = not self.session or long_name != self.session.long_name
         if new_long_name and Session.objects.filter(long_name=long_name).exists():
             raise forms.ValidationError(
@@ -358,6 +388,7 @@ class CreateSessionForm(forms.Form):
 
 
 class DeleteSessionForm(forms.Form):
+    """Form used by session admins to delete a session. Their password is requested to confirm."""
     delete = forms.BooleanField(
         label="Delete the session", label_suffix="", initial=False
     )
@@ -367,17 +398,20 @@ class DeleteSessionForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "user" is a mandatory kwargs of the form
         self.user = kwargs.pop("user")
         super(DeleteSessionForm, self).__init__(*args, **kwargs)
 
     def clean_password(self):
         password = self.cleaned_data["password"]
+        # Test credentials
         user = authenticate(username=self.user.username, password=password)
         if not user:
             raise forms.ValidationError("The password is incorrect.")
 
 
 class PlayerLoginForm(forms.Form):
+    """Form used for players to login into their session. For global users, LoginForm is used."""
     player_name = forms.SlugField(
         label="Player name",
         label_suffix="",
@@ -397,6 +431,7 @@ class PlayerLoginForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "session" is a mandatory kwargs of this form
         self.session = kwargs.pop("session")
         super(PlayerLoginForm, self).__init__(*args, **kwargs)
 
@@ -405,9 +440,12 @@ class PlayerLoginForm(forms.Form):
         if "player_name" in self.cleaned_data:
             player_name = self.cleaned_data["player_name"]
             user = None
+            # Search either for user with username = player_name or for session players
             if self.cleaned_data["search_user"]:
                 user = CustomUser.objects.filter(username=player_name)
                 if user.exists():
+                    # If user exists, check if there is a corresponding player profile and update
+                    # the cleaned data accordingly
                     user = user.first()
                     self.cleaned_data["user"] = user
                     player = Player.objects.filter(user=user, session=self.session)
@@ -416,6 +454,8 @@ class PlayerLoginForm(forms.Form):
                 else:
                     raise forms.ValidationError("No match was found.")
             else:
+                # For players, retrieve the player and update the cleaned data with the
+                # corresponding user
                 player = Player.objects.filter(
                     name__iexact=player_name, session=self.session
                 )
@@ -433,6 +473,7 @@ class PlayerLoginForm(forms.Form):
                     )
 
             if user:
+                # If a user has been found, test the password for authentication
                 password = self.cleaned_data["password"]
                 user = authenticate(username=user.username, password=password)
                 if not user:
@@ -442,6 +483,7 @@ class PlayerLoginForm(forms.Form):
 
 
 class PlayerRegistrationForm(forms.Form):
+    """Form used to register as a player of a session. Captcha protected."""
     player_name = forms.SlugField(
         label="Player name",
         label_suffix="",
@@ -460,8 +502,13 @@ class PlayerRegistrationForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "session" is a mandatory kwargs of the form
         self.session = kwargs.pop("session")
+        # The form can be filled in by an authenticated user who is creating a player profile for
+        # the session. In this case we do not ask for passwords.
         self.passwords_display = kwargs.pop("passwords_display", True)
+        # If "player" is passed as parameter, we interpret this as editing the details of the
+        # player.
         self.player = kwargs.pop("player", None)
         super(PlayerRegistrationForm, self).__init__(*args, **kwargs)
         if not self.passwords_display:
@@ -489,7 +536,10 @@ class PlayerRegistrationForm(forms.Form):
 
     def clean_player_name(self):
         player_name = self.cleaned_data["player_name"]
+        # If we do not have self.player, then the name can be modified
         if not self.player:
+            # We make sure that the player_name is not used in the session and that the
+            # corresponding username is not used by another user.
             username = player_username(self.session, player_name)
             if (
                 CustomUser.objects.filter(username=username).exists()
@@ -506,6 +556,7 @@ class PlayerRegistrationForm(forms.Form):
 
 
 class SessionGuestRegistration(forms.Form):
+    """Form used to join a session as a guest."""
     guest_name = forms.SlugField(
         label="Guest name",
         label_suffix="",
@@ -518,6 +569,8 @@ class SessionGuestRegistration(forms.Form):
 
     def clean_guest_name(self):
         guest_name = self.cleaned_data["guest_name"]
+        # We make sure that the guest_name is not used in the session and that the
+        # corresponding username is not used by another user.
         username = guest_username(self.session, guest_name)
         if (
             CustomUser.objects.filter(username=username).exists()
