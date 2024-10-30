@@ -11,6 +11,7 @@ from core.games import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES
 class CustomUser(AbstractUser):
     is_player = models.BooleanField(default=False)
     is_guest_player = models.BooleanField(default=False)
+    is_random_player = models.BooleanField(default=False)
 
     def display_name(self):
         if self.is_player:
@@ -63,7 +64,6 @@ class Player(models.Model):
         null=False,
         related_name="players",
     )
-    is_guest = models.BooleanField(default=False)
     is_team_player = models.BooleanField(default=False)
 
     def display_name(self):

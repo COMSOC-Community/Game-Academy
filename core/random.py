@@ -29,7 +29,7 @@ def random_user_names(num_users):
 
 def create_random_players(session, num_players):
     new_users = [
-        CustomUser(username=name, password=make_password(None), is_player=True)
+        CustomUser(username=name, password=make_password(None), is_player=True, is_random_player=True)
         for name in random_user_names(num_players)
     ]
     new_users = CustomUser.objects.bulk_create(new_users)

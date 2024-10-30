@@ -7,6 +7,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV3
 
 from core.games import INSTALLED_GAMES_CHOICES
 from core.models import Session, Player, Game, Team, CustomUser
@@ -81,7 +82,11 @@ class UserRegistrationForm(forms.Form):
         label="Repeat Password",
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
     )
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(
+        # widget=ReCaptchaV3(
+        #     action='UserSignUp'
+        # )
+    )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
@@ -220,7 +225,11 @@ class CreateSessionForm(forms.Form):
         help_text="If unselected, the result navigation buttons at the bottom of a game page content "
                   "will not be displayed."
     )
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(
+        # widget=ReCaptchaV3(
+        #     action='CreateSession'
+        # )
+    )
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop(
@@ -382,7 +391,11 @@ class PlayerRegistrationForm(forms.Form):
     password2 = forms.CharField(
         label="Repeat password", label_suffix="", widget=forms.PasswordInput()
     )
-    captcha = ReCaptchaField()
+    captcha = ReCaptchaField(
+        # widget=ReCaptchaV3(
+        #     action='PlayerSignUp'
+        # )
+    )
 
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session")
@@ -669,7 +682,7 @@ class ImportCSVFileForm(forms.Form):
 
 class RandomPlayersForm(forms.Form):
     num_players = forms.IntegerField(
-        label="Number of players", label_suffix="", validators=[MinValueValidator(1)]
+        label="Number of players", label_suffix="", validators=[MinValueValidator(1), MaxValueValidator(50)]
     )
 
 

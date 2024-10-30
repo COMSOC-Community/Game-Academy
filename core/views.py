@@ -470,7 +470,6 @@ def session_portal(request, session_url_tag):
                         name=guest_form.cleaned_data["guest_name"],
                         user=user,
                         session=session,
-                        is_guest=True,
                     )
                     user = authenticate(
                         username=user.username, password=guest_password(user.username)
@@ -852,19 +851,20 @@ def session_admin_players(request, session_url_tag):
             context["deleted_player_name"] = player.name
         elif "delete_guest_form" in request.POST:
             context["deleted_guest_name"] = player.name
-        player.user.delete()
+        if player.user.is_player:
+            player.user.delete()
         player.delete()
 
     if request.method == "POST" and "delete_all_players_form" in request.POST:
-        Player.objects.filter(session=session, is_guest=False).delete()
+        Player.objects.filter(session=session, user__is_guest_player=False).delete()
         context["all_players_deleted"] = True
 
     if request.method == "POST" and "delete_all_random_players_form" in request.POST:
-        Player.objects.filter(session=session, is_guest=False, name__startswith='RandomPlayer_').delete()
+        Player.objects.filter(session=session, user__is_random_player=True).delete()
         context["all_random_players_deleted"] = True
 
     if request.method == "POST" and "delete_all_guests_form" in request.POST:
-        Player.objects.filter(session=session, is_guest=True).delete()
+        Player.objects.filter(session=session, user__is_guest_player=True).delete()
         context["all_guests_deleted"] = True
 
     if is_session_super_admin(session, request.user):
@@ -892,8 +892,8 @@ def session_admin_players(request, session_url_tag):
     super_admins = session.super_admins.all()
     context["super_admins"] = super_admins
     context["admins"] = session.admins.exclude(id__in=super_admins)
-    context["players"] = Player.objects.filter(session=session, is_guest=False)
-    context["guests"] = Player.objects.filter(session=session, is_guest=True)
+    context["players"] = Player.objects.filter(session=session, user__is_guest_player=False)
+    context["guests"] = Player.objects.filter(session=session, user__is_guest_player=True)
 
     return render(request, "core/session_admin_players.html", context)
 
@@ -1144,7 +1144,8 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
             answer_model.objects.filter(game=game).delete()
             context["all_answers_deleted"] = True
         if request.method == "POST" and "delete_all_random_answers_form" in request.POST:
-            answer_model.objects.filter(game=game, player__name__startswith='RandomPlayer_').delete()
+            answer_model.objects.filter(game=game, player__user__is_random_player=True).delete()
+            Team.objects.filter(game=game, creator__user__is_random_player=True).delete()
             context["all_answers_deleted"] = True
 
         # Random answers

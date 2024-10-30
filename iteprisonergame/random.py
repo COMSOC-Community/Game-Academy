@@ -30,7 +30,7 @@ def create_random_answers(game, players):
                 automata=automata,
                 initial_state="0",
                 motivation="Answer has been randomly generated",
-                name=random.choices(string.ascii_letters + string.digits, k=5)
+                name=''.join(random.choices(string.ascii_letters + string.digits, k=5))
             )
         )
     return Answer.objects.bulk_create(answers)

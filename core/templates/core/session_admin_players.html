@@ -6,7 +6,7 @@
 
 {% block extra_head %}
     <script src="{% static 'js/filtered_collection.js' %}" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 {% endblock %}
 
 {% block header %}
@@ -152,7 +152,7 @@
                                 </span>
                             </div>
                             <div>
-                                {% if user_is_session_super_admin %}
+                                {% if user_is_session_super_admin and admin != user %}
                                     <td>
                                         <form action="{% url 'core:session_admin_players' session.url_tag %}#admins" method="post">
                                             {% csrf_token %}
@@ -205,7 +205,7 @@
 
         {% if all_random_players_deleted %}
             <div class="form-success-message">
-                <p>All the players whose name starts with 'RandomPlayer_' have been deleted from this session.</p>
+                <p>All the randomly generated players have been deleted from this session.</p>
             </div>
         {% endif %}
 
@@ -228,7 +228,9 @@
                         <div class="filtered-collection-item" data-value="{{ player.name }}">
                             <div class="side-by-side-pushed-wrapper">
                                 <div>
+                                    {% if player.user.is_random_player %}<i class="fa-solid fa-dice"></i>{% endif %}
                                     <span>{{ player.name }}</span>
+                                    {% if player.user.is_player %}<i class="fas fa-user"></i>{% endif %}
                                 </div>
                                 <div>
                                     <span class="button" style="margin-right: 20px">
@@ -245,6 +247,9 @@
                     {% endfor %}
                 </div>
             </div>
+
+            <p style="margin-bottom: 0;"><i class="fa-solid fa-dice"></i> : randomly generated</p>
+            <p><i class="fas fa-user"></i> : user limited to this session</p>
 
             <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
                 {% csrf_token %}

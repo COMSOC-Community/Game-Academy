@@ -62,7 +62,7 @@ def player_to_csv(writer, session):
         ]
     )
     for p in Player.objects.filter(session=session):
-        writer.writerow([p.name, p.is_guest, p.is_team_player])
+        writer.writerow([p.name, p.user.is_guest_player, p.is_team_player])
 
 
 def games_to_csv(writer, session):

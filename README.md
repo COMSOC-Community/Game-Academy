@@ -48,6 +48,7 @@ DATABASES = {
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 #RECAPTCHA_PUBLIC_KEY = 'your_public_key'
 #RECAPTCHA_PRIVATE_KEY = 'your_private_key'
+RECAPTCHA_REQUIRED_SCORE = 0.85
 
 MAX_NUM_SESSION_PER_USER = 10
 MAX_NUM_GAMES_PER_SESSION = 20
@@ -60,6 +61,7 @@ Then, run the following commands:
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
+python manage.py initialise_db
 ```
 
 You're done! If you're running the project locally, run `python manage.py runserver` 
@@ -112,6 +114,8 @@ Max session
 Max players
 
 Max games
+
+#### Player User and Teams
 
 ### Developing a New Game
 

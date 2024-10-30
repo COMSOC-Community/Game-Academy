@@ -132,5 +132,3 @@ try:
     from gameserver.local_settings import *
 except ImportError:
     pass
-
-
