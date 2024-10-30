@@ -13,6 +13,7 @@ from core.constants import FORBIDDEN_APP_URL_TAGS
 
 
 class GameConfig(AppConfig):
+    """AppConfig for games. Used to ensure proper registration of everything and all."""
     def __init__(
         self,
         app_name,
@@ -22,9 +23,6 @@ class GameConfig(AppConfig):
         url_tag,
         url_namespace,
         *,
-        setting_model=None,
-        setting_form=None,
-        answer_model=None,
         answer_model_fields=None,
         answer_to_csv_func=None,
         random_answers_func=None,
@@ -37,20 +35,32 @@ class GameConfig(AppConfig):
         super().__init__(app_name, app_module)
         self.is_game = True
 
+        # The name of the game, typically a slug
         self.name = app_name
+        # The long name of the game, includes whitespace and all
         self.long_name = long_name
+        # The name of the Python module in which the game is implemented
         self.package_name = package_name
+        # Ensures the url_tag is not forbidden
         if url_tag in FORBIDDEN_APP_URL_TAGS:
             raise ValueError(
                 f"The game app {package_name} has url_tag `{url_tag}` which is "
                 f"forbidden. Choose another url tag for the app."
             )
         self.url_tag = url_tag
+        # URL namespace used by Django
         self.url_namespace = url_namespace
-        self.setting_model = setting_model
-        self.setting_form = setting_form
-        self.answer_model = answer_model
 
+        # Models and Forms used by the game. Should be set with the register_models
+        # method because they would not have been registered yet
+        # The model used to describe the extra settings of the game
+        self.setting_model = None
+        # The form used to update the extra settings of the game
+        self.setting_form = None
+        # The model used to store the answers to the game
+        self.answer_model = None
+
+        # Field of the answer model that are displayed
         if isinstance(answer_model_fields, Iterable):
             if not all(isinstance(c, str) for c in answer_model_fields):
                 raise TypeError(
@@ -63,17 +73,22 @@ class GameConfig(AppConfig):
                 "string."
             )
         self.answer_model_fields = answer_model_fields
+        # Function creating a CSV file from the answers
         self.answer_to_csv_func = answer_to_csv_func
+        # Function generating random answers
         self.random_answers_func = random_answers_func
+        # Function creating a CSV file from the game settings
         self.settings_to_csv_func = settings_to_csv_func
 
+        # "home" view of the game
         if home_view is not None and not isinstance(home_view, str):
             raise TypeError(
                 "The home_view parameter of a GameConfig needs to be a string."
             )
         self.home_view = home_view
 
-        # Management commands
+        # The management commands for the game. The one passed here can be run by an admin from
+        # the website. Only use result rendering commands.
         if isinstance(management_commands, str):
             management_commands = [management_commands]
         elif isinstance(management_commands, Iterable):
@@ -103,9 +118,11 @@ class GameConfig(AppConfig):
                 "The update_management_commands parameter of a GameConfig needs to be either "
                 "a string or a collection of string."
             )
+        # Commands to use when updating after every new answer. Can be different from
+        # self.management_commands in case there are faster implementation to update.
         self.update_management_commands = update_management_commands
 
-        # Illustration Paths
+        # Paths to the illustrations of the game.
         if isinstance(illustration_paths, Iterable):
             if not all(isinstance(c, str) for c in illustration_paths):
                 raise TypeError(
@@ -120,11 +137,14 @@ class GameConfig(AppConfig):
         self.illustration_paths = illustration_paths
 
     def ready(self):
+        """Registers the game in the system. If you override this method, always call the super."""
         INSTALLED_GAMES.append(self)
         INSTALLED_GAMES_CHOICES.append((self.name, self.long_name))
         self.validate_app()
 
     def register_models(self, setting_model=None, setting_form=None, answer_model=None):
+        """Register models. Typically used in the overridden "ready" method to register models
+        and forms that had not yet been registered within Django."""
         if setting_model:
             self.setting_model = setting_model
         if setting_form:
@@ -133,6 +153,7 @@ class GameConfig(AppConfig):
             self.answer_model = answer_model
 
     def validate_app(self):
+        """Runs checks that the app has all the necessary elements."""
         # Check that management commands exist
         if (
             self.management_commands is not None

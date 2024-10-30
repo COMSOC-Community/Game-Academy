@@ -1,3 +1,6 @@
+"""Middleware that ensures that user cannot access pages they are not allowed to. Enforces
+appropriate permissions and also that players (thus not global users) cannot leave their
+session without logging out."""
 from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404

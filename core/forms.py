@@ -586,6 +586,7 @@ class SessionGuestRegistration(forms.Form):
 
 
 class CreateGameForm(forms.Form):
+    """Form used to create games."""
     game_type = forms.ChoiceField(
         choices=[],
         label_suffix="",
@@ -689,7 +690,9 @@ class CreateGameForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "session" is a mandatory kwarg of the form
         self.session = kwargs.pop("session")
+        # If "game" is passed as a kwarg, we use this form to modify the details of the game
         self.game = kwargs.pop("game", None)
         if self.game:
             kwargs.update(
@@ -712,10 +715,12 @@ class CreateGameForm(forms.Form):
 
         super(CreateGameForm, self).__init__(*args, **kwargs)
 
-        # Needed here because of the apps are only registered after their ready method.
+        # game_type choices are done here because the apps are only registered after their ready
+        # method.
         self.fields["game_type"].choices = INSTALLED_GAMES_CHOICES
 
         if self.game:
+            # If we modify the game, we update the values
             illustration_choices = [
                 (i, os.path.splitext(os.path.basename(i))[0])
                 for i in self.game.game_config().illustration_paths
@@ -726,6 +731,7 @@ class CreateGameForm(forms.Form):
             self.fields["view_after_submit"].choices = all_views
             self.fields["game_type"].disabled = True
         else:
+            # If we create a game, advanced settings are disabled
             self.fields.pop("illustration_path")
             self.fields.pop("ordering_priority")
             self.fields.pop("run_management_after_submit")
@@ -735,6 +741,8 @@ class CreateGameForm(forms.Form):
     def clean_name(self):
         name = self.cleaned_data["name"]
         new_name = not self.game or name != self.game.name
+        # Only check if already exists in the case of a fresh game creation, or if the value
+        # has changed (in case of modification of the game)
         if new_name and Game.objects.filter(session=self.session, name=name).exists():
             raise forms.ValidationError(
                 "A game with this name already exists for this session."
@@ -744,6 +752,8 @@ class CreateGameForm(forms.Form):
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]
         new_url_tag = not self.game or url_tag != self.game.url_tag
+        # Only check if already exists in the case of a fresh game creation, or if the value
+        # has changed (in case of modification of the game)
         if (
             new_url_tag
             and Game.objects.filter(session=self.session, url_tag=url_tag).exists()
@@ -756,6 +766,7 @@ class CreateGameForm(forms.Form):
 
 
 def validate_csv_file(value):
+    """Validator for CSV files"""
     value = deepcopy(value)
     if not value.name.endswith(".csv"):
         raise forms.ValidationError(
@@ -780,6 +791,7 @@ def validate_csv_file(value):
 
 
 class ImportCSVFileForm(forms.Form):
+    """Form used to import CSV files to the website. Used typically to import a CSV of players."""
     csv_file = forms.FileField(
         label="Upload CSV File",
         validators=[validate_csv_file],
@@ -796,14 +808,20 @@ class ImportCSVFileForm(forms.Form):
 
 
 class RandomPlayersForm(forms.Form):
+    """Form used to populate a session with random players."""
     num_players = forms.IntegerField(
-        label="Number of players", label_suffix="", validators=[MinValueValidator(1), MaxValueValidator(50)]
+        label="Number of players",
+        label_suffix="",
+        validators=[MinValueValidator(1), MaxValueValidator(50)]
     )
 
 
 class RandomAnswersForm(forms.Form):
+    """Form used to populate a game with random answers."""
     num_answers = forms.IntegerField(
-        label="Number of answers", label_suffix="", validators=[MinValueValidator(1), MaxValueValidator(50)]
+        label="Number of answers",
+        label_suffix="",
+        validators=[MinValueValidator(1), MaxValueValidator(50)]
     )
     run_management = forms.BooleanField(
         label="Run management commands",
@@ -815,6 +833,7 @@ class RandomAnswersForm(forms.Form):
 
 
 class MakeAdminForm(forms.Form):
+    """Form used to make a user an admin of a session"""
     username = forms.CharField(
         label="Username",
         max_length=CustomUser._meta.get_field("username").max_length,
@@ -840,18 +859,19 @@ class MakeAdminForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "session" is a mandatory kwarg of the form
         self.session = kwargs.pop("session")
         super(MakeAdminForm, self).__init__(*args, **kwargs)
 
     def clean(self):
         cleaned_data = super().clean()
         username = cleaned_data.get("username")
-        playername = cleaned_data.get("playername")
-        if not username and not playername:
+        player_name = cleaned_data.get("playername")
+        if not username and not player_name:
             raise forms.ValidationError(
                 "You need to input either a username or a player name."
             )
-        if username and playername:
+        if username and player_name:
             raise forms.ValidationError(
                 "You cannot provide both a username and a player name, choose one."
             )
@@ -866,13 +886,13 @@ class MakeAdminForm(forms.Form):
                         "This username has not been found in the database."
                     ),
                 )
-        if playername:
+        if player_name:
             try:
-                player = Player.objects.get(name=playername, session=self.session)
+                player = Player.objects.get(name=player_name, session=self.session)
                 cleaned_data["user"] = player.user
             except Player.DoesNotExist:
                 self.add_error(
-                    "playername",
+                    "player_name",
                     forms.ValidationError(
                         "No player with this name is registered for this session."
                     ),
@@ -881,6 +901,7 @@ class MakeAdminForm(forms.Form):
 
 
 class CreateTeamForm(forms.Form):
+    """Form used to create a team for a game."""
     name = forms.CharField(
         label_suffix="",
         label="Team name",
@@ -895,6 +916,7 @@ class CreateTeamForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "game" is a mandatory kwarg of the form
         self.game = kwargs.pop("game")
         super(CreateTeamForm, self).__init__(*args, **kwargs)
 
@@ -909,6 +931,7 @@ class CreateTeamForm(forms.Form):
 
 
 class JoinPrivateTeamForm(forms.Form):
+    """Form used to join a private team by entering its name."""
     name = forms.CharField(
         label_suffix="",
         label="Team name",
@@ -916,6 +939,7 @@ class JoinPrivateTeamForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
+        # "game" is a mandatory kwarg of the form
         self.game = kwargs.pop("game")
         super(JoinPrivateTeamForm, self).__init__(*args, **kwargs)
 
@@ -931,6 +955,7 @@ class JoinPrivateTeamForm(forms.Form):
 
 
 class JoinPublicTeamForm(forms.Form):
+    """Form used to join a private team by selecting one."""
     team = forms.ModelChoiceField(
         label="Public teams",
         label_suffix="",
@@ -947,8 +972,10 @@ class JoinPublicTeamForm(forms.Form):
 
     @property
     def team_count(self):
+        """Returns the number of public teams"""
         return self.fields["team"].queryset.count()
 
     @staticmethod
     def team_to_label(team):
+        """Formats the label in the selector"""
         return f"{team.name} — by {team.creator.display_name()}"

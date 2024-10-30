@@ -1,3 +1,7 @@
+"""
+Collections of view used in the game apps to simply the workflow. Their use is not mandatory but
+helps.
+"""
 from django.core import management
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -12,6 +16,8 @@ from core.views import (
 
 
 class GameView(View):
+    """Standard view for a game. Sets up the view with the session and the game, together with
+    the base context."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.context = None
@@ -20,11 +26,13 @@ class GameView(View):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
+        # Retrieve the session
         session_url_tag = kwargs.get("session_url_tag", None)
         if session_url_tag is None:
             raise ValueError(
                 "The game view did not receive a session_url_tag parameter, that is weird..."
             )
+        # Retrieve the game
         game_url_tag = kwargs.get("game_url_tag", None)
         if game_url_tag is None:
             raise ValueError(
@@ -33,6 +41,7 @@ class GameView(View):
         session = get_object_or_404(Session, url_tag=session_url_tag)
         game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+        # Initialise the context
         context = base_context_initialiser(request)
         session_context_initialiser(request, session, context)
         game_context_initialiser(
@@ -44,12 +53,17 @@ class GameView(View):
 
 
 class GameIndexView(GameView):
+    """View for the index page of a game. Does not do much."""
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.context["game_nav_display_home"] = False
 
 
 class GameSubmitAnswerView(GameView):
+    """View for submitted answer to a game. The idea is not to modify the post method but only
+    the other post helper methods. The process is: post_validated_form validates the form and
+    returns the answer, then post_code_if_form_valid or post_code_if_form_invalid is run
+    depending on the validation of the form, finally post_code_render renders the page."""
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.context["game_nav_display_answer"] = False
@@ -86,6 +100,7 @@ class GameSubmitAnswerView(GameView):
 
 
 class GameResultsView(GameView):
+    """View for seeing the results of a game. Does not do much."""
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.context["game_nav_display_result"] = False
