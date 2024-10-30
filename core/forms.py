@@ -83,9 +83,9 @@ class UserRegistrationForm(forms.Form):
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
     )
     captcha = ReCaptchaField(
-        # widget=ReCaptchaV3(
-        #     action='UserSignUp'
-        # )
+        widget=ReCaptchaV3(
+            action='UserSignUp'
+        )
     )
 
     def __init__(self, *args, **kwargs):
@@ -288,9 +288,9 @@ class CreateSessionForm(forms.Form):
                   "will not be displayed."
     )
     captcha = ReCaptchaField(
-        # widget=ReCaptchaV3(
-        #     action='CreateSession'
-        # )
+        widget=ReCaptchaV3(
+            action='CreateSession'
+        )
     )
 
     def __init__(self, *args, **kwargs):
@@ -454,9 +454,9 @@ class PlayerRegistrationForm(forms.Form):
         label="Repeat password", label_suffix="", widget=forms.PasswordInput()
     )
     captcha = ReCaptchaField(
-        # widget=ReCaptchaV3(
-        #     action='PlayerSignUp'
-        # )
+        widget=ReCaptchaV3(
+            action='PlayerSignUp'
+        )
     )
 
     def __init__(self, *args, **kwargs):
