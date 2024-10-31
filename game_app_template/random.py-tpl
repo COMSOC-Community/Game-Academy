@@ -1,0 +1,17 @@
+import random
+
+from core.utils import float_formatter
+from {{ app_name }}.models import Answer
+
+
+def create_random_answers(game, players):
+    answers = []
+    for player in players:
+        answers.append(
+            Answer(
+                game=game,
+                player=player,
+                answer=random.random()
+            )
+        )
+    return Answer.objects.bulk_create(answers)

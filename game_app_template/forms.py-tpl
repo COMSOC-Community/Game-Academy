@@ -11,7 +11,9 @@ class SettingForm(forms.ModelForm):
 
 
 class SubmitAnswerForm(forms.Form):
-    # Put here the form fields
+    answer = forms.FloatField(
+        label_suffix="",
+    )
 
     def __init__(self, *args, **kwargs):
         self.game = kwargs.pop("game", None)

@@ -1,4 +1,5 @@
-from core.games import GameConfig
+from core.game_config import GameConfig
+
 
 NAME = "{{ app_name }}"
 LONGNAME = "{{ app_long_name }}"
@@ -16,16 +17,24 @@ class {{ camel_case_app_name }}Config(GameConfig):
             __package__,
             URL_TAG,
             URL_NAMESPACE,
-            management_commands=None,
-            answer_model_fields=("answer",),
-            illustration_path="img/{{ camel_case_app_name }}.png"
+            management_commands=[],  # Put here your management commands
+            answer_model_fields=["answer"],
+            illustration_paths=[],
         )
 
     def ready(self):
+        from {{ app_name }}.models import Setting, Answer
+        from {{ app_name }}.forms import SettingForm
+
+        self.register_models(Setting, SettingForm, Answer)
+
+        from {{ app_name }}.exportdata import answers_to_csv, settings_to_csv
+
+        self.answer_to_csv_func = answers_to_csv
+        self.settings_to_csv_func = settings_to_csv
+
+        from {{ app_name }}.random import create_random_answers
+
+        self.random_answers_func = create_random_answers
+
         super({{ camel_case_app_name }}Config, self).ready()
-
-        # from {{ app_name }}.models import Setting, Answer
-        # from {{ app_name }}.forms import SettingForm
-        # self.register_models(Setting, SettingForm, Answer)
-
-

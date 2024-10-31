@@ -1,0 +1,41 @@
+import csv
+
+from {{ app_name }}.models import Answer, Setting
+
+
+def answers_to_csv(writer, game):
+    writer = csv.writer(writer)
+    writer.writerow(
+        [
+            "player_name",
+            "is_team_player",
+            "answer"
+        ]
+    )
+    for answer in Answer.objects.filter(game=game):
+        writer.writerow(
+            [
+                answer.player.name,
+                answer.player.is_team_player,
+                answer.answer,
+            ]
+        )
+
+def settings_to_csv(writer, game):
+    setting = None
+    try:
+        setting = game.{{ app_name }}_setting
+    except Setting.DoesNotExist:
+        pass
+    if setting:
+        writer = csv.writer(writer)
+        writer.writerow(
+            [
+                "setting1",
+            ]
+        )
+        writer.writerow(
+            [
+                setting.setting1,
+            ]
+        )

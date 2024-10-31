@@ -4,12 +4,12 @@ from core.models import Player, Game
 
 
 class Setting(models.Model):
-    game = models.ForeignKey(
+    game = models.OneToOneField(
         Game,
         on_delete=models.CASCADE,
         related_name="{{ app_name }}_setting"
     )
-#     setting1 = models.FloatField()
+    setting1 = models.FloatField()
 
 
 class Answer(models.Model):
@@ -19,17 +19,15 @@ class Answer(models.Model):
     player = models.ForeignKey(
         Player, on_delete=models.CASCADE, related_name="{{ app_name }}_answer"
     )
-#     answer = models.FloatField()
-#     motivation = models.TextField()
-
+    answer = models.FloatField()
 
     class Meta:
         ordering = ["game", "player"]
         unique_together = ("game", "player")
 
 
-# class Result(models.Model):
-#     game = models.OneToOneField(
-#         Game, on_delete=models.CASCADE, related_name="{{ app_name }}_results"
-#     )
-#     result = models.FloatField()
+class Result(models.Model):
+    game = models.OneToOneField(
+        Game, on_delete=models.CASCADE, related_name="{{ app_name }}_results"
+    )
+    result = models.FloatField()
