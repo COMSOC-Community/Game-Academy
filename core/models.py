@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group, AbstractUser
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
-from core.games import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES
+from core.game_config import INSTALLED_GAMES_CHOICES, INSTALLED_GAMES
 
 
 class CustomUser(AbstractUser):

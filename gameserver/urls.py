@@ -5,7 +5,7 @@ from core.views import error_400_view, error_403_view, error_404_view, error_500
 
 import re
 
-from core.games import INSTALLED_GAMES
+from core.game_config import INSTALLED_GAMES
 
 handler400 = error_400_view
 handler403 = error_403_view

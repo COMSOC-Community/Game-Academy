@@ -882,6 +882,7 @@ def session_admin_games(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_games_export(request, session_url_tag):
+    """View to export the setting of a game in a CSV file"""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
     response = HttpResponse(content_type="text/csv")
@@ -895,6 +896,8 @@ def session_admin_games_export(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_players(request, session_url_tag):
+    """View for the page to admin the players of a session. Displays all the players of the session.
+    Offers forms to add new players, to delete some, etc... """
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
     context = base_context_initialiser(request)
@@ -905,6 +908,7 @@ def session_admin_players(request, session_url_tag):
     if request.method == "POST" and "add_player_form" in request.POST:
         add_player_form = PlayerRegistrationForm(request.POST, session=session)
         if add_player_form.is_valid():
+            # Create the user and the player profile
             user = CustomUser.objects.create_user(
                 username=add_player_form.cleaned_data["player_username"],
                 password=add_player_form.cleaned_data["password1"],
@@ -919,6 +923,7 @@ def session_admin_players(request, session_url_tag):
                 context["new_player"] = new_player
                 add_player_form = PlayerRegistrationForm(session=session)
             except Exception as e:
+                # If something happens, we delete the user not to leave some mess behind
                 user.delete()
                 logger = logging.getLogger("Core_SessionPortal")
                 logger.exception("An exception occurred while creating a player", e)
@@ -927,6 +932,7 @@ def session_admin_players(request, session_url_tag):
 
     # Random players form
     num_random_players = Player.objects.filter(session=session, user__is_random_player=True).count()
+    # We can only add random players if the limit for random players has not been reached.
     if num_random_players >= MAX_NUM_RANDOM_PER_SESSION:
         context["max_num_random_players_reached"] = True
         context["MAX_NUM_RANDOM_PER_SESSION"] = MAX_NUM_RANDOM_PER_SESSION
@@ -938,6 +944,8 @@ def session_admin_players(request, session_url_tag):
             if random_players_form.is_valid():
                 num_players = random_players_form.cleaned_data["num_players"]
 
+                # Run the management command and capture its stdout to display the log on the
+                # website
                 try:
                     out = StringIO()
                     params = {"stdout": out}
@@ -959,10 +967,12 @@ def session_admin_players(request, session_url_tag):
     if request.method == "POST" and "import_player_csv_form" in request.POST:
         import_player_csv_form = ImportCSVFileForm(request.POST, request.FILES)
         if import_player_csv_form.is_valid():
+            # We get the file submitted in the form
             uploaded_file = request.FILES["csv_file"]
             file_name = FileSystemStorage(location=tempfile.gettempdir()).save(
                 uploaded_file.name, uploaded_file
             )
+            # We try running the import command, capturing its stdout to display the log
             try:
                 out = StringIO()
                 params = {"stdout": out}
@@ -975,7 +985,6 @@ def session_admin_players(request, session_url_tag):
                 context["import_player_csv_log"] = out.getvalue()
             except Exception as e:
                 context["import_player_csv_error"] = e.__repr__()
-                raise e
     context["import_player_csv_form"] = import_player_csv_form
 
     # Delete player form
@@ -992,26 +1001,30 @@ def session_admin_players(request, session_url_tag):
             player.user.delete()
         player.delete()
 
+    # Delete all players form
     if request.method == "POST" and "delete_all_players_form" in request.POST:
         Player.objects.filter(session=session, user__is_guest_player=False).delete()
         context["all_players_deleted"] = True
 
+    # Delete all randomly generated players form
     if request.method == "POST" and "delete_all_random_players_form" in request.POST:
         Player.objects.filter(session=session, user__is_random_player=True).delete()
         context["all_random_players_deleted"] = True
 
+    # Delete all guests form
     if request.method == "POST" and "delete_all_guests_form" in request.POST:
         Player.objects.filter(session=session, user__is_guest_player=True).delete()
         context["all_guests_deleted"] = True
 
     if is_session_super_admin(session, request.user):
-        # Make admin form
+        # Make (super-)admin form
         make_admin_form = MakeAdminForm(session=session)
         if request.method == "POST" and "make_admin_form" in request.POST:
             make_admin_form = MakeAdminForm(request.POST, session=session)
             if make_admin_form.is_valid():
                 user = make_admin_form.cleaned_data["user"]
                 session.admins.add(user)
+                # If asked for it, we make the user super-admin
                 if make_admin_form.cleaned_data["super_admin"]:
                     session.super_admins.add(user)
                 make_admin_form = MakeAdminForm(session=session)
@@ -1037,12 +1050,15 @@ def session_admin_players(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_players_export(request, session_url_tag):
+    """View to export players of a session in a CSV file."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
+    # Prepare the response as a CSV file
     response = HttpResponse(content_type="text/csv")
     filename = sanitise_filename(f"{session.name}_players")
     response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
 
+    # Write the CSV content in the response
     player_to_csv(response, session)
 
     return response
@@ -1050,13 +1066,18 @@ def session_admin_players_export(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_player_password(request, session_url_tag, player_user_id):
+    """View that allows an admin to change the password of a player of a session. Only
+    the password of a user restricted to a session can be changed."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
-    player = get_object_or_404(Player, session=session, user__id=player_user_id)
+    player = get_object_or_404(Player, session=session, user__id=player_user_id, user__is_player=True)
 
+    # Initialise context for a session page
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     context["player"] = player
 
+    # Update password form
+    # We use PlayerRegistrationForm and pass it a player argument to use it as a modifier form
     update_password_form = PlayerRegistrationForm(session=session, player=player)
     if request.method == "POST" and "update_password_form" in request.POST:
         update_password_form = PlayerRegistrationForm(
@@ -1077,6 +1098,8 @@ def session_admin_player_password(request, session_url_tag, player_user_id):
 
 
 def create_or_join_team(request, session_url_tag, game_url_tag):
+    """View to create or join a team. Public teams are all visible and can be joined with a
+    simple click. Private teams are joined by searching for their name."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, needs_teams=True
@@ -1085,6 +1108,7 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
     if not game.needs_teams:
         raise Http404("This game does not require teams.")
 
+    # Initialise the context as a game context
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
     game_context_initialiser(
@@ -1095,35 +1119,53 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
     if not game.playable and not context["user_is_session_admin"]:
         raise Http404("The game is not playable and the user is not an admin.")
 
+    # If the player is not yet part of a team, we generate the required objects
     player = context["player"]
     if player and context["team"] is None:
         create_team_form = CreateTeamForm(game=game)
         join_public_team_form = JoinPublicTeamForm(game=game)
         join_private_team_form = JoinPrivateTeamForm(game=game)
         if request.method == "POST":
+            # Form to create a team
             if "create_team_form" in request.POST:
                 create_team_form = CreateTeamForm(request.POST, game=game)
                 if create_team_form.is_valid():
                     team_name = create_team_form.cleaned_data["name"]
+                    # We create the user that will represent the team
                     team_player_user = CustomUser.objects.get(
                         username=TEAM_USER_USERNAME
                     )
-                    team_player = Player.objects.create(
-                        user=team_player_user,
-                        name=team_player_name(game.name, team_name),
-                        session=session,
-                        is_team_player=True,
-                    )
-                    new_team = Team.objects.create(
-                        name=create_team_form.cleaned_data["name"],
-                        is_public=create_team_form.cleaned_data["is_public"],
-                        game=game,
-                        creator=player,
-                        team_player=team_player,
-                    )
-                    new_team.players.add(player)
-                    new_team.save()
-                    context["created_team"] = new_team
+                    team_player = None
+                    try:
+                        # We create the player that will represent the team
+                        team_player = Player.objects.create(
+                            user=team_player_user,
+                            name=team_player_name(game.name, team_name),
+                            session=session,
+                            is_team_player=True,
+                        )
+                    except Exception as e:
+                        # If something goes wrong, we clean the mess
+                        team_player_user.delete()
+                        raise e
+                    # Finally, we create the team
+                    if team_player:
+                        try:
+                            new_team = Team.objects.create(
+                                name=create_team_form.cleaned_data["name"],
+                                is_public=create_team_form.cleaned_data["is_public"],
+                                game=game,
+                                creator=player,
+                                team_player=team_player,
+                            )
+                            new_team.players.add(player)
+                            new_team.save()
+                        except Exception as e:
+                            # If something goes wrong, we clean the mess
+                            team_player_user.delete()
+                            raise e
+                        context["created_team"] = new_team
+            # Form to join public teams
             elif "join_public_team_form" in request.POST:
                 join_public_team_form = JoinPublicTeamForm(request.POST, game=game)
                 if join_public_team_form.is_valid():
@@ -1131,6 +1173,7 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
                     joined_team.players.add(player)
                     joined_team.save()
                     context["joined_team_name"] = joined_team.name
+            # Form to join private teams
             elif "join_private_team_form" in request.POST:
                 join_private_team_form = JoinPrivateTeamForm(request.POST, game=game)
                 if join_private_team_form.is_valid():
@@ -1142,6 +1185,7 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 
         context["create_team_form"] = create_team_form
         context["join_private_team_form"] = join_private_team_form
+        # If there are no public team, we disable the public team form
         if join_public_team_form.team_count == 0:
             join_public_team_form = None
         context["join_public_team_form"] = join_public_team_form
@@ -1156,22 +1200,30 @@ def create_or_join_team(request, session_url_tag, game_url_tag):
 
 @session_admin_decorator
 def session_admin_games_settings(request, session_url_tag, game_url_tag):
+    """View to change the settings of a game."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+    # Initialise context as a session page
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
 
     context["game"] = game
+
+    # Check if there are answers to display a warning message before modifying the settings
     answer_model = game.game_config().answer_model
     if answer_model:
         context["answers_exist"] = answer_model.objects.filter(game=game).exists()
 
     # Modify game form
+    # We use the CreateGameForm passing it a "game" parameter to use it as a modifier form
     modify_game_form = CreateGameForm(session=session, game=game, prefix=game.url_tag)
+    # If the app as configured a setting model and form, we retrieve it
     modify_game_setting_form = None
     if game.game_config().setting_form is not None:
         setting_model = game.game_config().setting_model
+        # We try to retrieve the setting object by fetching the right attribute based on the
+        # related_query_name. Only works if the setting model does use a "game" field as intended.
         game_setting_obj = None
         try:
             game_setting_obj = getattr(
@@ -1179,11 +1231,14 @@ def session_admin_games_settings(request, session_url_tag, game_url_tag):
             )
         except ObjectDoesNotExist:
             pass
+        # If we retrieve the setting object, we set up the setting form. This only works if the
+        # setting form is a ModelForm
         if game_setting_obj:
             modify_game_setting_form = game.game_config().setting_form(
                 instance=game_setting_obj
             )
     if request.method == "POST":
+        # Modify game, POST handling
         if "modify_game_form" in request.POST:
             modify_game_form = CreateGameForm(
                 request.POST, session=session, game=game, prefix=game.url_tag
@@ -1215,6 +1270,7 @@ def session_admin_games_settings(request, session_url_tag, game_url_tag):
                     session=session, game=game, prefix=game.url_tag
                 )
                 context["game_modified"] = True
+        # Modify setting POST handling
         elif "modify_game_setting_form" in request.POST:
             setting_model = game.game_config().setting_model
             game_setting_obj = getattr(
@@ -1232,24 +1288,26 @@ def session_admin_games_settings(request, session_url_tag, game_url_tag):
     context["modify_game_form"] = modify_game_form
     context["modify_game_setting_form"] = modify_game_setting_form
 
-    context["export_settings_configured"] = (
-        game.game_config().settings_to_csv_func is not None
-    )
+    context["export_settings_configured"] = game.game_config().settings_to_csv_func is not None
 
     return render(request, "core/session_admin_games_settings.html", context)
 
 
 @session_admin_decorator
 def session_admin_games_settings_export(request, session_url_tag, game_url_tag):
+    """View to export a game's settings into a CSV file"""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+    # If not export function is configured, we raise a 404
     export_function = game.game_config().settings_to_csv_func
     if export_function is not None:
+        # Preparing the response as a CSV file
         response = HttpResponse(content_type="text/csv")
         filename = sanitise_filename(f"{session.name}_{game.name}_settings")
         response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
 
+        # Write the CSV into the response
         export_function(response, game)
 
         return response
@@ -1258,17 +1316,21 @@ def session_admin_games_settings_export(request, session_url_tag, game_url_tag):
 
 @session_admin_decorator
 def session_admin_games_answers(request, session_url_tag, game_url_tag):
+    """View to handle the answers to a game: exporting the answers, generating random answers,
+    deleting answers etc..."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+    # Initialise the context as a session page
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
 
     context["game"] = game
 
+    # Most of this view is only available if an answer model has been configure in the game app
     answer_model = game.game_config().answer_model
     if answer_model is not None:
-        # Delete answer
+        # Form to delete an answer
         if request.method == "POST" and "delete_answer_form" in request.POST:
             deleted_answer_id = request.POST["remove_answer_id"]
             answer_to_delete = answer_model.objects.get(id=deleted_answer_id)
@@ -1276,18 +1338,22 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
             context["deleted_answer_player"] = answer_to_delete.player.display_name()
             answer_to_delete.delete()
 
-        # Delete all answers
+        # Form to delete all answers
         if request.method == "POST" and "delete_all_answers_form" in request.POST:
             answer_model.objects.filter(game=game).delete()
             context["all_answers_deleted"] = True
+
+        # Form to delete all randomly generated answers
         if request.method == "POST" and "delete_all_random_answers_form" in request.POST:
             answer_model.objects.filter(game=game, player__user__is_random_player=True).delete()
             Team.objects.filter(game=game, creator__user__is_random_player=True).delete()
             context["all_answers_deleted"] = True
 
-        # Random answers
+        # Generate random answers
+        # Only if a random generator function has been configured in the game app
         if game.game_config().random_answers_func is not None:
             num_random_players = Player.objects.filter(session=session, user__is_random_player=True).count()
+            # Only available if there are not too many randomly generated user in the session
             if num_random_players >= MAX_NUM_RANDOM_PER_SESSION:
                 context["max_num_random_players_reached"] = True
                 context["MAX_NUM_RANDOM_PER_SESSION"] = MAX_NUM_RANDOM_PER_SESSION
@@ -1299,6 +1365,8 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
                     if random_answers_form.is_valid():
                         num_answers = random_answers_form.cleaned_data["num_answers"]
                         run_management = random_answers_form.cleaned_data["run_management"]
+                        # Run the command to generate the answers, capturing the stdout to show the
+                        # log
                         try:
                             out = StringIO()
                             params = {"stdout": out}
@@ -1317,9 +1385,10 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
                             raise e
                 context["random_answers_form"] = random_answers_form
 
-        # Name of the fields of the answer model
+        # Fetch the fields to display from the game_config
         answer_model_fields = game.game_config().answer_model_fields
         if answer_model_fields is None:
+            # We always omit some fields
             omitted_fields = ("id", "game", "player")
             answer_model_fields = [
                 f.name
@@ -1331,24 +1400,26 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
     else:
         context["no_answer_model"] = True
 
-    context["export_answers_configured"] = (
-        game.game_config().answer_to_csv_func is not None
-    )
+    context["export_answers_configured"] = game.game_config().answer_to_csv_func is not None
 
     return render(request, "core/session_admin_games_answers.html", context)
 
 
 @session_admin_decorator
 def session_admin_games_answers_export(request, session_url_tag, game_url_tag):
+    """View to export answers of a game"""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+    # Only if the export function has been configured in the game_config
     export_function = game.game_config().answer_to_csv_func
     if export_function is not None:
+        # Prepare the response as a CSV file
         response = HttpResponse(content_type="text/csv")
         filename = sanitise_filename(f"{session.name}_{game.name}_answers")
         response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
 
+        # Write the CSV content to the response
         export_function(response, game)
 
         return response
@@ -1357,12 +1428,15 @@ def session_admin_games_answers_export(request, session_url_tag, game_url_tag):
 
 @session_admin_decorator
 def session_admin_games_teams(request, session_url_tag, game_url_tag):
+    """View to admin teams of a game"""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+    # Initialise the context as a session page
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
 
+    # Delete team form
     if request.method == "POST" and "delete_team_form" in request.POST:
         deleted_team_id = request.POST["remove_team_id"]
         team_to_delete = Team.objects.get(id=deleted_team_id)
@@ -1370,6 +1444,7 @@ def session_admin_games_teams(request, session_url_tag, game_url_tag):
         context["deleted_team_name"] = team_to_delete.name
         team_to_delete.delete()
 
+    # Delete all teams form
     if request.method == "POST" and "delete_all_teams_form" in request.POST:
         Team.objects.filter(game=game).delete()
         context["all_teams_deleted"] = True
@@ -1382,19 +1457,24 @@ def session_admin_games_teams(request, session_url_tag, game_url_tag):
 
 @session_admin_decorator
 def session_admin_games_teams_export(request, session_url_tag, game_url_tag):
+    """View to export teams of a game as a CSV file."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
+    # Prepare the response as a CSV file
     response = HttpResponse(content_type="text/csv")
     filename = sanitise_filename(f"{session.name}_{game.name}_teams")
     response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
 
+    # Write the content of the CSV into the file
     team_to_csv(response, game)
 
     return response
 
 
 def quick_game_admin_render(request, session, game, info_message):
+    """Helper function for the quick-access management button for a game. Displays a message
+    and redirect as requested."""
     request.session["_message_view_message"] = info_message
     if "next" in request.GET:
         request.session["_message_view_next_url"] = request.GET["next"]
@@ -1408,6 +1488,7 @@ def quick_game_admin_render(request, session, game, info_message):
 
 @session_admin_decorator
 def game_visibility_toggle(request, session_url_tag, game_url_tag, game_type):
+    """View that toggles the visibility of a game."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=game_type
@@ -1423,6 +1504,7 @@ def game_visibility_toggle(request, session_url_tag, game_url_tag, game_type):
 
 @session_admin_decorator
 def game_play_toggle(request, session_url_tag, game_url_tag, game_type):
+    """View that toggles the playability of a game."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=game_type
@@ -1438,6 +1520,7 @@ def game_play_toggle(request, session_url_tag, game_url_tag, game_type):
 
 @session_admin_decorator
 def game_result_toggle(request, session_url_tag, game_url_tag, game_type):
+    """View that toggles the visibility of the results of a game."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=game_type
@@ -1454,11 +1537,14 @@ def game_result_toggle(request, session_url_tag, game_url_tag, game_type):
 
 @session_admin_decorator
 def game_run_management_cmds(request, session_url_tag, game_url_tag, game_type):
+    """View to run the management commands of a game."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     game = get_object_or_404(
         Game, session=session, url_tag=game_url_tag, game_type=game_type
     )
+    # Fetch the commands from the game_config
     if game.game_config().management_commands is not None:
+        # Run each command, one after the other
         for cmd_name in game.game_config().management_commands:
             management.call_command(
                 cmd_name, session=session.url_tag, game=game.url_tag

@@ -8,7 +8,7 @@ from django.urls import reverse, resolve
 
 import core.authorisations
 from core.constants import FORBIDDEN_SESSION_URL_TAGS
-from core.games import INSTALLED_GAMES_CHOICES
+from core.game_config import INSTALLED_GAMES_CHOICES
 from core.models import Session, Game
 
 # Views that do not require authenticated users

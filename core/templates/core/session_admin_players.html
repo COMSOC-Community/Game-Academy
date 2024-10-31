@@ -224,6 +224,8 @@
         {% endif %}
 
         {% if players %}
+            <p><em>Note:</em>You can only change the password of users that are restricted to this session.</p>
+
             <div class="filtered-collection-wrapper">
                 <div class="filtered-collection-filter">
                     <div class="side-by-side-pushed-wrapper" style="flex-wrap: nowrap;">
@@ -241,9 +243,11 @@
                                     {% if player.user.is_player %}<i class="fas fa-user"></i>{% endif %}
                                 </div>
                                 <div>
-                                    <span class="button" style="margin-right: 20px">
-                                        <a href="{% url "core:session_admin_player_password" session.url_tag player.user.id %}">Change Password</a>
-                                    </span>
+                                    {% if player.user.is_player and player.user != user %}
+                                        <span class="button" style="margin-right: 20px">
+                                            <a href="{% url "core:session_admin_player_password" session.url_tag player.user.id %}">Change Password</a>
+                                        </span>
+                                    {% endif %}
                                     <form action="{% url 'core:session_admin_players' session.url_tag %}#players" method="post">
                                         {% csrf_token %}
                                         <input type="hidden" name="remove_player_id" value={{ player.id }} />

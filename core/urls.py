@@ -2,7 +2,7 @@ import re
 
 from django.urls import path
 
-from core.games import INSTALLED_GAMES
+from core.game_config import INSTALLED_GAMES
 from . import views
 
 

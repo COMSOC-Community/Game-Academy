@@ -9,7 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV3
 
-from core.games import INSTALLED_GAMES_CHOICES
+from core.game_config import INSTALLED_GAMES_CHOICES
 from core.models import Session, Player, Game, Team, CustomUser
 from core.constants import (
     player_username,

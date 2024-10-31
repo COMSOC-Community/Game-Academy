@@ -4,10 +4,12 @@ from collections.abc import Iterable, Callable
 
 from django.apps import AppConfig
 from django.contrib.staticfiles import finders
+from django.core.exceptions import FieldDoesNotExist
 from django.core.management import get_commands
+from django.db.models import OneToOneField
 from django.db.models.base import ModelBase
 from django.db.models.fields.related_descriptors import ForwardManyToOneDescriptor
-from django.forms.models import ModelFormMetaclass
+from django.forms.models import ModelFormMetaclass, ModelForm
 
 from core.constants import FORBIDDEN_APP_URL_TAGS
 
@@ -189,19 +191,37 @@ class GameConfig(AppConfig):
                     )
 
         # Check that the models and forms are indeed models and forms
-        if self.setting_model is not None and not isinstance(
-            self.setting_model, ModelBase
-        ):
-            raise TypeError(
-                "The setting_model attribute of a GameConfig needs to be a "
-                "Django Model object."
-            )
+        if self.setting_model is not None:
+            if not isinstance(
+                self.setting_model, ModelBase
+            ):
+                raise TypeError(
+                    "The setting_model attribute of a GameConfig needs to be a "
+                    "Django Model object."
+                )
+            try:
+                game_field = self.setting_model._meta.get_field('game')
+
+                from core.models import Game
+
+                if not isinstance(game_field, OneToOneField) or game_field.related_model != Game:
+                    raise ValueError("The 'game' attribute of the setting_model should be a "
+                                     "OneToOneField to the core.models.Game model.")
+            except FieldDoesNotExist:
+                raise ValueError("The setting model needs to have a 'game' attribute.")
         if self.setting_form is not None and not isinstance(
             self.setting_form, ModelFormMetaclass
         ):
             raise TypeError(
                 "The setting_form attribute of a GameConfig needs to be a "
-                "Django Form object."
+                "Django ModelForm object."
+            )
+        if self.setting_form is not None and not issubclass(
+            self.setting_form, ModelForm
+        ):
+            raise TypeError(
+                "The setting_form attribute of a GameConfig needs to be a "
+                "Django ModelForm object."
             )
         if self.answer_model is not None:
             if not isinstance(self.answer_model, ModelBase):

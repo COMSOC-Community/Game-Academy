@@ -1,4 +1,4 @@
-from core.games import GameConfig
+from core.game_config import GameConfig
 
 NAME = "iteprisonergame"
 LONGNAME = "Iterative Prisoner's Dilemma Game"
