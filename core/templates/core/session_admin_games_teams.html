@@ -68,7 +68,7 @@
                         <p class="center-align" style="margin: 20px 0;">
                             {% with "core:"|add:game.game_config.url_tag|add:"_run_management" as url_name %}
                                 <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
-                                    Run management commands
+                                    Run management commands &nbsp;
                                     <span class="info-span" title="Management commands usually perform computations once all the answers have been submitted (determining the winner, preparing the graphs, etc...).">&#9432;</span>
                                 </a>
                             {% endwith %}

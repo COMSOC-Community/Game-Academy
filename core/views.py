@@ -52,24 +52,29 @@ from .utils import sanitise_filename
 
 
 def error_render(request, template, status):
+    """Render function used for all errors"""
     response = render(request, template, locals())
     response.status_code = status
     return response
 
 
 def error_400_view(request, exception):
+    """Render error 400"""
     return error_render(request, "400.html", 400)
 
 
 def error_403_view(request, exception):
+    """Render error 403"""
     return error_render(request, "403.html", 403)
 
 
 def error_404_view(request, exception):
+    """Render error 404"""
     return error_render(request, "404.html", 404)
 
 
 def error_500_view(request):
+    """Render error 500"""
     return error_render(request, "500.html", 500)
 
 
@@ -79,6 +84,8 @@ def error_500_view(request):
 
 
 def validate_next_url(request, next_url):
+    """Check that the url passed in parameter is safe. Use to secure the use of get parameters for
+    redirecting URLs."""
     return url_has_allowed_host_and_scheme(
         url=next_url,
         allowed_hosts={request.get_host()},
@@ -87,12 +94,16 @@ def validate_next_url(request, next_url):
 
 
 def force_player_logout(request, session_url_tag):
+    """View that forces a player user, i.e., someone restricted to their session to log out before
+    continuing if they are attempting to reach a page that is not part of their session."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     next_url = request.GET.get("next")
+    # If POST, the form has been submitted and the user chose to log out and continue where
+    # they wanted to go (coming back is a simple link, not a form).
     if request.method == "POST":
         if "logout_and_continue" in request.POST:
             logout(request)
-            print(request.GET)
+            # If there is a next URL we redirect there, otherwise we go to the index page
             if "next" in request.GET:
                 next_url = request.GET["next"]
                 if validate_next_url(request, next_url):
@@ -101,6 +112,8 @@ def force_player_logout(request, session_url_tag):
         else:
             raise Http404("POST request but unknown form type")
 
+    # The URL to stay within the session can be passed as a GET "prev" argument, we default
+    # to the home page of the session if the argument is not there.
     url_back = reverse("core:session_home", args=(session.url_tag,))
     if "prev" in request.GET:
         prev_url = request.GET["prev"]
@@ -118,39 +131,49 @@ def force_player_logout(request, session_url_tag):
 
 
 def message(request):
+    """View to display a message and redirect somewhere afterwards"""
     context = {
         "next_url": reverse("core:index"),
         "message": request.session.pop(
             "_message_view_message", "This is the default message"
         ),
     }
+    # If there is no next URL or it's not valid, we default to the home page of the site
     next_url = request.session.pop("_message_view_next_url", None)
     if next_url:
-        if validate_next_url(request, next_url):
-            context["next_url"] = next_url
+        if not validate_next_url(request, next_url):
+            next_url = None
+    if not next_url:
+        next_url = reverse("core:index")
+    context["next_url"] = next_url
     return render(request, "core/message.html", context)
 
 
 def redirect_to_session_main(session):
+    """Helper function that redirects to the home page of a session. Used to ensure the correct
+    behaviour of the session.game_after_logging parameter."""
     if session.game_after_logging is not None:
-        return redirect_to_game_main(session.game_after_logging)
+        game = session.game_after_logging
+        return redirect(
+            f"{game.game_config().url_namespace}:{game.initial_view}",
+            session_url_tag=game.session.url_tag,
+            game_url_tag=game.url_tag,
+        )
     return redirect("core:session_home", session_url_tag=session.url_tag)
-
-
-def redirect_to_game_main(game):
-    return redirect(
-        f"{game.game_config().url_namespace}:{game.initial_view}",
-        session_url_tag=game.session.url_tag,
-        game_url_tag=game.url_tag,
-    )
 
 
 # ==========================
 #    CONTEXT INITIALISERS
 # ==========================
 
+# These are functions that inialise contexts for different types of view. It would probably be
+# cleaner to use class-based views instead but well...
 
 def base_context_initialiser(request, context=None):
+    """Initialise the context for any page. Mainly fills up the information related to the user,
+    notably for the side panel.
+
+    If a context is passed as argument, the latter is extended with the relevant information."""
     if context is None:
         context = {}
     context["user_is_authenticated"] = request.user.is_authenticated
@@ -170,6 +193,10 @@ def base_context_initialiser(request, context=None):
 
 
 def session_context_initialiser(request, session, context=None):
+    """Initialise the context for a page in a session. Adds the information related to the admin of
+    a session and correct display based on the session parameters.
+
+    If a context is passed as argument, the latter is extended with the relevant information."""
     if context is None:
         context = {}
     context["session"] = session
@@ -185,9 +212,15 @@ def session_context_initialiser(request, session, context=None):
 
 
 def game_context_initialiser(request, session, game, answer_model, context=None):
+    """Initialise the context for a page of a game in a session. Adds information about the player
+    (submitted answer if exists, etc...) together with extra display details.
+
+    If a context is passed as argument, the latter is extended with the relevant information."""
     if context is None:
         context = {}
     context["game"] = game
+    # Retrieve the player, the team if the game requires one, and the potential answer submitted
+    # by the player
     player = None
     team = None
     answer = None
@@ -210,11 +243,14 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
     context["player"] = player
     context["team"] = team
     context["answer"] = answer
+    # "submitting_player" defines the player used to submit the answer, in case of a team we use the
+    # fake player corresponding to the team
     if game.needs_teams:
         context["submitting_player"] = team.team_player if team else None
     else:
         context["submitting_player"] = player
 
+    # Display stuff
     context["game_nav_display_home"] = session.show_game_nav_home
     context["game_nav_display_team"] = game.needs_teams and game.playable and not team
     context["game_nav_display_answer"] = (
@@ -222,6 +258,8 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
     )
     context["game_nav_display_result"] = game.results_visible and session.show_game_nav_home
 
+    # If admin we add extra information: number of registered players/teams and number of answers
+    # received
     if context["user_is_session_admin"]:
         num_players = game.session.players.filter(is_team_player=False).count()
         context["num_players"] = num_players
@@ -253,12 +291,16 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
 
 
 def index(request):
+    """Index of the website. Displays different forms: sign in, register and join a session."""
+    # Initialise the context
     context = base_context_initialiser(request)
 
     login_form = LoginForm()
     registration_form = UserRegistrationForm()
     session_finder_form = SessionFinderForm()
+    # If POST, we go through the different possible forms to check which has been submitted
     if request.method == "POST":
+        # Form to find a session by name, if valid we send the user to the session
         if "session_finder" in request.POST:
             session_finder_form = SessionFinderForm(request.POST)
             if session_finder_form.is_valid():
@@ -266,6 +308,7 @@ def index(request):
                     "core:session_portal",
                     session_url_tag=session_finder_form.cleaned_data["session_url_tag"],
                 )
+        # Log in form, if valid the user is logged in and we stay on the index page
         elif "login_form" in request.POST:
             login_form = LoginForm(request.POST)
             if login_form.is_valid():
@@ -280,6 +323,7 @@ def index(request):
                 else:
                     login(request, user)
                     return redirect("core:index")
+        # Registration form, if valid the user is created and we stay on the index page
         elif "registration_form" in request.POST:
             registration_form = UserRegistrationForm(request.POST)
             if registration_form.is_valid():
@@ -300,6 +344,7 @@ def index(request):
 
 
 def about(request):
+    """View for the about page of the website."""
     context = base_context_initialiser(request)
     return render(request, "core/about.html", context=context)
 
@@ -309,6 +354,7 @@ def about(request):
 
 
 def logout_user(request):
+    """View to log out a user and then redirect to the next URL"""
     logout(request)
     next_url = request.GET.get("next")
     if next_url:
@@ -318,6 +364,7 @@ def logout_user(request):
 
 
 def user_profile(request, user_id):
+    """View to display the details of a user. Offers a form to change the password and """
     user = get_object_or_404(CustomUser, id=user_id)
     if request.user != user:
         raise Http404("This page is not the business of the logged-in user.")
@@ -329,12 +376,14 @@ def user_profile(request, user_id):
     if request.method == "POST" and "update_password_form" in request.POST:
         update_password_form = UpdatePasswordForm(request.POST, user=user)
         if update_password_form.is_valid():
+            # If valid we update the password and the Django session
             request.user.set_password(update_password_form.cleaned_data["new_password1"])
             request.user.save()
             update_session_auth_hash(request, request.user)
             request.session[
                 "_message_view_message"
             ] = f"Your password has been changed."
+            # Redirect depending on whether the user is session-restricted or not
             if request.user.is_player:
                 request.session["_message_view_next_url"] = reverse("core:session_home", kwargs={
                     "session_url_tag": user.players.first().session.url_tag
@@ -355,6 +404,7 @@ def user_profile(request, user_id):
             request.session[
                 "_message_view_message"
             ] = f"Your account {user.username} has been deleted. Have fun under new skies!"
+            # Redirect depending on whether the user is session-restricted or not
             if request.user.is_player:
                 request.session["_message_view_next_url"] = reverse("core:session_portal", kwargs={
                     "session_url_tag": user.players.first().session.url_tag
@@ -374,15 +424,18 @@ def user_profile(request, user_id):
 
 
 def create_session(request):
+    """View to create a session. A simple form."""
     user_can_create_session = can_create_sessions(request.user)
     if not user_can_create_session:
         raise Http404("This user cannot create sessions.")
 
     context = base_context_initialiser(request)
+    # Ensures that the user has not yet created too many sessions
     if len(context["user_administrated_sessions"]) >= settings.MAX_NUM_SESSION_PER_USER:
         context["MAX_NUM_SESSION_PER_USER"] = settings.MAX_NUM_SESSION_PER_USER
         context["max_num_session_reached"] = True
     else:
+        # If creating a session is possible, we deal with the form.
         create_session_form = CreateSessionForm()
         if request.method == "POST":
             if "create_session_form" in request.POST:
@@ -401,6 +454,8 @@ def create_session(request):
                         ],
                         visible=create_session_form.cleaned_data["visible"],
                     )
+                    # The creator of the session is by default a super-admin of the session (and
+                    # thus also an admin)
                     session_obj.admins.add(request.user)
                     session_obj.super_admins.add(request.user)
                     create_session_form = CreateSessionForm()
@@ -412,6 +467,8 @@ def create_session(request):
 
 
 def session_portal(request, session_url_tag):
+    """View for the portal of a session, i.e., the entry page to a session. Offers log in and sign
+    up forms."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
     context = base_context_initialiser(request)
@@ -419,6 +476,8 @@ def session_portal(request, session_url_tag):
 
     authenticated_user = request.user.is_authenticated
     is_user_admin = is_session_admin(session, request.user)
+    # If the user is a session admin, then log in is not necessary and we already display the
+    # session context. Otherwise, this is just a basic page.
     if is_user_admin:
         session_context_initialiser(request, session, context)
 
@@ -430,7 +489,8 @@ def session_portal(request, session_url_tag):
                 passwords_display=not authenticated_user,
             )
             if registration_form.is_valid():
-                # If user is not already authenticated, we need to create one
+                # If user is not already authenticated, we need to create one and then to
+                # attach the player profile to it
                 if authenticated_user:
                     user = request.user
                 else:
@@ -470,9 +530,12 @@ def session_portal(request, session_url_tag):
                 if user:
                     login(request, user)
                     if "player" in login_form.cleaned_data:
-                        # If we are loging in a player, we redirected to home
+                        # If we are loging in a player, we redirected to home. For regular users,
+                        # the "player" of the login form is set in the clean method so that
+                        # it is set if the user has a player profile
                         return redirect_to_session_main(session)
-                    # If not, we are loging in a user, thus we stay here
+                    # If not, we are loging in a user, thus we stay here because they don't have a
+                    # profile yet
                     return redirect(
                         "core:session_portal", session_url_tag=session.url_tag
                     )
@@ -484,13 +547,13 @@ def session_portal(request, session_url_tag):
         elif "guest_form" in request.POST and session.show_guest_login:
             guest_form = SessionGuestRegistration(request.POST, session=session)
             if guest_form.is_valid():
+                # We create a user and a player for the guest
                 user = CustomUser.objects.create_user(
                     username=guest_form.cleaned_data["guest_username"],
                     password=guest_password(guest_form.cleaned_data["guest_username"]),
                     is_player=True,
                     is_guest_player=True,
                 )
-
                 try:
                     Player.objects.create(
                         name=guest_form.cleaned_data["guest_name"],
@@ -506,6 +569,7 @@ def session_portal(request, session_url_tag):
                     # Something weird happened: form is valid but authenticate fails
                     context["general_login_error"] = True
                 except Exception as e:
+                    # If an exception occurred, we clean up the mess
                     if not authenticated_user:
                         user.delete()
                     logger = logging.getLogger("Core_SessionPortal")
@@ -534,13 +598,17 @@ def session_portal(request, session_url_tag):
 
 
 def session_home(request, session_url_tag):
+    """View for the home of a session, display all the games available"""
     session = get_object_or_404(Session, url_tag=session_url_tag)
     games = Game.objects.filter(session=session, visible=True)
 
+    # Initialise the context for a session page
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
+
     context["games"] = games
 
+    # If admin, we add the games that are not visible to the players
     if is_session_admin(session, request.user):
         context["invisible_games"] = Game.objects.filter(session=session, visible=False)
 
@@ -554,12 +622,16 @@ def session_home(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin(request, session_url_tag):
+    """View for the modifying the details of the session. Offers forms to modify the settings of the
+    session and to delete it. Session export functionality are also displayed there."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
+    # We initialise the context for a session page
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
 
-    # Modify session form
+    # Modify session form. We use the CreateSessionForm by passing a session to it to use it as
+    # a modify form instead
     modify_session_form = CreateSessionForm(session=session)
     delete_session_form = DeleteSessionForm(user=request.user)
     if request.method == "POST":
@@ -601,6 +673,7 @@ def session_admin(request, session_url_tag):
         elif "delete_session_form" in request.POST:
             delete_session_form = DeleteSessionForm(request.POST, user=request.user)
             if delete_session_form.is_valid():
+                # Show a confirm message once the session has been deleted
                 request.session[
                     "_message_view_message"
                 ] = f"The session {session.name} has been deleted."
@@ -617,12 +690,15 @@ def session_admin(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_export(request, session_url_tag):
+    """Returns a CSV response with the session's settings."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
+    # Initialise the response as a CSV file
     response = HttpResponse(content_type="text/csv")
     filename = sanitise_filename(f"{session.name}_parameters")
     response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
 
+    # Write the csv file in the request
     session_to_csv(response, session)
 
     return response
@@ -630,11 +706,13 @@ def session_admin_export(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_export_full(request, session_url_tag):
+    """Returns a ZIP response with all the CSV files from the element of the session."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
+    # We create the zip file on the fly
     zip_buffer = io.BytesIO()
-
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        # Parameters of the session
         session_buffer = io.StringIO()
         session_to_csv(session_buffer, session)
         zip_file.writestr(
@@ -642,6 +720,7 @@ def session_admin_export_full(request, session_url_tag):
             session_buffer.getvalue(),
         )
 
+        # Players of the session
         player_buffer = io.StringIO()
         player_to_csv(player_buffer, session)
         zip_file.writestr(
@@ -649,13 +728,16 @@ def session_admin_export_full(request, session_url_tag):
             player_buffer.getvalue(),
         )
 
+        # Games of the session
         games_buffer = io.StringIO()
         games_to_csv(games_buffer, session)
         zip_file.writestr(
             sanitise_filename(f"{session.name}_games") + ".csv", games_buffer.getvalue()
         )
 
+        # For each game, the export function is called if it is set up
         for game in Game.objects.filter(session=session):
+            # Game settings export
             settings_export_function = game.game_config().settings_to_csv_func
             if settings_export_function is not None:
                 settings_buffer = io.StringIO()
@@ -665,6 +747,7 @@ def session_admin_export_full(request, session_url_tag):
                     settings_buffer.getvalue(),
                 )
 
+            # Answers export
             answers_export_function = game.game_config().answer_to_csv_func
             if answers_export_function is not None:
                 answers_buffer = io.StringIO()
@@ -674,6 +757,7 @@ def session_admin_export_full(request, session_url_tag):
                     answers_buffer.getvalue(),
                 )
 
+            # Team export
             if game.needs_teams:
                 teams_buffer = io.StringIO()
                 team_to_csv(teams_buffer, game)
@@ -682,6 +766,7 @@ def session_admin_export_full(request, session_url_tag):
                     teams_buffer.getvalue(),
                 )
 
+    # We return the zip file as the response
     zip_buffer.seek(0)
     response = HttpResponse(zip_buffer, content_type="application/zip")
     filename = sanitise_filename({session.name})
@@ -692,12 +777,15 @@ def session_admin_export_full(request, session_url_tag):
 
 @session_admin_decorator
 def session_admin_games(request, session_url_tag):
+    """View to admin the games of the session. Offers the form to add new games and lists the game
+    already in the session."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
 
     context = base_context_initialiser(request)
     session_context_initialiser(request, session, context)
 
     # Create game form
+    # We only offer the form if the limit of games per session has not yet been reached
     if len(session.games.all()) >= settings.MAX_NUM_GAMES_PER_SESSION:
         context["max_num_games_reached"] = True
         context["MAX_NUM_GAMES_PER_SESSION"] = settings.MAX_NUM_GAMES_PER_SESSION
@@ -708,6 +796,7 @@ def session_admin_games(request, session_url_tag):
             if create_game_form.is_valid():
                 games = session.games
                 if games.exists():
+                    # If there already are games, we give the new game the highest priority
                     ordering_priority = (
                         session.games.aggregate(Max("ordering_priority"))[
                             "ordering_priority__max"
@@ -728,6 +817,8 @@ def session_admin_games(request, session_url_tag):
                     description=create_game_form.cleaned_data["description"],
                     ordering_priority=ordering_priority,
                 )
+                # If the "home_view" for the game app is not configured, we try to find an "index"
+                # view, we eventually default to the first available URL if nothing works
                 if new_game.game_config().home_view is not None:
                     home_view = new_game.game_config().home_view
                 else:
@@ -737,11 +828,11 @@ def session_admin_games(request, session_url_tag):
                     else:
                         home_view = all_url_names[0]
                 new_game.initial_view = home_view
+                # By default, after submitting we get back to the home_view
                 new_game.view_after_submit = home_view
-                new_game.save()
-                create_game_form = CreateGameForm(session=session)
-                context["new_game"] = new_game
 
+                # We set the illustration of the new game, by selecting the next illustration
+                # available (in a cycle)
                 game_config = new_game.game_config()
                 num_games_of_type = (
                     session.games.filter(game_type=new_game.game_type).count() - 1
@@ -751,9 +842,22 @@ def session_admin_games(request, session_url_tag):
                     num_games_of_type % len(all_illustrations)
                 ]
                 new_game.save()
-                if game_config.setting_model is not None:
-                    game_config.setting_model.objects.create(game=new_game)
 
+                # If there is a setting model, we need to create it as well.
+                if game_config.setting_model is not None:
+                    try:
+                        game_config.setting_model.objects.create(game=new_game)
+                    except Exception as e:
+                        raise RuntimeError(
+                            "Something went wrong when creating the instance of the setting model "
+                            "for the game. Are you sure that your setting model only requires a "
+                            "'game' parameter and no additional one?"
+                        ) from e
+
+                create_game_form = CreateGameForm(session=session)
+                context["new_game"] = new_game
+
+        # In case we created a new game, we check again for the max number of games per session
         if "new_game" in context and len(session.games.all()) == settings.MAX_NUM_GAMES_PER_SESSION - 1:
             context["max_num_games_reached"] = True
             context["MAX_NUM_GAMES_PER_SESSION"] = settings.MAX_NUM_GAMES_PER_SESSION
@@ -767,6 +871,7 @@ def session_admin_games(request, session_url_tag):
         context["deleted_game_name"] = deleted_game.name
         deleted_game.delete()
 
+    # Delete all games form
     if request.method == "POST" and "delete_all_games_form" in request.POST:
         Game.objects.filter(session=session).delete()
         context["all_games_deleted"] = True

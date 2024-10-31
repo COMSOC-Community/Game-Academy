@@ -8,28 +8,41 @@ from core.models import CustomUser, Player, Team
 
 
 def random_user_names(num_users):
+    """Generates random names for users, ensuring they don't exist"""
     res = []
     db_user_names = CustomUser.objects.all().values_list("username", flat=True)
     db_player_names = Player.objects.all().values_list("name", flat=True)
     for _ in range(num_users):
         player_name = RANDOM_PLAYERNAME_PREFIX + "_"
+        while_run = 0
         while (
             player_name in res
             or player_name in db_player_names
             or player_name in db_user_names
         ):
+            while_run += 1
             player_name = (
                 RANDOM_PLAYERNAME_PREFIX
                 + "_"
                 + "".join(random.choices(string.ascii_letters + string.digits, k=20))
             )
-        res.append(player_name)
+            if while_run > 10000:
+                player_name = None
+                break
+        if player_name is not None:
+            res.append(player_name)
     return res
 
 
 def create_random_players(session, num_players):
+    """Creates random players for a given session"""
     new_users = [
-        CustomUser(username=name, password=make_password(None), is_player=True, is_random_player=True)
+        CustomUser(
+            username=name,
+            password=make_password(None),
+            is_player=True,
+            is_random_player=True
+        )
         for name in random_user_names(num_players)
     ]
     new_users = CustomUser.objects.bulk_create(new_users)
@@ -46,6 +59,7 @@ def create_random_players(session, num_players):
 
 
 def create_random_teams(session, game, num_teams):
+    """Creates random teams for a given session and a given name"""
     players = create_random_players(session, num_teams)
     team_player_user = CustomUser.objects.get(username=TEAM_USER_USERNAME)
     team_players = []

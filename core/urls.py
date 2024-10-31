@@ -97,6 +97,8 @@ urlpatterns = [
     ),
 ]
 
+# For each game app in the INSTALLED_GAMES we add specific URLs to the urlpatterns. These are the
+# urls to create teams and some management urls.
 for game_config in INSTALLED_GAMES:
     urlpatterns += [
         path(

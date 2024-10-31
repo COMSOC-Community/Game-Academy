@@ -90,11 +90,18 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                 # We know user is authenticated (assert above, and first test), session views are
                 # only available to players of the session. If player_user, we let go so that it's
                 # caught by the session scope enforcement.
-                if not player_user and request.user.players.first().session == session:
-                    raise Http404(
-                        "Middleware block: this session view is not accessible to this user "
-                        "(not admin, not player)."
-                    )
+                if not player_user:
+                    user_players = request.user.players.all()
+                    if not user_players:
+                        raise Http404(
+                            "Middleware block: this session view is not accessible to this user "
+                            "(not admin, not player) who has no player profile.")
+                    else:
+                        if not user_players.filter(session=session).exists():
+                            raise Http404(
+                                "Middleware block: this session view is not accessible to this "
+                                "user (not admin, not player) who is no player of this session."
+                            )
             # If session is NOT visible, only admins can access the page
             elif view_name not in HIDDEN_SESSION_OPEN_VIEWS:
                 raise Http404(
