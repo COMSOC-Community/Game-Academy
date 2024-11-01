@@ -9,7 +9,7 @@ class Setting(models.Model):
         on_delete=models.CASCADE,
         related_name="{{ app_name }}_setting"
     )
-    setting1 = models.FloatField()
+    setting1 = models.FloatField(default=0)
 
 
 class Answer(models.Model):
