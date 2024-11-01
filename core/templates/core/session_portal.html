@@ -34,66 +34,87 @@
                 <span><a class="button" href="{% url 'core:session_home' session.url_tag %}">Join the session as {{ player_profile.name }}</a></span>
             </p>
         {% else %}
-            {% if user_is_authenticated %}
+            {% if login_form or registration_form or guest_form %}
                 <p>
-                    To participate in the session you need a player profile.
-                    {% if session.show_create_account %}
-                        Use the form below to create a player profile for this session.
-                    {% else %}
-                        Unfortunately, it is no longer possible to create a player profile for this
-                        session.
-                    {% endif %}
+                    You are at the portal of the session {{ session.long_name }}.
+                    Only few more clicks and you'll be able to start playing!
                 </p>
-            {% endif %}
-            {% if login_form and guest_form %}
-                <div class="side-by-side-two-columns-wrapper">
-            {% endif %}
-            {% if login_form %}
-                <div>
-                    <h3>Log in to an Existing Account</h3>
-
-                    <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
-                        {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
-                    </form>
-                </div>
-            {% endif %}
-            {% if guest_form %}
-                <div>
-                    <h3>Continue as a Guest</h3>
-
-                    <p class="center-align" style="margin-bottom: 0">
-                        <button onclick="generateRandomName()">Generate random name</button>
-                    </p>
-                    <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
-                        {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
-                    </form>
-                </div>
-            {% endif %}
-            {% if login_form and guest_form %}
-                </div>
+            {% else %}
+                <p>This session is close. You can no longer join it.</p>
             {% endif %}
         {% endif %}
     </section>
 
-    {% if not player_profile and registration_form %}
-        <section id="registration">
-            <h2>Create a Player Profile</h2>
-            {% if created_player %}
-                <div class="form-success-message">
-                    <p>
-                        Your player profile has been created, you can now log in.
-                    </p>
-                </div>
-            {% endif %}
-            {% if player_creation_error %}
-                <p class="form-error">There was a general problem here: {{ player_creation_error }}. Please report that to the admin.</p>
-            {% endif %}
-            <form action="{% url 'core:session_portal' session.url_tag %}#registration" method="post">
-                {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register as a Player' %}
-            </form>
-        </section>
-    {% endif %}
+    {% if not player_profile %}
+        <div id="portal-forms-wrap">
+            {% if login_form %}
+                <section>
+                    <h3>Log in to an Existing Account</h3>
 
+                    <p>Already have an account? Sign in and then join the session!</p>
+
+                    <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
+                        {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Log in' %}
+                    </form>
+                </section>
+            {% endif %}
+
+            {% if registration_form %}
+                <section>
+                    <h3>Create a Player Profile</h3>
+                    {% if created_player %}
+                        <div class="form-success-message">
+                            <p>
+                                Your player profile has been created, you can now log in.
+                            </p>
+                        </div>
+                    {% endif %}
+                    {% if player_creation_error %}
+                        <p class="form-error">There was a general problem here: {{ player_creation_error }}. Please report that to the admin.</p>
+                    {% endif %}
+                    {% if user_is_authenticated %}
+                        <p>Create a player profile for this session. This profile will be linked to your account and allows to play in this session!</p>
+                    {% else %}
+                        <p>Not yet registered? Fill in the form below to create a player profile and join the session.</p>
+                    {% endif %}
+                    <form action="{% url 'core:session_portal' session.url_tag %}#registration" method="post">
+                        {% include "include/form_table_template.html" with form=registration_form form_type='registration_form' submit_button_label='Register as a Player' %}
+                    </form>
+                </section>
+            {% endif %}
+
+            {% if guest_form %}
+                <section>
+                    <h3>Continue as a Guest</h3>
+
+                    <p>This session is open for guest users. By choosing this option you will access the session without creating an account.</p>
+
+                    {% if session.visible %}
+                        <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
+                            <div style="display: inline-block; margin:auto; padding: 10px 20px; border-radius: 5px; background-color: var(--color-background-medium);">
+                                <p class="center-align" style="margin-bottom: 0">
+                                    <button onclick="generateRandomName()">Generate random name</button>
+                                </p>
+                                {% if user_is_authenticated %}
+                                    {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Logout and continue as guest' %}
+                                {% else %}
+                                    {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Continue as guest' %}
+                                {% endif %}
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="warning-section" style="padding: 10px 20px">
+                            <p>
+                                Because this session is not visible, the form is not displayed.
+                                Indeed, continuing as a guest forces the user to be logged out, you
+                                would then not be able to see anything of the session (since it's not visible).
+                            </p>
+                        </div>
+                    {% endif %}
+                </section>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block extra_scripts %}

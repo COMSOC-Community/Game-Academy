@@ -3,10 +3,10 @@
         {% with "core:"|add:game.game_config.url_tag|add:"_visibility_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
                 {% if game.visible %}
-                    Hide the game
+                    Hide the game &nbsp;
                     <span class="info-span" title="Players can currently see the game submit their answers, hiding the game will prevent them to do so.">&#9432;</span>
                 {% else %}
-                    Reveal the game
+                    Reveal the game &nbsp;
                     <span class="info-span" title="Players cannot see the game at the moment, revealing the game will allow them to do so.">&#9432;</span>
                 {% endif %}
             </a>
@@ -14,10 +14,10 @@
         {% with "core:"|add:game.game_config.url_tag|add:"_play_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
                 {% if game.playable %}
-                    Close the game
+                    Close the game &nbsp;
                     <span class="info-span" title="Players can currently submit their answers, closing the game will prevent them to do so.">&#9432;</span>
                 {% else %}
-                    Open the game
+                    Open the game &nbsp;
                     <span class="info-span" title="Players cannot submit their answers at the moment, opening the game will allow them to do so.">&#9432;</span>
                 {% endif %}
             </a>
@@ -25,10 +25,10 @@
         {% with "core:"|add:game.game_config.url_tag|add:"_result_toggle" as url_name %}
             <a class="button process-button" href="{% url url_name session.url_tag game.url_tag %}?next={{ request.path }}">
                 {% if game.results_visible %}
-                        Hide the results
+                        Hide the results &nbsp;
                         <span class="info-span" title="Players can access the result page, hiding it will prevent them from seeing the results of the game.">&#9432;</span>
                 {% else %}
-                        Reveal the results
+                        Reveal the results &nbsp;
                         <span class="info-span" title="Players cannot access the result page, revealing it will allow them to see the results of the game.">&#9432;</span>
                 {% endif %}
             </a>

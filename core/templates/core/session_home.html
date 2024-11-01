@@ -18,6 +18,10 @@
     {% if not session.visible %}
         <section class="warning-section">
             <p>This session is not visible, you are only seeing this page because you are an administrator of the session!</p>
+            <p>Make is visible by changing the session parameter:</p>
+            <p class="center-align">
+            <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin' session.url_tag %}#parameters">Session's Parameters Admin Page</a>
+            </p>
         </section>
     {% endif %}
 
@@ -56,6 +60,13 @@
             </div>
         {% else %}
             <p>No games are currently available.</p>
+
+            {% if user_is_session_admin %}
+                <p>As an admin, you can add games from the session settings:</p>
+                <p class="center-align">
+                <a class="button navigation-button color-warning-dark" href="{% url 'core:session_admin_games' session.url_tag %}#add_game">Session's Game Admin Page</a>
+                </p>
+            {% endif %}
         {% endif %}
     </section>
 

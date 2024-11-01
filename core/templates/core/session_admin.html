@@ -35,7 +35,7 @@
         </p>
     </section>
 
-    <section>
+    <section id="parameters">
         <h2>General Parameters</h2>
         <p>
             Here are the current values for the main parameters of session {{ session.long_name }}. If you modify them,
@@ -49,7 +49,7 @@
         {% endif %}
 
         {% if modify_session_form %}
-            <form action="{% url 'core:session_admin' session.url_tag %}" method="post">
+            <form action="{% url 'core:session_admin' session.url_tag %}#parameters" method="post">
                 {% include "include/form_table_template.html" with form=modify_session_form form_type='modify_session_form' submit_button_label='Modify Session' %}
             </form>
         {% endif %}

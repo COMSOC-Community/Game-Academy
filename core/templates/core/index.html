@@ -62,20 +62,24 @@
     {% endif %}
 
     {% if not user_is_authenticated %}
-        <section>
+        <section id="login-register">
             <h2>Register or Login</h2>
 
-            <div class="side-by-side-centered-wrapper">
+            <p>Want to organise your own session? Create an account or login if you already have one.</p>
+
+            <div id="login-register-wrap" class="side-by-side-centered-wrapper">
                 <div>
+                    <h4>Sign In to your Account</h4>
                     {% if general_login_error %}
                         <div class="form-error-message">Something went wrong with the login, contact the administrator.</div>
                     {% endif %}
-                    <form action="{% url 'core:index' %}" method="post">
+                    <form action="{% url 'core:index' %}#login-register" method="post">
                         {% include "include/form_table_template.html" with form=login_form form_type='login_form' submit_button_label='Login' %}
                     </form>
                 </div>
 
                 <div>
+                    <h4>Create an Account</h4>
                     {% if created_user %}
                         <div class="form-success-message">User <em>{{ created_user.username }}</em> has been created. You can now log in.</div>
                     {% else %}

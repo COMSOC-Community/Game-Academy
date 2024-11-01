@@ -247,7 +247,7 @@ class CreateSessionForm(forms.Form):
     show_guest_login = forms.BooleanField(
         label="Guest login available",
         label_suffix="",
-        initial=True,
+        initial=False,
         required=False,
         help_text="If the guest login is available users have the possibility to join the session "
         "as guests, i.e., they do not need to have an account.",
@@ -348,6 +348,8 @@ class CreateSessionForm(forms.Form):
             # information
             self.fields.pop("game_after_logging")
             self.fields.pop("show_side_panel")
+            self.fields.pop("show_game_nav_home")
+            self.fields.pop("show_game_nav_result")
 
     def clean_url_tag(self):
         url_tag = self.cleaned_data["url_tag"]

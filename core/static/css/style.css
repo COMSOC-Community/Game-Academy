@@ -3,6 +3,7 @@
 :root {
 	--color-frame: #333;
 	--color-background-light: white;
+	--color-background-medium: #f8f8f8;
 	--color-background-dark: #ececec;
 	--color-success-light: #a4e8a1;
 	--color-success: #8ace66;
@@ -180,13 +181,21 @@ section {
 	padding: 20px;
 	margin: 20px 0;
 	background-color: white;
-	border: 1px solid var(--color-frame);
+	/*border: 1px solid var(--color-frame);*/
 	border-radius: 5px;
+}
+
+section > *:first-child {
+	margin-top: 0;
 }
 
 .warning-section {
 	background: var(--color-warning-light);
-	border: var(--color-warning-dark) solid 2px;
+	/*border: var(--color-warning-dark) solid 2px;*/
+}
+
+.warning-section p:only-child {
+	margin: 0;
 }
 
 footer {
@@ -243,6 +252,7 @@ Typical layouts
 	align-items: center;
 	width: 100%;
 	box-sizing: border-box;
+	gap: 20px;
 }
 
 .side-by-side-pushed-wrapper {
@@ -391,9 +401,9 @@ Side panel
 
 #side-panel {
     background-color: white;
-	border-right: 1px solid var(--color-frame);
-	border-top: 1px solid var(--color-frame);
-	border-bottom: 1px solid var(--color-frame);
+	/*border-right: 1px solid var(--color-frame);*/
+	/*border-top: 1px solid var(--color-frame);*/
+	/*border-bottom: 1px solid var(--color-frame);*/
 	border-bottom-right-radius: 5px;
 	border-top-right-radius: 5px;
     width: 20vw;
@@ -458,10 +468,11 @@ Side panel
 }
 
 #side-panel .nav-content {
-	margin-left: 20px;
+	/*margin-left: 5px;*/
 }
 
 #side-panel .nav-content .nav-content {
+	margin-left: 20px;
 	border-left: 3px solid var(--color-frame);
 	padding: 20px;
 }
@@ -488,10 +499,9 @@ Side panel
 
 #side-panel h4 {
     display: flex;
-	background-color: var(--color-background-dark);
-	border-top: 1px solid var(--color-frame);
-	border-bottom: 1px solid var(--color-frame);
-	border-left: 1px solid var(--color-frame);
+	background-color: var(--color-background-medium);
+	border-top: 1px solid var(--color-background-dark);
+	border-bottom: 1px solid var(--color-background-dark);
 	padding: 5px 10px 5px 10px;
 	margin: 0;
 }
@@ -528,9 +538,15 @@ Side panel
 	padding: 5px 10px 10px;
 }
 
-@media screen and (max-width: 480px) {
+@media screen and (max-width: 650px) {
 	#main-panel.full-main {
-		margin: 5px;
+		margin: 40px 0;
+	}
+
+	#main-panel.full-main section {
+		border-radius: 0;
+		border-left: none;
+		border-right: none;
 	}
 }
 
@@ -541,7 +557,7 @@ Side panel
     }
 
 	#main-panel.truncated-main {
-		margin: 50px 0;
+		margin: 40px 0;
 		padding-left: 0;
 		border-radius: 0;
 	}
@@ -559,11 +575,20 @@ Side panel
 		border-radius: 0;
 	}
 
+	#side-panel.hidden {
+		visibility: visible;
+		opacity: 100;
+	}
+
 	#side-panel-toggle-in {
 		display: none;
 	}
 
 	#side-panel-toggle-out {
+		display: none;
+	}
+
+	#side-panel-toggle-out.visible {
 		display: none;
 	}
 }
@@ -573,9 +598,17 @@ Side panel
 Forms
 == */
 
+form {
+	display: flex;
+	justify-items: center;
+}
+
 .form-table {
 	border-spacing: 0 10px;
 	border-collapse: separate;
+	padding: 10px 20px;
+	border-radius: 5px;
+	background-color: var(--color-background-medium);
 }
 
 .form-table td {
@@ -629,7 +662,7 @@ Forms
 
 .form-success-message {
 	background: var(--color-success-light);
-	border: var(--color-success-dark) solid 2px;
+	/*border: var(--color-success-dark) solid 2px;*/
 	border-radius: 10px;
 	padding: 10px 20px;
 	margin-bottom: 10px;
@@ -640,7 +673,7 @@ Forms
 
 .form-error-message {
 	background: var(--color-error-light);
-	border: var(--color-error-dark) solid 2px;
+	/*border: var(--color-error-dark) solid 2px;*/
 	border-radius: 10px;
 	padding: 0 20px;
 	margin-bottom: 10px;
@@ -671,6 +704,7 @@ Forms
 	text-decoration: none;
 	display: inline-flex;
 	flex-wrap: wrap;
+	align-items: center;
 }
 
 .button a {
@@ -731,6 +765,32 @@ Index page
 	border-top-right-radius: 5px;
 	border: 1px solid var(--color-success-light);
 	background: var(--color-success-light);
+}
+
+#login-register-wrap h4 {
+	margin-top: 0;
+	margin-bottom: 5px;
+	text-align: center;
+}
+
+/* ==============
+   Session Portal
+================ */
+
+#portal-forms-wrap {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+	gap: 20px;
+}
+
+#portal-forms-wrap > section {
+	margin: 0;
+}
+
+@media (min-width: 760px) and (max-width: 1519px) {
+    #portal-forms-wrap > section:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
 }
 
 /* ==============

@@ -17,6 +17,16 @@
 {% block content %}
     {% if user_is_session_admin %}
         {% include 'include/game_admin_panel.html' %}
+
+        {% if not player_profile %}
+            <section class="warning-section">
+                <p>
+                    You are seeing this page because you are an admin but you do not have a player profile.
+                    Some of the elements of the website may not be displayed properly, for instance
+                    the forms to submit answers to the games.
+                </p>
+            </section>
+        {% endif %}
     {% endif %}
 
     {% block game_content %}
