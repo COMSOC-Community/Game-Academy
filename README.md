@@ -36,6 +36,7 @@ developing it further.
   - [Management Commands](#management-commands)
   - [Export Functions](#export-functions)
   - [Random Answer Generator](#random-answers-generator)
+- [Maintainment](#maintainment) 
 
 ## Setting Up the Scene
 
@@ -353,3 +354,23 @@ users to test the display of the game before actual answers are submitted.
 
 To implement this functionality, populate the `create_random_answers` function in the `random.py` file of your
 app. Then, update the value of the `random_answers_func` member in the `ready()` method of your `GameConfig`.
+
+## Maintainmen
+
+To update the server:
+
+- SSH to the server
+- Add your GitHub ssh key to the agent: `ssh-add ~/.ssh/your_key`
+- Move to the folder of the Django project: `cd gameserver/Game-Server`
+- Pull the git: `git pull`
+- If static files have been updated:
+  - `source ../venv/bin/activate`
+  - `python manage.py collectstatic`
+- If the database needs updating:
+  - `source ../venv/bin/activate`
+  - `python manage.py makemigrations`
+  - `python manage.py migrate`
+- In any case, restart the uwsgi:
+  - `cd`
+  - `./restart_supervisord.sh`
+- Log out from the server 
