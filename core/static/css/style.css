@@ -215,8 +215,13 @@ footer {
 	align-items: center;
 }
 
+.footer-wrap:not(:first-of-type) {
+	margin-top: 10px;
+}
+
 .footer-element {
 	color: white;
+	font-size: 0.8rem;
 }
 
 .footer-element a {
@@ -239,6 +244,11 @@ p {
 .center-margin {
 	margin-left: auto;
 	margin-right: auto;
+}
+
+a {
+	text-decoration: none;
+	color: var(--color-warning-dark)
 }
 
 /* ============
@@ -844,8 +854,25 @@ Index page
 	width: 100%;
 }
 
-.admin-nav-item {
+/* ======
+   FAQ
+======  */
 
+.faq-wrap {
+	background-color: var(--color-background-medium);
+}
+
+.faq-wrap h3 {
+	background-color: var(--color-background-dark);
+	padding: 3px 5px;
+}
+
+.faq-content {
+	padding: 3px 5px;
+}
+
+.faq-content code {
+	font-size: 0.8rem;
 }
 
 /* =========

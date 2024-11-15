@@ -15,6 +15,7 @@ from core.models import Session, Game
 OPEN_VIEWS = {
     "core:index",
     "core:about",
+    "core:faq",
     "core:logout",
     "core:message",
     "core:session_portal",

@@ -1,0 +1,253 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Frequently Asked Questions and Tutorials{% endblock %}
+
+{% block extra_head %}
+    <script src="{% static 'js/collapsible_next.js' %}"></script>
+{% endblock %}
+
+{% block header %}
+    <h1>Frequently Asked Questions and Tutorials</h1>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <p>
+            The page presents a collection of extra information and tips on how to use the website.
+        </p>
+
+        <p>
+            This page is purposefully long, use the search function of your browser or any of the
+            following links for in-page navigation.
+        </p>
+
+        <ul>
+            <li><a href="#session_management">General Management of a Session</a></li>
+            <li><a href="#course">Setting up a Session for a Course</a></li>
+            <li><a href="#one-shot-event">Setting up a Session for a One-Shot Event</a></li>
+        </ul>
+    </section>
+
+    <section id="session_management">
+        <h2>General Management of a Session</h2>
+
+        <div class="faq-wrap">
+            <h3>Creating a Session</h3>
+            <div class="faq-content">
+                <p>
+                    This is done <a href="{% url "core:create_session" %}">here</a>. You can only see
+                    this page if you are logged in, and if you have the suitable permission.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+            <h3>Deleting a Session</h3>
+            <div class="faq-content">
+                <p>
+                    To delete a session, go to parameter admin page of the session at <code>SESSION_URL/admin/</code>.
+                    At the bottom of the page there is a form to delete the session.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+
+            <h3>Session Portal vs Session Home</h3>
+            <div class="faq-content">
+                <p>
+                    The portal of a session is the page from which the users can enter the session
+                    (via logging in for instance). The home is the page in which players see all the
+                    games that are on offer.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+
+            <h3>Users, Players and Restricted Users</h3>
+            <div class="faq-content">
+                <p>
+                    Users can either have a global account, or an account that is specific to a session.
+                    We call the latter restricted users. Users are restricted when a non-authenticated
+                    person creates a player profile from the portal of a session.
+                </p>
+                <p>
+                    Restricted users can only access the content of the session to which they registered.
+                    Whenever they try to access a page outside of the session, a prompt will require
+                    them to log out first.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+
+            <h3>Guest Players</h3>
+            <div class="faq-content">
+                <p>
+                    Guest players are users who joined the session without registering. These players
+                    cannot log in.
+                </p>
+                <p>
+                    They are typically used for one-shot events in which there is no need to create
+                    accounts.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+            <h3>Changing Password</h3>
+            <div class="faq-content">
+                <p>
+                    Every user can change their password by going to their account settings. This page
+                    is accessible via the side panel.
+                </p>
+
+                <p>
+                    An admin of a session can also change the password of the players of the session.
+                    This is only possible for players who are restricted to the session. Use this
+                    functionality if a player has lost their password, for instance. The links to
+                    change the password of the players are located in the tables available at
+                    <code>SESSION_URL/admin/players</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+            <h3>Session admins pages</h3>
+            <div class="faq-content">
+                <p>
+                    There are many admin pages for a session. The admin pages for the whole sessions
+                    can be found under:
+                </p>
+                <ul>
+                    <li><code>SESSION_URL/admin/</code> for the parameters of the session,</li>
+                    <li><code>SESSION_URL/admin/players</code> for the players,</li>
+                    <li><code>SESSION_URL/admin/games</code> for the games.</li>
+                </ul>
+
+                <p>
+                    In addition, each game has its own set of admin pages:
+                </p>
+                <ul>
+                    <li><code>SESSION_URL/admin/game/GAME_URL_TAG</code> for the settings of the game,</li>
+                    <li><code>SESSION_URL/admin/game/GAME_URL_TAG/teams</code> for the teams of the game,</li>
+                    <li><code>SESSION_URL/admin/game/GAME_URL_TAG/answers</code> for the answers of the game.</li>
+                </ul>
+
+                <p>
+                    Links to these different admin pages can be found in the side-panel and at the top
+                    of each admin page.
+                </p>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="course">
+        <h2>Setting up a Session for a Course</h2>
+
+        <p>
+            Are you using the game academy for a course? Here are few ideas that you can use to set up
+            your session.
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Accounts for the Students</h3>
+            <div class="faq-content">
+                <p>
+                    <strong>Via registration.</strong> Once you have created the session, you can open
+                    the registration to allow the students to register for your session. Registration
+                    can be closed again after some time to avoid students creating more than one account
+                    (which would allow them to have additional influence in the games).
+                </p>
+                <p>
+                    <strong>Via upload.</strong> You can also upload a CSV file with the account details
+                    to pre-create player profiles for your students. This is done under via form in
+                    the page: <code>SESSION_URL/admin/players</code>. You do not need
+                    to ever open the registration to your session. This ensures that all students have
+                    an account (and no more than one).
+                </p>
+                <p>
+                    Opening and closing the registration is done by updating the session parameters
+                    on the page <code>SESSION_URL/admin</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+            <h3>Add your Teaching Assistants as Admin</h3>
+            <div class="faq-content">
+                <p>
+                    If you need more workforce, simply for running the management commands on time
+                    for instance, you can add admins to the session. Do so on the page:
+                    <code>SESSION_URL/admin/players</code>.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="one-shot-event">
+        <h2>Setting up a Session for a One-Shot Event</h2>
+
+        <p>
+            Do you want to use the game-academy for an event in which the participants can easily play
+            one of the games? Here are some ideas on how to set up the session.
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Guest Players Only</h3>
+            <div class="faq-content">
+                <p>
+                    To reduce the overhead, consider disabling the display of the registration and
+                    logging in forms in the session portal. To do so, update the session parameters
+                    on the page <code>SESSION_URL/admin</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+            <h3>Game After Login</h3>
+            <div class="faq-content">
+                <p>
+                    If you are only using a single game in your session, save one click by setting
+                    up a direct redirect to a game after login. This skips the session home.
+                    To do so, update the parameters of the session
+                    on the page <code>SESSION_URL/admin</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap">
+            <h3>Display the Results of the Games Directly</h3>
+            <div class="faq-content">
+                <p>
+                    If you want the players to have direct feedback after submitting an answer, you
+                    can select the result page to be the page after submit of a game. To do so,
+                    update the settings of the game
+                    on the page <code>SESSION_URL/admin/game/GAME_URL_TAG</code>.
+                </p>
+
+                <p>
+                    Consider running the management commands automatically as well. That is
+                    necessary for the games that need them to display the result page properly.
+                    This is also done by updating the settings of the game on the page
+                    <code>SESSION_URL/admin/game/GAME_URL_TAG</code>. This can incur delay in the
+                    response, especially as the number of players increases.
+                </p>
+            </div>
+        </div>
+
+{#        <div class="faq-wrap">#}
+{#            <h3></h3>#}
+{#            <div class="faq-content">#}
+{#                <p>#}
+{##}
+{#                </p>#}
+{#            </div>#}
+{#        </div>#}
+
+    </section>
+{% endblock %}

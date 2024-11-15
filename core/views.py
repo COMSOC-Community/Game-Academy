@@ -348,6 +348,13 @@ def about(request):
     context = base_context_initialiser(request)
     return render(request, "core/about.html", context=context)
 
+
+def faq(request):
+    """View for the FAQ page of the website."""
+    context = base_context_initialiser(request)
+    return render(request, "core/faq.html", context=context)
+
+
 # ================
 #    USER VIEWS
 # ================

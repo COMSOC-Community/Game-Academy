@@ -10,6 +10,7 @@ app_name = "core"
 urlpatterns = [
     path("", views.index, name="index"),
     path("about/", views.about, name="about"),
+    path("faq/", views.faq, name="faq"),
     path("createsession/", views.create_session, name="create_session"),
     path("message/", views.message, name="message"),
     path("logout/", views.logout_user, name="logout"),
