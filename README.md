@@ -1,9 +1,11 @@
 # The Game Academy
 
-The Game Academy is a [Django](https://www.djangoproject.com/) project that provides a
+The [Game Academy](https://game-academy.org/) is a [Django](https://www.djangoproject.com/) project that provides a
 platform for educational games. It has been developed within the 
 [Computational Social Choice Group](https://staff.science.uva.nl/u.endriss/group.php)
 of the [University of Amsterdam](https://uva.nl) and is used for public events and courses.
+
+Check it out: https://game-academy.org/!
 
 The project is open-source. You can find the entire source code in this repository. 
 Below, we provide explanations about the general structure of the code for anyone interested in
