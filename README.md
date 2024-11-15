@@ -355,7 +355,7 @@ users to test the display of the game before actual answers are submitted.
 To implement this functionality, populate the `create_random_answers` function in the `random.py` file of your
 app. Then, update the value of the `random_answers_func` member in the `ready()` method of your `GameConfig`.
 
-## Maintainmen
+## Maintainment
 
 To update the server:
 
