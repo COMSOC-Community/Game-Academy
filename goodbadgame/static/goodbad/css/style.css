@@ -1,3 +1,7 @@
+.goodbad_play_form {
+    display: flex;
+    flex-direction: column;
+}
 
 .question_title {
     text-align: center;
