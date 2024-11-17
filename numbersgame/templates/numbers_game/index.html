@@ -5,7 +5,7 @@
     <section>
         <h2>Rules of the Game</h2>
         <p>
-            This is the main page for the game <em>{{ game.name }}</em>. In this game every player
+            This is the main page for the <em>{{ game.name }}</em>. In this game every player
             submits a rational number between {{ game.numbers_setting.lower_bound|float_formatter:5}}
             and {{ game.numbers_setting.upper_bound|float_formatter:5 }}. The player closest to {{ game.numbers_setting.factor_display }}
             times the average of the answers wins the game.
