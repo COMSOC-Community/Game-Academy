@@ -158,7 +158,7 @@ class Player(models.Model):
         unique_together = ("name", "session")
 
     def __str__(self):
-        return "[{}] {}".format(self.session, self.name)
+        return "[{}] {}".format(self.session.name, self.name)
 
 
 @receiver(post_delete, sender=Player)

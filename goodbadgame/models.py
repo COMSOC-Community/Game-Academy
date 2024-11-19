@@ -68,6 +68,9 @@ class Answer(models.Model):
     score = models.IntegerField(blank=True, null=True)
     accuracy = models.FloatField(blank=True, null=True)
 
+    def __str__(self):
+        return f"[{self.game.session.name}] {self.game.name} - {self.player.display_name()}"
+
 
 class QuestionAnswer(models.Model):
     answer = models.ForeignKey(
