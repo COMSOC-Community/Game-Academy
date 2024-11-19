@@ -93,7 +93,7 @@
                         <form action="{% url 'core:session_portal' session.url_tag %}" method="post">
                             <div style="display: inline-block; margin:auto; padding: 10px 20px; border-radius: 5px; background-color: var(--color-background-medium);">
                                 <p class="center-align" style="margin-bottom: 0">
-                                    <button onclick="generateRandomName()">Generate random name</button>
+                                    <span class="process-button button" onclick="generateRandomName()">Generate random name</>
                                 </p>
                                 {% if user_is_authenticated %}
                                     {% include "include/form_table_template.html" with form=guest_form form_type='guest_form' submit_button_label='Logout and continue as guest' %}

@@ -6,6 +6,7 @@ from io import TextIOWrapper
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.safestring import mark_safe
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV3
 
@@ -86,6 +87,10 @@ class UserRegistrationForm(forms.Form):
     password2 = forms.CharField(
         label="Repeat Password",
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
+    )
+    accept_terms = forms.BooleanField(
+        label=mark_safe("I accept the <a href='termsconditions/'>Terms and Conditions</a>"),
+        required=True
     )
     captcha = ReCaptchaField(
         widget=ReCaptchaV3(
@@ -497,6 +502,10 @@ class PlayerRegistrationForm(forms.Form):
     password2 = forms.CharField(
         label="Repeat password", label_suffix="", widget=forms.PasswordInput()
     )
+    accept_terms = forms.BooleanField(
+        label=mark_safe("I accept the <a href='termsconditions/'>Terms and Conditions</a>"),
+        required=True
+    )
     captcha = ReCaptchaField(
         widget=ReCaptchaV3(
             action='PlayerSignUp'
@@ -563,6 +572,15 @@ class SessionGuestRegistration(forms.Form):
         label="Guest name",
         label_suffix="",
         max_length=Player._meta.get_field("name").max_length,
+    )
+    accept_terms = forms.BooleanField(
+        label=mark_safe("I accept the <a href='termsconditions/'>Terms and Conditions</a>"),
+        required=True
+    )
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV3(
+            action='PlayerSignUp'
+        )
     )
 
     def __init__(self, *args, **kwargs):

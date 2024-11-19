@@ -355,6 +355,19 @@ def faq(request):
     return render(request, "core/faq.html", context=context)
 
 
+def terms_and_conditions(request):
+    """View for the Terms and Conditions page of the website."""
+    context = base_context_initialiser(request)
+    return render(request, "core/terms_and_conditions.html", context=context)
+
+
+def privacy_policy(request):
+    """View for the Privacy Policy page of the website."""
+    context = base_context_initialiser(request)
+    return render(request, "core/privacy_policy.html", context=context)
+
+
+
 # ================
 #    USER VIEWS
 # ================

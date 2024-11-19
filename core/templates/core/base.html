@@ -71,7 +71,11 @@
             <div class="footer-element button navigation-button"><a href="{% url 'core:about' %}">About</a></div>
         </div>
         <div class="footer-wrap">
-            <div class="footer-element">&copy; 2024 Simon Rey</div>
+            <div class="footer-element button navigation-button"><a href="{% url 'core:terms_and_conditions' %}">Terms and Conditions</a></div>
+            <div class="footer-element button navigation-button"><a href="{% url 'core:privacy_policy' %}">Privacy Policy</a></div>
+        </div>
+        <div class="footer-wrap">
+            <div class="footer-element">&copy; <script>document.write(new Date().getFullYear());</script> Simon Rey</div>
         </div>
     </footer>
 

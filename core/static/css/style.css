@@ -625,6 +625,11 @@ form {
 	padding: 0;
 }
 
+.form-table .form-field-row td > * {
+	max-height: 500px;
+	overflow-y: scroll;
+}
+
 .form-table .form-field-row td:first-child {
     text-align: right;
 	padding: 0 10px 0 30px;
