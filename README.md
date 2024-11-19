@@ -1,21 +1,21 @@
 # The Game Academy
 
 The [Game Academy](https://game-academy.org/) is a [Django](https://www.djangoproject.com/) project that provides a
-platform for educational games. It has been developed within the 
+platform for educational games. It has been developed within the
 [Computational Social Choice Group](https://staff.science.uva.nl/u.endriss/group.php)
-of the [University of Amsterdam](https://uva.nl) and is used for public events and courses.
+of the [University of Amsterdam](https://uva.nl) and can used for courses and public outreach events.
 
 Check it out: https://game-academy.org/!
 
-The project is open-source. You can find the entire source code in this repository. 
-Below, we provide explanations about the general structure of the code for anyone interested in
+The project is open-source. You can find the entire source code in this repository.
+Below, we provide explanations regarding the general structure of the code for anyone interested in
 developing it further.
 
 ## Table of Content
 
 - [Setting-Up the Scene](#setting-up-the-scene)
   - [General Setup](#general-setup)
-  - [Games Setup](#games-setup)
+  - [Game Setup](#game-setup)
 - [Details of the Implementation](#details-of-the-implementation)
   - [Structure of the Project](#structure-of-the-project)
   - [Core Models](#the-core-models)
@@ -36,17 +36,17 @@ developing it further.
   - [Management Commands](#management-commands)
   - [Export Functions](#export-functions)
   - [Random Answer Generator](#random-answers-generator)
-- [Maintainment](#maintainment) 
+- [Maintenance](#maintenance)
 
 ## Setting Up the Scene
 
-The Game Academy is provided as a finished product that can readily be installed on any server 
+The Game Academy is provided as a finished product that can readily be installed on any server
 capable of running a [Django](https://www.djangoproject.com/) project.
 Just use it out of the box!
 
-If you want to develop it further, prior knowledge of 
-[Django](https://www.djangoproject.com/) is 
-recommended. In its current state, the project utilizes many features of Django,
+If you want to develop it further, prior knowledge of
+[Django](https://www.djangoproject.com/) is
+recommended. In its current state, the project utilises many features of Django,
 so a good understanding of its inner workings is preferable (but not per se needed).
 
 ### General Setup
@@ -110,16 +110,16 @@ python manage.py runserver
 
 You're all set! Enjoy using The Game Academy!
 
-### Games Setup
+### Game Setup
 
 Some games require additional setup.
 
 #### Good/Bad Game
 
-For the good/bad games, the set of questions are added individually. There are two sets of questions:
+For the Good/Bad Game, the set of questions are added individually. There are two read-made sets of questions:
 
 - Riddles about Computational Social Choice (COMSOC)
-- Companies Logos
+- Company Logos
 
 Each set is added via a different command:
 
@@ -129,12 +129,12 @@ python manage.py goodbad_addlogos
 ```
 ## Details of the Implementation
 
-Below, we provide details about the actual implementation of the website.
-Any prospective developer should read this first before starting.
+Below, we provide details regarding the implementation of the website.
+Any prospective developer should read this before starting.
 
 ### Structure of the Project
 
-The project is organized around different Django apps.
+The project is organised around different Django apps.
 
 - **`core`**: This app implements the general website. The core models (Session, Players, Game, Team)
 are defined here, along with a set of views for the entire website.
@@ -146,10 +146,10 @@ defined in the `core` module. These modules include: `numbersgame`, `goodbadgame
 The basic element is a session, described in the `core.models.Session` model. A session
 includes players and games that the players can participate in.
 
-The `core.models.Game` model records the games that are part of a session (the game logic is 
+The `core.models.Game` model records the games that are part of a session (the game logic is
 implemented in the respective game app).
 
-The `core.models.Player` model records the players of a session. This model defines "player 
+The `core.models.Player` model records the players of a session. This model defines "player
 profiles," while actual Django users are described in the `core.models.CustomUser` model.
 
 The `core.models.Team` model records teams that have been registered for a game within a session.
@@ -157,16 +157,16 @@ A team is linked to a given game and contains several players.
 
 ### Users and Player Profiles
 
-To manage users, we utilize the provided Django user framework. The model 
-`core.models.CustomUser` extends Django's `AbstractUser` to add extra information, 
-notably whether the user is restricted to a session. 
+To manage users, we utilise the provided Django user framework. The model
+`core.models.CustomUser` extends Django's `AbstractUser` to add extra information,
+notably whether the user is restricted to a session.
 
 Users can register for a session by creating a player profile. These profiles are
 recorded in the `core.models.Player` model. A user can have a player profile in several
-sessions, but no more than one profile per session. 
+sessions, but no more than one profile per session.
 
 Users of the website can also directly create a player profile for a session. In this case,
-they are restricted to the session, and the `is_player` attribute of their `core.models.CustomUser` 
+they are restricted to the session, and the `is_player` attribute of their `core.models.CustomUser`
 instance is set to `True` (the user is created in the background without their knowledge).
 These users have restricted permissions (as implemented in the `EnforceLoginScopeMiddleware`
 middleware).
@@ -174,16 +174,16 @@ middleware).
 ### Handling Teams
 
 It is also possible to require players to submit answers as a team. In this case, players
-create teams, which are instances of `core.models.Team`. When a team is created, a 
+create teams, which are instances of `core.models.Team`. When a team is created, a
 team player is automatically created, so that we have an instance of `core.models.Player`
-representing the team. When a user submits an answer as a team, behind the scenes it is 
+representing the team. When a user submits an answer as a team, behind the scenes it is
 actually the team player that is submitting the answer.
 
 ### `GameConfig` for Game Apps
 
 To register game apps within the website, the configuration for all these apps should
-inherit from the `GameConfig` class (defined in `core.game_config`). Wihtout that, it is not possible
-to add use the game that the app defines in a session.
+inherit from the `GameConfig` class (defined in `core.game_config`). Without that, it is not possible
+to add use the game that the app defines to a session.
 
 ### The Story of a Request
 
@@ -192,9 +192,9 @@ Additional checks and processes are added by the website to the standard Django 
 - The `EnforceLoginScopeMiddleware` implements various permission tests
 for users when accessing a page.
 - For the correct display of pages, many elements need to be passed to the Django
-templates. A set of context initializers is defined in `core.views`.
+templates. A set of context initialisers is defined in `core.views`.
 - To facilitate the integration of game apps into the website, class-based views are provided
-to ensure expected behaviors.
+to ensure expected behaviours.
 
 Here are the details.
 
@@ -208,26 +208,26 @@ authentication middleware. It ensures several things:
 - That users who are restricted to a session (users with `is_player=True`) cannot access
 pages outside of their session.
 
-Not taking this middleware into account can lead to unexpected behaviors. For instance, 
-if you are adding a new page to the website that is meant to be accessible to anyone, 
+Not taking this middleware into account can lead to unexpected behaviour. For instance,
+if you are adding a new page to the website that is meant to be accessible to anyone,
 don't forget to add it to the `OPEN_VIEWS` list of the middleware.
 
-#### Context Initializers
+#### Context Initialisers
 
-Once the request has passed all the middlewares, it reaches the view level. There, in 
-order to ensure the proper behavior of the base templates, the context needs to include a
-long list of elements. For that reason, we provide a set of context initializers to 
-ensure that the correct information is passed to the template. 
+Once the request has passed all the middleware, it reaches the view level. There, in
+order to ensure the proper behaviour of the base templates, the context needs to include a
+long list of elements. For that reason, we provide a set of context initialisers to
+ensure that the correct information is passed to the template.
 
-There are three context initializers, all defined in `core.views`:
-- `base_context_initializer`: initializes the context for any view. This is the only 
+There are three context initialisers, all defined in `core.views`:
+- `base_context_initializer`: initialises the context for any view. This is the only
 initializer needed for general views that do not relate to a session or a game.
 - `session_context_initializer`: expands the context for views that relate to a session.
 It needs to be called on top of the `base_context_initializer`.
-- `game_context_initializer`: expands the context for views that are within a game 
-(submitting answers, viewing results, etc.). It needs to be called on top of the other two initializers.
+- `game_context_initializer`: expands the context for views that are within a game
+(submitting answers, viewing results, etc.). It needs to be called on top of the other two initialisers.
 
-Check the code to see which values are initialized in the context through these functions.
+Check the code to see which values are initialised in the context through these functions.
 
 #### Base Templates
 
@@ -240,7 +240,7 @@ and adds the game navigation buttons.
 - `base_game_index.html`: the base template for the index page of a game. It extends
 the `base_game.html` template and adds the team section when needed (if the game requires it).
 - `base_game_submit_answers.html`: the base template for the submit answer page of a
-game. It extends the `base_game.html` template and adds team checks if the game 
+game. It extends the `base_game.html` template and adds team checks if the game
 requires them.
 - `core/templates/include/form_table_template.html`: the template to use for rendering
 forms. Use the Django include mechanism in the following manner:
@@ -250,7 +250,7 @@ forms. Use the Django include mechanism in the following manner:
 ```
 ### Control of the Side Panel
 
-The display of the side panel is partially controlled by JavaScript. 
+The display of the side panel is partially controlled by JavaScript.
 The script defined in `core/static/js/side_panel.js` sets the height of the side panel
 along with its position on the page (so that it’s sticky and does not hide the
 header or footer).
@@ -265,12 +265,13 @@ project.
 no more than 10.
 - Within a session, there cannot be more than `MAX_NUM_GAMES_PER_SESSION` games.
 We advise this value to be no more than 20.
-- Within a session, there cannot be more than `MAX_NUM_RANDOM_PER_SESSION` randomly generated 
+- Within a session, there cannot be more than `MAX_NUM_RANDOM_PER_SESSION` randomly generated
 players. We advise this value to be no more than 1000.
 
 Some forms are also Captcha-protected to avoid abuse. We use ReCaptcha v3, which means that for
 local development you need to generate a set of keys for 127.0.0.1. These keys should be
 placed in `gameserver.local_settings.py` as `RECAPTCHA_PUBLIC_KEY` and `RECAPTCHA_PRIVATE_KEY`.
+
 ## Developing a New Game
 
 If you are planning on developing a new game, here is some information to take into account.
@@ -289,23 +290,24 @@ created for your app with all the necessary files.
 
 ### Models and Forms
 
-By default, your app will have three models: `Setting`, `Answer`, and `Result`. These models are 
+By default, your app will have three models: `Setting`, `Answer`, and `Result`. These models are
 respectively used to store:
 
 - `Setting`: the settings that are specific to your game;
 - `Answer`: the answers submitted by the players;
 - `Result`: the results of the game (data for graphs, name of the winner, etc.).
 
-All these models are optional. If you use an `Answer` model (and you probably should), it should 
+All these models are optional. If you use an `Answer` model (and you probably should), it should
 have a foreign key to `core.models.Game` and a foreign key to `core.models.Player`.
 
 If you use the `Setting` model, it must have a `OneToOneField` to `core.models.Game` called `game`.
-Moreover, all the fields, except for the `game` field, should have a default value or accept null. 
-Indeed, when creating a game, the associated `Setting` object is automatically created without 
+Moreover, all the fields, except for the `game` field, should have a default value or accept null.
+Indeed, when creating a game, the associated `Setting` object is automatically created without
 passing any other argument than `game`.
 
-To allow users to modify the `Setting` instances, you need to provide a form. This should 
+To allow users to modify the `Setting` instances, you need to provide a form. This should
 be a `ModelForm` that excludes the `game` field.
+
 ### Game Views
 
 To assist with developing game views with the correct contexts, we provide several class-based views
@@ -317,11 +319,11 @@ for games. These views are defined in the `core/game_views.py` file.
 - `GameSubmitAnswerView`: This class is for the submit answer page of a game. It defines many methods
   to be overridden to ensure proper handling of parameters, such as running the management commands after
   submission.
-- `GameResultsView`: This class is for the results page of a game. It ensures that non-authorized users
+- `GameResultsView`: This class is for the results page of a game. It ensures that non-authorised users
   cannot access this page.
 
 Check the code for these views, and review examples in other game apps to see how they are used, and you'll
-be able to utilize all these tools easily.
+be able to utilise all these tools easily.
 
 ### Base Templates for Games
 
@@ -330,15 +332,16 @@ For the templates, extend the base templates for games described above. These ar
 - `base_game.html`
 - `base_game_index.html`
 - `base_game_submit_answers.html`
+
 ### Management Commands
 
-Some games require management commands to be run, typically to prepare the results page. If this is 
+Some games require management commands to be run, typically to prepare the results page. If this is
 the case, implement your management command within the app and update the value of the
 `management_commands` argument passed to the `GameConfig` inside the `apps.py` file of your app.
 
 ### Export Functions
 
-You can configure export functions to allow your game to be exported as CSV. This includes the 
+You can configure export functions to allow your game to be exported as CSV. This includes the
 settings of the game and the answers submitted by players. These functions are typically implemented in
 the `exportdata.py` file of your app. These functions should take two parameters: `writer`, which is
 a buffer that you can write to, and `game`, which is the instance of the `Game` model that is
@@ -355,7 +358,7 @@ users to test the display of the game before actual answers are submitted.
 To implement this functionality, populate the `create_random_answers` function in the `random.py` file of your
 app. Then, update the value of the `random_answers_func` member in the `ready()` method of your `GameConfig`.
 
-## Maintainment
+## Maintenance
 
 To update the server:
 
@@ -373,4 +376,4 @@ To update the server:
 - In any case, restart the uwsgi:
   - `cd`
   - `./restart_supervisord.sh`
-- Log out from the server 
+- Log out of the server
