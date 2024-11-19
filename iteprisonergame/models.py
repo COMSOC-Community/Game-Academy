@@ -9,8 +9,8 @@ class Setting(models.Model):
     )
     num_repetitions = models.CharField(
         default="168, 359, 306, 622, 319",
-        help_text="The number of repetition. If there is more than one round, separate it with a "
-        "comma.",
+        help_text="The number of rounds each strategy play against every other strategies. "
+                  "Several number of rounds can be indicated by using a comma-separated list.",
         max_length=50,
     )
     store_scores = models.BooleanField(

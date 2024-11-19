@@ -28,7 +28,14 @@ OPEN_VIEWS = {
 }
 
 # Views outside of session that can be accessed by players
-PLAYER_OPEN_VIEWS = {"core:logout", "core:force_player_logout", "core:user_profile"}
+PLAYER_OPEN_VIEWS = {
+    "core:logout",
+    "core:force_player_logout",
+    "core:user_profile",
+    "core:privacy_policy",
+    "core:cookie_policy",
+    "core:terms_and_conditions",
+}
 
 # Views within a session that can be accessed by anyone (i.e., non-players)
 SESSION_OPEN_VIEWS = {

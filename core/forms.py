@@ -37,7 +37,8 @@ class SessionFinderForm(forms.Form):
             return session_name
         else:
             raise forms.ValidationError(
-                "There is no session named {}.".format(session_name)
+                f"There is no session named {session_name}. Remember to enter the name of the "
+                f"session, and not its URL tag."
             )
 
 
@@ -89,7 +90,7 @@ class UserRegistrationForm(forms.Form):
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
     )
     accept_terms = forms.BooleanField(
-        label=mark_safe("I accept the <a href='termsconditions/' target='_blank'>Terms and Conditions</a>"),
+        label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
     captcha = ReCaptchaField(
@@ -503,14 +504,14 @@ class PlayerRegistrationForm(forms.Form):
         label="Repeat password", label_suffix="", widget=forms.PasswordInput()
     )
     accept_terms = forms.BooleanField(
-        label=mark_safe("I accept the <a href='termsconditions/' target='_blank'>Terms and Conditions</a>"),
+        label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
-    captcha = ReCaptchaField(
-        widget=ReCaptchaV3(
-            action='PlayerSignUp'
-        )
-    )
+    # captcha = ReCaptchaField(
+    #     widget=ReCaptchaV3(
+    #         action='PlayerSignUp'
+    #     )
+    # )
 
     def __init__(self, *args, **kwargs):
         # "session" is a mandatory kwargs of the form
@@ -574,12 +575,12 @@ class SessionGuestRegistration(forms.Form):
         max_length=Player._meta.get_field("name").max_length,
     )
     accept_terms = forms.BooleanField(
-        label=mark_safe("I accept the <a href='termsconditions/' target='_blank'>Terms and Conditions</a>"),
+        label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
     captcha = ReCaptchaField(
         widget=ReCaptchaV3(
-            action='PlayerSignUp'
+            action='GuestSignUp'
         )
     )
 

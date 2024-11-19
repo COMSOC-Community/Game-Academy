@@ -8,6 +8,9 @@ class SettingForm(forms.ModelForm):
     class Meta:
         model = Setting
         exclude = ["game"]
+        labels = {
+            "num_repetitions": "Number of Rounds",
+        }
 
     def clean_num_repetitions(self):
         num_repetitions = self.cleaned_data.get("num_repetitions")
@@ -19,7 +22,7 @@ class SettingForm(forms.ModelForm):
                 except ValueError:
                     raise forms.ValidationError(
                         "The numbers of repetitions need to be cast as a "
-                        f"float. This failed for value '{r}'."
+                        f"float. After splitting based on ',', this failed for value '{r}'."
                     )
             num_repetitions = ",".join(repetitions)
         else:
@@ -35,16 +38,17 @@ class SettingForm(forms.ModelForm):
 
     def clean_forbidden_strategies(self):
         forbidden_strategies = self.cleaned_data.get("forbidden_strategies")
-        for strategy in forbidden_strategies.split("---"):
-            automata = MooreMachine()
-            lines = strategy.strip().split("\n")
-            errors = automata.parse(lines)
-            if errors:
-                raise forms.ValidationError(errors)
-            else:
-                validity_errors = automata.test_validity(["C", "D"])
-                if validity_errors:
-                    raise forms.ValidationError(validity_errors)
+        if len(forbidden_strategies) > 0:
+            for strategy in forbidden_strategies.split("---"):
+                automata = MooreMachine()
+                lines = strategy.strip().split("\n")
+                errors = automata.parse(lines)
+                if errors:
+                    raise forms.ValidationError(errors)
+                else:
+                    validity_errors = automata.test_validity(["C", "D"])
+                    if validity_errors:
+                        raise forms.ValidationError(validity_errors)
         return forbidden_strategies
 
 

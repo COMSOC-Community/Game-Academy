@@ -118,9 +118,9 @@ def force_player_logout(request, session_url_tag):
     if "prev" in request.GET:
         prev_url = request.GET["prev"]
         if url_has_allowed_host_and_scheme(
-            url=prev_url,
-            allowed_hosts={request.get_host()},
-            require_https=request.is_secure(),
+                url=prev_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
         ):
             url_back = prev_url
     return render(
@@ -207,7 +207,8 @@ def session_context_initialiser(request, session, context=None):
         )
     if not session.show_side_panel and not context.get("user_is_session_admin", False):
         context["show_side_panel"] = False
-        context["session_portal_url"] = reverse("core:session_portal", kwargs={"session_url_tag": session.url_tag})
+        context["session_portal_url"] = reverse("core:session_portal",
+                                                kwargs={"session_url_tag": session.url_tag})
     return context
 
 
@@ -254,7 +255,7 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
     context["game_nav_display_home"] = session.show_game_nav_home
     context["game_nav_display_team"] = game.needs_teams and game.playable and not team
     context["game_nav_display_answer"] = (
-        game.playable and not answer and not context["game_nav_display_team"]
+            game.playable and not answer and not context["game_nav_display_team"]
     )
     context["game_nav_display_result"] = game.results_visible and session.show_game_nav_home
 
@@ -270,14 +271,14 @@ def game_context_initialiser(request, session, game, answer_model, context=None)
             context["num_teams"] = num_teams
             if num_teams > 0:
                 context["percent_answer_received"] = (
-                    100 * num_answer_received / num_teams
+                        100 * num_answer_received / num_teams
                 )
             else:
                 context["percent_answer_received"] = 0
         else:
             if num_players > 0:
                 context["percent_answer_received"] = (
-                    100 * num_answer_received / num_players
+                        100 * num_answer_received / num_players
                 )
             else:
                 context["percent_answer_received"] = 0
@@ -512,6 +513,7 @@ def session_portal(request, session_url_tag):
                 request.POST,
                 session=session,
                 passwords_display=not authenticated_user,
+                prefix="player"
             )
             if registration_form.is_valid():
                 # If user is not already authenticated, we need to create one and then to
@@ -546,7 +548,7 @@ def session_portal(request, session_url_tag):
             else:
                 context["registration_form"] = registration_form
         elif "login_form" in request.POST and session.show_user_login:
-            login_form = PlayerLoginForm(request.POST, session=session)
+            login_form = PlayerLoginForm(request.POST, session=session, prefix="login")
             if login_form.is_valid():
                 user = authenticate(
                     username=login_form.cleaned_data["user"].username,
@@ -570,7 +572,7 @@ def session_portal(request, session_url_tag):
                 context["login_form"] = login_form
 
         elif "guest_form" in request.POST and session.show_guest_login:
-            guest_form = SessionGuestRegistration(request.POST, session=session)
+            guest_form = SessionGuestRegistration(request.POST, session=session, prefix="guest")
             if guest_form.is_valid():
                 # We create a user and a player for the guest
                 user = CustomUser.objects.create_user(
@@ -608,17 +610,17 @@ def session_portal(request, session_url_tag):
     # We put in the context all the forms that are needed and not already in there
     if session.show_create_account and "registration_form" not in context:
         context["registration_form"] = PlayerRegistrationForm(
-            session=session, passwords_display=not authenticated_user
+            session=session, passwords_display=not authenticated_user, prefix="player",
         )
     if session.show_guest_login and "guest_form" not in context:
-        context["guest_form"] = SessionGuestRegistration(session=session)
+        context["guest_form"] = SessionGuestRegistration(session=session,prefix="guest")
     if authenticated_user:
         player_profile = Player.objects.filter(session=session, user=request.user)
         if player_profile.exists():
             player_profile = player_profile.first()
             context["player_profile"] = player_profile
     elif session.show_user_login and "login_form" not in context:
-        context["login_form"] = PlayerLoginForm(session=session)
+        context["login_form"] = PlayerLoginForm(session=session, prefix="login")
     return render(request, "core/session_portal.html", context)
 
 
@@ -823,10 +825,10 @@ def session_admin_games(request, session_url_tag):
                 if games.exists():
                     # If there already are games, we give the new game the highest priority
                     ordering_priority = (
-                        session.games.aggregate(Max("ordering_priority"))[
-                            "ordering_priority__max"
-                        ]
-                        + 1
+                            session.games.aggregate(Max("ordering_priority"))[
+                                "ordering_priority__max"
+                            ]
+                            + 1
                     )
                 else:
                     ordering_priority = 0
@@ -860,12 +862,12 @@ def session_admin_games(request, session_url_tag):
                 # available (in a cycle)
                 game_config = new_game.game_config()
                 num_games_of_type = (
-                    session.games.filter(game_type=new_game.game_type).count() - 1
+                        session.games.filter(game_type=new_game.game_type).count() - 1
                 )
                 all_illustrations = game_config.illustration_paths
                 new_game.illustration_path = all_illustrations[
                     num_games_of_type % len(all_illustrations)
-                ]
+                    ]
                 new_game.save()
 
                 # If there is a setting model, we need to create it as well.
@@ -883,7 +885,8 @@ def session_admin_games(request, session_url_tag):
                 context["new_game"] = new_game
 
         # In case we created a new game, we check again for the max number of games per session
-        if "new_game" in context and len(session.games.all()) == settings.MAX_NUM_GAMES_PER_SESSION - 1:
+        if "new_game" in context and len(
+                session.games.all()) == settings.MAX_NUM_GAMES_PER_SESSION - 1:
             context["max_num_games_reached"] = True
             context["MAX_NUM_GAMES_PER_SESSION"] = settings.MAX_NUM_GAMES_PER_SESSION
         else:
@@ -1014,7 +1017,7 @@ def session_admin_players(request, session_url_tag):
 
     # Delete player form
     if request.method == "POST" and (
-        "delete_player_form" in request.POST or "delete_guest_form" in request.POST
+            "delete_player_form" in request.POST or "delete_guest_form" in request.POST
     ):
         player_id = request.POST["remove_player_id"]
         player = Player.objects.get(id=player_id)
@@ -1094,7 +1097,8 @@ def session_admin_player_password(request, session_url_tag, player_user_id):
     """View that allows an admin to change the password of a player of a session. Only
     the password of a user restricted to a session can be changed."""
     session = get_object_or_404(Session, url_tag=session_url_tag)
-    player = get_object_or_404(Player, session=session, user__id=player_user_id, user__is_player=True)
+    player = get_object_or_404(Player, session=session, user__id=player_user_id,
+                               user__is_player=True)
 
     # Initialise context for a session page
     context = base_context_initialiser(request)
@@ -1377,7 +1381,8 @@ def session_admin_games_answers(request, session_url_tag, game_url_tag):
         # Generate random answers
         # Only if a random generator function has been configured in the game app
         if game.game_config().random_answers_func is not None:
-            num_random_players = Player.objects.filter(session=session, user__is_random_player=True).count()
+            num_random_players = Player.objects.filter(session=session,
+                                                       user__is_random_player=True).count()
             # Only available if there are not too many randomly generated user in the session
             if num_random_players >= MAX_NUM_RANDOM_PER_SESSION:
                 context["max_num_random_players_reached"] = True

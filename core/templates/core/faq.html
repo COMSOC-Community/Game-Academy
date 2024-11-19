@@ -116,7 +116,7 @@
         </div>
 
         <div class="faq-wrap">
-            <h3>Session admins pages</h3>
+            <h3>Session Admin Pages</h3>
             <div class="faq-content">
                 <p>
                     There are many admin pages for a session. The admin pages for the whole sessions
@@ -144,6 +144,19 @@
             </div>
         </div>
 
+        <div class="faq-wrap">
+            <h3>The Result Page returns a 404 error for the Players</h3>
+            <div class="faq-content">
+                <p>
+                    This probably means that you did not update the setting of the game so that the results are visible.
+                    This can be changed from the page <code>SESSION_URL/admin/game/GAME_URL_TAG</code> or by using one
+                    of the quick admin link at the top of page of a game.
+                </p>
+                <p>
+                    Note that admins can always see the result page, regardless of the visibility status of the results.
+                </p>
+            </div>
+        </div>
     </section>
 
     <section id="course">
@@ -250,4 +263,171 @@
 {#        </div>#}
 
     </section>
+
+    <section id="numbers-game">
+        <h2>The Numbers Game</h2>
+
+        <p>
+            In the numbers game, players are asked to submit a number between 0 and 100. The player that is the
+            closest to 2/3 of the average submitted number wins the game.
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Settings for the Numbers Game</h3>
+            <div class="faq-content">
+                <p>The following settings can be adapted in the definition of the Numbers Game.</p>
+                <ul>
+                    <li>
+                        <strong>Lower and Upper bounds:</strong> The minimum and maximum values that can be submitted.
+                        The values are 0 and 100 by default.
+                    </li>
+                    <li>
+                        <strong>Factor:</strong> The multiplier applied to the average submitted number when determining
+                        the winning answers. The winning answers are the answers that are the closest to the average
+                        submitted number multiplied by this factor. The default value is 2/3.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="iterated-prisoners-game">
+        <h2>The Iterated Prisoner's Dilemma Tournament</h2>
+
+        <p>
+            The Prisoner's Dilemma is the classical two-player game in which each player must choose between two actions
+            (cooperate and defect). The payoff matrix is as follows.
+        </p>
+
+        <table class="center-margin payoff-matrix">
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td class="payoff-player-header payoff-player-2">Cooperate</td>
+                    <td class="payoff-player-header payoff-player-2">Defect</td>
+                </tr>
+                <tr>
+                    <td class="payoff-player-header payoff-player-1">Cooperate</td>
+                    <td><span class="payoff-player-1">-10</span>, <span class="payoff-player-2">-10</span></td>
+                    <td><span class="payoff-player-1">-25</span>, <span class="payoff-player-2">0</span></td>
+                </tr>
+                <tr>
+                    <td class="payoff-player-header payoff-player-1">Defect</td>
+                    <td><span class="payoff-player-1">0</span>, <span class="payoff-player-2">-25</span></td>
+                    <td><span class="payoff-player-1">-20</span>, <span class="payoff-player-2">-20</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>
+            In its iterated version, the two players repeatedly play the game for a fixed number of rounds, their final
+            gains/losses being the average of their gains/losses for each individual instance of the game.
+        </p>
+
+        <p>
+            In the game academy, a round-robin tournament is organise between all the players: every player competes
+            against every other player. The total score of a player is their average score.
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Settings for the  Game</h3>
+            <div class="faq-content">
+                <p>The following settings can be adapted in the definition of the Game.</p>
+                <ul>
+                    <li>
+                        <strong>The Payoff Matrix:</strong> Each entry of the payoff matrix is customisable.
+                        The default is as displayed above.
+                    </li>
+                    <li>
+                        <strong>The Number of Rounds:</strong> The number of times the game is iterated. Several numbers
+                        can be specified. In that case, each answer will play against every other answer for all specified
+                        number of rounds.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="-game">
+        <h2>Centipede Game</h2>
+        <p>
+            The Centipede Game is a classic example of an extensive game in which two players take turns to decide
+            whether to pursue the game further or whether to stop.
+            The game looks like this:
+        </p>
+        <p class="center-align">
+            {% include "centipedegame_include/centipede_svg.html" %}
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Settings for the  Game</h3>
+            <div class="faq-content">
+                <p>The following settings can be adapted in the definition of the Game.</p>
+                <ul>
+                    <li>
+                        <strong>:</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="-game">
+        <p>
+
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Settings for the  Game</h3>
+            <div class="faq-content">
+                <p>The following settings can be adapted in the definition of the Game.</p>
+                <ul>
+                    <li>
+                        <strong>:</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="-game">
+        <p>
+
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Settings for the  Game</h3>
+            <div class="faq-content">
+                <p>The following settings can be adapted in the definition of the Game.</p>
+                <ul>
+                    <li>
+                        <strong>:</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="-game">
+        <p>
+
+        </p>
+
+        <div class="faq-wrap">
+            <h3>Settings for the  Game</h3>
+            <div class="faq-content">
+                <p>The following settings can be adapted in the definition of the Game.</p>
+                <ul>
+                    <li>
+                        <strong>:</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
 {% endblock %}

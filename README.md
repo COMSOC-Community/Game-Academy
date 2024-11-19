@@ -360,7 +360,8 @@ app. Then, update the value of the `random_answers_func` member in the `ready()`
 
 ## Maintenance
 
-To update the server:
+
+### Updating the server
 
 - SSH to the server
 - Add your GitHub ssh key to the agent: `ssh-add ~/.ssh/your_key`
@@ -377,3 +378,29 @@ To update the server:
   - `cd`
   - `./restart_supervisord.sh`
 - Log out of the server
+
+### Django Admin
+
+If you are a superuser, you can access the Django admin website: https://game-academy.org/admin/.
+There, you have direct access to the database. Among others, you can:
+
+- Delete or modify any entry,
+- Give a user the superuser status (from [here](https://game-academy.org/admin/core/customuser/)),
+- Change a user's password (from [here](https://game-academy.org/admin/core/customuser/)).
+
+## Credits
+
+The Game Academy was developed through a collaborative effort by the Computational Social Choice Group at the Institute 
+for Logic, Language, and Computation, part of the University of Amsterdam.
+
+The core concept and platform design were conceived by Ulle Endriss and Simon Rey, with Simon Rey leading the
+implementation. Additional contributions came from group members, including Adrian Haret and Julian Chingoma,
+who provided valuable input on various aspects of the project.
+
+Adrian Haret authored the popular science explanation of the Good/Bad game.
+
+The COMSOC riddles are taken from the [COMSOC Seminar](https://www.comsocseminar.org/) and were primarily created
+by Dominik Peters.
+
+The logos for the Good/Bad game were adapted by us from their original versions. Both the original
+logos and the modifications are the property of their respective copyright holders.

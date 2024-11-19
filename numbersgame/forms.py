@@ -18,6 +18,19 @@ class SettingForm(forms.ModelForm):
             )
         return bin_size
 
+    def clean(self):
+        cleaned_data = super().clean()
+        lower_bound = cleaned_data.get("lower_bound")
+        upper_bound = cleaned_data.get("upper_bound")
+
+        if lower_bound is not None and upper_bound is not None:
+            if lower_bound > upper_bound:
+                raise forms.ValidationError(
+                    {"lower_bound": "The lower bound cannot be greater than the upper bound."}
+                )
+
+        return cleaned_data
+
 
 class SubmitAnswerForm(forms.Form):
     answer = forms.FloatField(
