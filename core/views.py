@@ -367,6 +367,11 @@ def privacy_policy(request):
     return render(request, "core/privacy_policy.html", context=context)
 
 
+def cookie_policy(request):
+    """View for the Cookie Policy page of the website."""
+    context = base_context_initialiser(request)
+    return render(request, "core/cookie_policy.html", context=context)
+
 
 # ================
 #    USER VIEWS

@@ -10,7 +10,7 @@ TEAM_PLAYERNAME_PREFIX = "TeamPlayer_"
 RANDOM_PLAYERNAME_PREFIX = "RandomPlayer"
 
 # Names that are reserved and cannot be chosen as session name (not to mess up with URL routing)
-FORBIDDEN_SESSION_URL_TAGS = ("", "admin", "user", "logout", "message", "createsession")
+FORBIDDEN_SESSION_URL_TAGS = ("", "admin", "user", "logout", "message", "createsession", "about", "faq", "termsconditions", "privacypolicy", "cookiepolicy", )
 # Names that are reserved and cannot be chosen as a URL tag for a game app  (not to mess up with
 # URL routing)
 FORBIDDEN_APP_URL_TAGS = ("forcedlogout", "home", "admin")

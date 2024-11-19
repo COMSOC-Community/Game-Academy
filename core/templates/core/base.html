@@ -73,11 +73,62 @@
         <div class="footer-wrap">
             <div class="footer-element button navigation-button"><a href="{% url 'core:terms_and_conditions' %}">Terms and Conditions</a></div>
             <div class="footer-element button navigation-button"><a href="{% url 'core:privacy_policy' %}">Privacy Policy</a></div>
+            <div class="footer-element button navigation-button"><a href="{% url 'core:cookie_policy' %}">Cookie Policy</a></div>
         </div>
         <div class="footer-wrap">
             <div class="footer-element">&copy; <script>document.write(new Date().getFullYear());</script> Simon Rey</div>
         </div>
     </footer>
+
+    <div id="cookie-consent-banner">
+        <p>
+            We use cookies to ensure that we give you the best experience on our website.
+            We only use necessary cookies.
+            By continuing to browse, you accept their use.
+            <a href="{% url 'core:cookie_policy' %}">Learn more</a>
+        </p>
+        <span id="accept-cookies" class="button color-success-dark">Accept</span>
+    </div>
+
+    <script>
+    // Check if the user has already accepted cookies
+    function checkCookieConsent() {
+        const cookieConsent = getCookie("cookie-consent");
+        if (!cookieConsent) {
+            document.getElementById("cookie-consent-banner").style.display = "block";
+        }
+    }
+
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+        const d = new Date();
+        d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + d.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Function to get a cookie value
+    function getCookie(name) {
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            const c = ca[i].trim();
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    // When the user accepts cookies, set the cookie and hide the banner
+    document.getElementById("accept-cookies").addEventListener("click", function() {
+        setCookie("cookie-consent", "accepted", 100); // Store the acceptance for 100 days
+        document.getElementById("cookie-consent-banner").style.display = "none"; // Hide the banner
+    });
+
+    // Check for existing consent on page load
+    checkCookieConsent();
+    </script>
 
     {% block extra_scripts %}{% endblock %}
 </body>

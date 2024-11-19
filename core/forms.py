@@ -89,7 +89,7 @@ class UserRegistrationForm(forms.Form):
         widget=forms.PasswordInput(attrs={"placeholder": "Repeat password"}),
     )
     accept_terms = forms.BooleanField(
-        label=mark_safe("I accept the <a href='termsconditions/'>Terms and Conditions</a>"),
+        label=mark_safe("I accept the <a href='termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
     captcha = ReCaptchaField(
@@ -503,7 +503,7 @@ class PlayerRegistrationForm(forms.Form):
         label="Repeat password", label_suffix="", widget=forms.PasswordInput()
     )
     accept_terms = forms.BooleanField(
-        label=mark_safe("I accept the <a href='termsconditions/'>Terms and Conditions</a>"),
+        label=mark_safe("I accept the <a href='termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
     captcha = ReCaptchaField(
@@ -574,7 +574,7 @@ class SessionGuestRegistration(forms.Form):
         max_length=Player._meta.get_field("name").max_length,
     )
     accept_terms = forms.BooleanField(
-        label=mark_safe("I accept the <a href='termsconditions/'>Terms and Conditions</a>"),
+        label=mark_safe("I accept the <a href='termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
     captcha = ReCaptchaField(

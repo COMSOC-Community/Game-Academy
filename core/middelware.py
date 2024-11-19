@@ -17,6 +17,7 @@ OPEN_VIEWS = {
     "core:about",
     "core:faq",
     "core:privacy_policy",
+    "core:cookie_policy",
     "core:terms_and_conditions",
     "core:logout",
     "core:message",
