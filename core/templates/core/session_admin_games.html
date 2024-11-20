@@ -50,7 +50,10 @@
                 Please delete some before adding new games.
             </p>
         {% else %}
-            <p>If you want to add new games to the session, fill in this form:</p>
+            <p>
+                If you want to add new games to the session, fill the following form. More information about the games
+                can be found on the <a href="{% url 'core:faq' %}" target="_blank">FAQ page</a>.
+            </p>
 
             {% if create_game_form %}
                 <form action="{% url 'core:session_admin_games' session.url_tag %}#add_game" method="post">

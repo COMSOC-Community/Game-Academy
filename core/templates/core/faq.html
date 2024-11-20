@@ -22,21 +22,56 @@
         </p>
 
         <p>
-            This page is purposefully long, use the search function of your browser or any of the
-            following links for in-page navigation.
+            This page is purposefully long. To find what you are looking for either use the search function of your
+            browser or any of the following links.
         </p>
 
         <ul>
             <li><a href="#session_management">General Management of a Session</a></li>
+            <li>
+                <ul>
+                    <li><a href="#creating-session">Creating a Session</a></li>
+                    <li><a href="#deleting-session">Deleting a Session</a></li>
+                    <li><a href="#portal-and-home">Session Portal vs Session Home</a></li>
+                    <li><a href="#users-players">Users, Players and Restricted Users</a></li>
+                    <li><a href="#guest-players">Guest Players</a></li>
+                    <li><a href="#changing-password">Changing Password</a></li>
+                    <li><a href="#session-admin-pages">Session Admin Pages</a></li>
+                    <li><a href="#how-to-test-session">How to Test the Session</a></li>
+                    <li><a href="#result-page-404">The Result Page returns a 404 error for the Players</a></li>
+                    <li><a href="#result-page-incorrect">The display in the Result Page is not correct</a></li>
+                </ul>
+            </li>
             <li><a href="#course">Setting up a Session for a Course</a></li>
+            <li>
+                <ul>
+                    <li><a href="#accoutns-for-students">Accounts for the Students</a></li>
+                    <li><a href="#adding-tas">Add your Teaching Assistants as Admin</a></li>
+                    <li><a href="#student-lost-password">Retrieving the Password of a Student</a></li>
+                    <li><a href="#adding-late-student">Adding a Student after Registration is Close</a></li>
+                </ul>
+            </li>
             <li><a href="#one-shot-event">Setting up a Session for a One-Shot Event</a></li>
+            <li>
+                <ul>
+                    <li><a href="#guest-players-only">Guest Players Only</a></li>
+                    <li><a href="#game-after-login">Game After Login</a></li>
+                    <li><a href="#direct-results">Display the Results of the Games Directly</a></li>
+                </ul>
+            </li>
+            <li><a href="#numbers-game">Numbers Game</a></li>
+            <li><a href="#iterated-prisoners-game">Iterated Prisoner's Dilemma Tournament</a></li>
+            <li><a href="#centipede-game">Centipede Game</a></li>
+            <li><a href="#simplified-poker">Simplified Poker</a></li>
+            <li><a href="#auction-game">Auction Game</a></li>
+            <li><a href="#good-bad-game">Good or Bad Game</a></li>
         </ul>
     </section>
 
     <section id="session_management">
         <h2>General Management of a Session</h2>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="creating-session">
             <h3>Creating a Session</h3>
             <div class="faq-content">
                 <p>
@@ -46,7 +81,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="deleting-session">
             <h3>Deleting a Session</h3>
             <div class="faq-content">
                 <p>
@@ -56,8 +91,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
-
+        <div class="faq-wrap" id="portal-and-home">
             <h3>Session Portal vs Session Home</h3>
             <div class="faq-content">
                 <p>
@@ -68,8 +102,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
-
+        <div class="faq-wrap" id="users-players">
             <h3>Users, Players and Restricted Users</h3>
             <div class="faq-content">
                 <p>
@@ -85,8 +118,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
-
+        <div class="faq-wrap" id="guest-players">
             <h3>Guest Players</h3>
             <div class="faq-content">
                 <p>
@@ -100,7 +132,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="changing-password">
             <h3>Changing Password</h3>
             <div class="faq-content">
                 <p>
@@ -118,7 +150,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="session-admin-pages">
             <h3>Session Admin Pages</h3>
             <div class="faq-content">
                 <p>
@@ -147,7 +179,23 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="how-to-test-session">
+            <h3>How to Test the Session</h3>
+            <div class="faq-content">
+                <p>
+                    To test the session and see how things look the easiest is to create a test player account. Login to
+                    that test account in a different browser (or an incognito page) and you will be able to see how
+                    things are presented. Note that as an admin, the display is quite different. If things are correctly
+                    displayed to admins it does not mean that they are correctly displayed to the players.
+                </p>
+                <p>
+                    Note that most of the games implement random answer generation if you want to see how the result
+                    page of a game looks.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap" id="result-page-404">
             <h3>The Result Page returns a 404 error for the Players</h3>
             <div class="faq-content">
                 <p>
@@ -157,6 +205,17 @@
                 </p>
                 <p>
                     Note that admins can always see the result page, regardless of the visibility status of the results.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap" id="result-page-incorrect">
+            <h3>The display in the Result Page is not correct</h3>
+            <div class="faq-content">
+                <p>
+                    Your result page indicates that there are no answers or some of the fields are not displayed properly
+                    (None, or wrong values)? You probably did not run the management commands. These are often necessary
+                    for the results to be displayed correctly.
                 </p>
             </div>
         </div>
@@ -170,7 +229,7 @@
             your session.
         </p>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="accoutns-for-students">
             <h3>Accounts for the Students</h3>
             <div class="faq-content">
                 <p>
@@ -193,13 +252,35 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="adding-tas">
             <h3>Add your Teaching Assistants as Admin</h3>
             <div class="faq-content">
                 <p>
                     If you need more workforce, simply for running the management commands on time
                     for instance, you can add admins to the session. Do so on the page:
                     <code>SESSION_URL/admin/players</code>.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap" id="student-lost-password">
+            <h3>Retrieving the Password of a Student</h3>
+            <div class="faq-content">
+                <p>
+                    If a student has lost their password, the only way to get access to the account again is by changing
+                    their password directly. As a session admin, you can do that in the <code>SESSION_URL/admin/players</code>
+                    page. Not that this is only possible if the student is session-restricted.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-wrap" id="adding-late-student">
+            <h3>Adding a Student after Registration is Close</h3>
+            <div class="faq-content">
+                <p>
+                    To add a new student after you have closed the registrations. You can use the form available on
+                    the <code>SESSION_URL/admin/players</code> page. Set up a default password and ask the student to
+                    immediately change their password after their first login.
                 </p>
             </div>
         </div>
@@ -213,7 +294,7 @@
             one of the games? Here are some ideas on how to set up the session.
         </p>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="guest-players-only">
             <h3>Guest Players Only</h3>
             <div class="faq-content">
                 <p>
@@ -224,7 +305,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="game-after-login">
             <h3>Game After Login</h3>
             <div class="faq-content">
                 <p>
@@ -236,7 +317,7 @@
             </div>
         </div>
 
-        <div class="faq-wrap">
+        <div class="faq-wrap" id="direct-results">
             <h3>Display the Results of the Games Directly</h3>
             <div class="faq-content">
                 <p>
@@ -256,19 +337,10 @@
             </div>
         </div>
 
-{#        <div class="faq-wrap">#}
-{#            <h3></h3>#}
-{#            <div class="faq-content">#}
-{#                <p>#}
-{##}
-{#                </p>#}
-{#            </div>#}
-{#        </div>#}
-
     </section>
 
     <section id="numbers-game">
-        <h2>The Numbers Game</h2>
+        <h2>Numbers Game</h2>
 
         <p>
             In the numbers game, players are asked to submit a number between 0 and 100. The player that is the
@@ -295,7 +367,7 @@
     </section>
 
     <section id="iterated-prisoners-game">
-        <h2>The Iterated Prisoner's Dilemma Tournament</h2>
+        <h2>Iterated Prisoner's Dilemma Tournament</h2>
 
         <p>
             The Prisoner's Dilemma is the classical two-player game in which each player must choose between two actions
@@ -414,8 +486,8 @@
         </div>
     </section>
 
-
     <section id="simplified-poker">
+        <h2>Simplified Poker</h2>
         <p>
             The Simplified Poker game is a severely simplified version of Poker. There are two players and three
             cards: King, Queen, and Jack of Hearts. Each player is dealt one card and pays $1 to participate.
@@ -431,6 +503,7 @@
 
 
     <section id="auction-game">
+        <h2>Auction Game</h2>
         <p>
             The Auction Game simulates a first-price sealed bid auction. Each player is assigned a valuation for the
             item on auction—sampled from a given probability distribution. Players then are asked to submit a bid for
@@ -459,17 +532,18 @@
 
 
     <section id="good-bad-game">
+        <h2>Good or Bad Game</h2>
         <p>
-            In the Good/Bad Game, players are presented with a list of questions.
+            In the Good or Bad Game, players are presented with a list of questions.
             For each question, several possible answers are proposed and the
             goal is to identify the correct one. The questions can be text-based,
             but also image-based.
         </p>
 
         <div class="faq-wrap">
-            <h3>Settings for the Good/Bad Game</h3>
+            <h3>Settings for the Good or Bad Game</h3>
             <div class="faq-content">
-                <p>The following settings can be adapted in the definition of the Good/Bad Game.</p>
+                <p>The following settings can be adapted in the definition of the Good or Bad Game.</p>
                 <ul>
                     <li>
                         <strong>Questions:</strong> The set of question that is available in the game. These questions
