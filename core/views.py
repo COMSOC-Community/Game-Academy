@@ -613,7 +613,7 @@ def session_portal(request, session_url_tag):
             session=session, passwords_display=not authenticated_user, prefix="player",
         )
     if session.show_guest_login and "guest_form" not in context:
-        context["guest_form"] = SessionGuestRegistration(session=session,prefix="guest")
+        context["guest_form"] = SessionGuestRegistration(session=session, prefix="guest")
     if authenticated_user:
         player_profile = Player.objects.filter(session=session, user=request.user)
         if player_profile.exists():

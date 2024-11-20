@@ -507,11 +507,11 @@ class PlayerRegistrationForm(forms.Form):
         label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
-    # captcha = ReCaptchaField(
-    #     widget=ReCaptchaV3(
-    #         action='PlayerSignUp'
-    #     )
-    # )
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV3(
+            action='PlayerSignUp'
+        )
+    )
 
     def __init__(self, *args, **kwargs):
         # "session" is a mandatory kwargs of the form
