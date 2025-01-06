@@ -18,7 +18,7 @@
 {% block content %}
     <section>
         <p>
-            The page presents a collection of additional information and tips on how to use the website.
+            The page presents a collection of additional information and tips on how to use the Game Academy.
         </p>
 
         <p>
@@ -38,17 +38,17 @@
                     <li><a href="#changing-password">Changing Password</a></li>
                     <li><a href="#session-admin-pages">Session Admin Pages</a></li>
                     <li><a href="#how-to-test-session">How to Test the Session</a></li>
-                    <li><a href="#result-page-404">The Result Page returns a 404 error for the Players</a></li>
-                    <li><a href="#result-page-incorrect">The display in the Result Page is not correct</a></li>
+                    <li><a href="#result-page-404">The Result Page returns a 404 Error for the Players</a></li>
+                    <li><a href="#result-page-incorrect">The Display in the Result Page is not Correct</a></li>
                 </ul>
             </li>
             <li><a href="#course">Setting up a Session for a Course</a></li>
             <li>
                 <ul>
-                    <li><a href="#accoutns-for-students">Accounts for the Students</a></li>
-                    <li><a href="#adding-tas">Add your Teaching Assistants as Admin</a></li>
+                    <li><a href="#accoutns-for-students">Accounts for Students</a></li>
+                    <li><a href="#adding-tas">Adding Teaching Assistants as Admins</a></li>
                     <li><a href="#student-lost-password">Retrieving the Password of a Student</a></li>
-                    <li><a href="#adding-late-student">Adding a Student after Registration is Close</a></li>
+                    <li><a href="#adding-late-student">Adding a Student after Registration Closed</a></li>
                 </ul>
             </li>
             <li><a href="#one-shot-event">Setting up a Session for a One-Shot Event</a></li>
@@ -56,7 +56,7 @@
                 <ul>
                     <li><a href="#guest-players-only">Guest Players Only</a></li>
                     <li><a href="#game-after-login">Game After Login</a></li>
-                    <li><a href="#direct-results">Display the Results of the Games Directly</a></li>
+                    <li><a href="#direct-results">Display the Results of Games Directly</a></li>
                 </ul>
             </li>
             <li><a href="#numbers-game">Numbers Game</a></li>
@@ -64,7 +64,7 @@
             <li><a href="#centipede-game">Centipede Game</a></li>
             <li><a href="#simplified-poker">Simplified Poker</a></li>
             <li><a href="#auction-game">Auction Game</a></li>
-            <li><a href="#good-bad-game">Good or Bad Game</a></li>
+            <li><a href="#good-bad-game">Good/Bad Game</a></li>
         </ul>
     </section>
 
@@ -76,7 +76,7 @@
             <div class="faq-content">
                 <p>
                     This is done <a href="{% url "core:create_session" %}">here</a>. You can only see
-                    this page if you are logged in, and if you have the suitable permission.
+                    this page if you are logged in, and if you have the suitable permissions.
                 </p>
             </div>
         </div>
@@ -85,7 +85,7 @@
             <h3>Deleting a Session</h3>
             <div class="faq-content">
                 <p>
-                    To delete a session, go to parameter admin page of the session at <code>SESSION_URL/admin/</code>.
+                    To delete a session, go to the admin page of the session at <code>SESSION_URL/admin/</code>.
                     At the bottom of the page there is a form to delete the session.
                 </p>
             </div>
@@ -95,8 +95,8 @@
             <h3>Session Portal vs Session Home</h3>
             <div class="faq-content">
                 <p>
-                    The portal of a session is the page from which the users can enter the session
-                    (via logging in for instance). The home is the page in which players see all the
+                    The portal of a session is the page from which users enter the session
+                    (via logging in, for instance). The home is the page where players see all the
                     games that are on offer.
                 </p>
             </div>
@@ -137,7 +137,7 @@
             <div class="faq-content">
                 <p>
                     Every user can change their password by going to their account settings. This page
-                    is accessible via the side panel.
+                    is accessible via the side-panel.
                 </p>
 
                 <p>
@@ -154,7 +154,7 @@
             <h3>Session Admin Pages</h3>
             <div class="faq-content">
                 <p>
-                    There are many admin pages for a session. The admin pages for the whole sessions
+                    There are many admin pages for a session. The admin pages for the whole session
                     can be found under:
                 </p>
                 <ul>
@@ -183,25 +183,25 @@
             <h3>How to Test the Session</h3>
             <div class="faq-content">
                 <p>
-                    To test the session and see how things look the easiest is to create a test player account. Login to
+                    To test the session and see how things look, the easiest way is to create a test player account. Log in to
                     that test account in a different browser (or an incognito page) and you will be able to see how
                     things are presented. Note that as an admin, the display is quite different. If things are correctly
-                    displayed to admins it does not mean that they are correctly displayed to the players.
+                    displayed to admins this does not always mean that they are also correctly displayed to the players.
                 </p>
                 <p>
-                    Note that most of the games implement random answer generation if you want to see how the result
-                    page of a game looks.
+	            Note that most of the games implement random answer generation, which can be helpful if you want to see
+	            what the result page of a game looks like.
                 </p>
             </div>
         </div>
 
         <div class="faq-wrap" id="result-page-404">
-            <h3>The Result Page returns a 404 error for the Players</h3>
+            <h3>The Result Page returns a 404 Error for the Players</h3>
             <div class="faq-content">
                 <p>
-                    This probably means that you did not update the setting of the game so that the results are visible.
+                    This probably means that you did not update the settings of the game so that the results are visible.
                     This can be changed from the page <code>SESSION_URL/admin/game/GAME_URL_TAG</code> or by using one
-                    of the quick admin link at the top of page of a game.
+                    of the quick admin links at the top of page of a game.
                 </p>
                 <p>
                     Note that admins can always see the result page, regardless of the visibility status of the results.
@@ -210,7 +210,7 @@
         </div>
 
         <div class="faq-wrap" id="result-page-incorrect">
-            <h3>The display in the Result Page is not correct</h3>
+            <h3>The Display in the Result Page is not Correct</h3>
             <div class="faq-content">
                 <p>
                     Your result page indicates that there are no answers or some of the fields are not displayed properly
@@ -225,7 +225,7 @@
         <h2>Setting up a Session for a Course</h2>
 
         <p>
-            Are you using the game academy for a course? Here are few ideas that you can use to set up
+            Are you using the Game Academy for a course? Here are few ideas that you can use to set up
             your session.
         </p>
 
@@ -234,7 +234,7 @@
             <div class="faq-content">
                 <p>
                     <strong>Via registration.</strong> Once you have created the session, you can open
-                    the registration to allow the students to register for your session. Registration
+                    the registration to allow your students to register for your session. Registration
                     can be closed again after some time to avoid students creating more than one account
                     (which would allow them to have additional influence in the games).
                 </p>
@@ -253,11 +253,11 @@
         </div>
 
         <div class="faq-wrap" id="adding-tas">
-            <h3>Add your Teaching Assistants as Admin</h3>
+            <h3>Adding Teaching Assistants as Admins</h3>
             <div class="faq-content">
                 <p>
                     If you need more workforce, simply for running the management commands on time
-                    for instance, you can add admins to the session. Do so on the page:
+                    for instance, you can add admins to the session. Do so on this page:
                     <code>SESSION_URL/admin/players</code>.
                 </p>
             </div>
@@ -269,13 +269,13 @@
                 <p>
                     If a student has lost their password, the only way to get access to the account again is by changing
                     their password directly. As a session admin, you can do that in the <code>SESSION_URL/admin/players</code>
-                    page. Not that this is only possible if the student is session-restricted.
+                    page. Note that this is only possible if the student's account is session-restricted.
                 </p>
             </div>
         </div>
 
         <div class="faq-wrap" id="adding-late-student">
-            <h3>Adding a Student after Registration is Close</h3>
+            <h3>Adding a Student after Registration Closed</h3>
             <div class="faq-content">
                 <p>
                     To add a new student after you have closed the registrations. You can use the form available on
@@ -290,8 +290,8 @@
         <h2>Setting up a Session for a One-Shot Event</h2>
 
         <p>
-            Do you want to use the game-academy for an event in which the participants can easily play
-            one of the games? Here are some ideas on how to set up the session.
+            Do you want to use the Game Academy for an event in which the participants can easily play
+            one of the games? Here are some ideas for how to set up the session.
         </p>
 
         <div class="faq-wrap" id="guest-players-only">
@@ -299,7 +299,7 @@
             <div class="faq-content">
                 <p>
                     To reduce the overhead, consider disabling the display of the registration and
-                    logging in forms in the session portal. To do so, update the session parameters
+                    logging-in forms in the session portal. To do so, update the session parameters
                     on the page <code>SESSION_URL/admin</code>.
                 </p>
             </div>
@@ -318,7 +318,7 @@
         </div>
 
         <div class="faq-wrap" id="direct-results">
-            <h3>Display the Results of the Games Directly</h3>
+            <h3>Display the Results of Games Directly</h3>
             <div class="faq-content">
                 <p>
                     If you want the players to have direct feedback after submitting an answer, you
@@ -331,7 +331,7 @@
                     Consider running the management commands automatically as well. That is
                     necessary for the games that need them to display the result page properly.
                     This is also done by updating the settings of the game on the page
-                    <code>SESSION_URL/admin/game/GAME_URL_TAG</code>. This can incur delay in the
+                    <code>SESSION_URL/admin/game/GAME_URL_TAG</code>. Note though that this can incur delays in the
                     response, especially as the number of players increases.
                 </p>
             </div>
@@ -343,7 +343,7 @@
         <h2>Numbers Game</h2>
 
         <p>
-            In the numbers game, players are asked to submit a number between 0 and 100. The player that is the
+            In the Numbers Game, players are asked to submit a number between 0 and 100. The player who is 
             closest to 2/3 of the average submitted number wins the game.
         </p>
 
@@ -400,7 +400,7 @@
         </p>
 
         <p>
-            In the game academy, a round-robin tournament is organise between all the players: every player competes
+            In the Game Academy, a round-robin tournament is organised between all players: every player competes
             against every other player. The total score of a player is their average score.
         </p>
 
@@ -415,7 +415,7 @@
                     </li>
                     <li>
                         <strong>The Number of Rounds:</strong> The number of times the game is iterated. Several numbers
-                        can be specified. In that case, each answer will play against every other answer for all specified
+                        can be specified. In that case, each player will play against every other player for the specified
                         number of rounds.
                     </li>
                 </ul>
@@ -506,7 +506,7 @@
         <h2>Auction Game</h2>
         <p>
             The Auction Game simulates a first-price sealed bid auction. Each player is assigned a valuation for the
-            item on auction—sampled from a given probability distribution. Players then are asked to submit a bid for
+            item on auction, sampled from a given probability distribution. Players then are asked to submit a bid for
             the item. The player with the highest bid wins the auction, unless someone bids higher than their assigned
             valuation, in which case there is no winner.
         </p>
@@ -532,9 +532,9 @@
 
 
     <section id="good-bad-game">
-        <h2>Good or Bad Game</h2>
+        <h2>Good/Bad Game</h2>
         <p>
-            In the Good or Bad Game, players are presented with a list of questions.
+            In the Good/Bad Game, players are presented with a list of questions.
             For each question, several possible answers are proposed and the
             goal is to identify the correct one. The questions can be text-based,
             but also image-based.
@@ -543,7 +543,7 @@
         <div class="faq-wrap">
             <h3>Settings for the Good or Bad Game</h3>
             <div class="faq-content">
-                <p>The following settings can be adapted in the definition of the Good or Bad Game.</p>
+                <p>The following settings can be adapted in the definition of the Good/Bad Game.</p>
                 <ul>
                     <li>
                         <strong>Questions:</strong> The set of question that is available in the game. These questions
@@ -553,7 +553,7 @@
                     </li>
                     <li>
                         <strong>Number of displayed questions:</strong> With this parameter, you can set how many
-                        questions do the players have to provide an answer for. The questions will be selected uniformly
+                        questions the players have to provide an answer for. The questions will be selected uniformly
                         at random from the ser of available questions.
                     </li>
                 </ul>
