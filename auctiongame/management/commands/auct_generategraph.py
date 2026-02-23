@@ -27,10 +27,8 @@ class Command(BaseCommand):
             self.stderr.write(f"ERROR: No game found with URL tag {options['game']}")
             return
 
-        # Retrieve all answers and compute initial utilities
+        # Retrieve all answers
         all_answers = Answer.objects.filter(game=game)
-        for a in all_answers:
-            a.utility = a.valuation - Decimal(a.bid)
 
         global_highest_utility = None
         global_winner = []
@@ -76,8 +74,9 @@ class Command(BaseCommand):
             highest_bid = max(bids_decimal)
             local_winners = [a for a in answers if Decimal(a.bid) == highest_bid]
             for answer in answers:
-                answer.winning_auction = answer in local_winners
-                answer.utility = answer.valuation - Decimal(answer.bid) if answer in local_winners else 0
+                if answer.bid:
+                    answer.winning_auction = answer in local_winners
+                    answer.utility = answer.valuation - Decimal(answer.bid) if answer in local_winners else 0
                 answer.winning_global = False
                 answers_to_update.append(answer)
 
