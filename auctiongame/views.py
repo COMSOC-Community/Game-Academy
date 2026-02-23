@@ -77,11 +77,11 @@ class Results(GameResultsView):
     def get(self, request, session_url_tag, game_url_tag):
         context = self.context
 
-        answers = Answer.objects.filter(game=self.game).order_by("auction_id", "-bid")
+        answers = Answer.objects.filter(game=self.game, bid__isnull=False).order_by("auction_id", "-bid")
         unique_auction_ids = answers.values_list('auction_id', flat=True).distinct()
         context["answers"] = answers
         answers_per_auction = {
-            auction_id: Answer.objects.filter(auction_id=auction_id)
+            auction_id: answers.filter(auction_id=auction_id)
             for auction_id in unique_auction_ids
         }
         formatted_winners = {str(auction_id): "" for auction_id in range(1, 6)}

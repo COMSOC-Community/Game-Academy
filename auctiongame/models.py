@@ -44,13 +44,9 @@ class ArbitraryPrecisionDecimalField(models.TextField):
         if value is None or isinstance(value, Decimal):
             return value
         try:
-            print(value, Decimal(value))
             return Decimal(value)
         except (InvalidOperation, TypeError):
             raise ValidationError("Invalid decimal value.")
-
-    def get_prep_value(self, value):
-        return value
 
     def formfield(self, **kwargs):
         defaults = {

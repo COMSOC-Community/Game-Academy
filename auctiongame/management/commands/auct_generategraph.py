@@ -49,7 +49,7 @@ class Command(BaseCommand):
                 continue
 
             # Process histogram data for bids
-            bids_values = [Decimal(a) for a in answers.filter(auction_id=auction_id).values_list("bid", flat=True)]
+            bids_values = [Decimal(a) for a in answers.filter(auction_id=auction_id, bid__isnull=False).values_list("bid", flat=True)]
             bids = np.array(bids_values)
             bid_lb, bid_up = int(bids.min()), int(bids.max()) + 1
             bid_bins, bid_counts = np.histogram(bids, bins=np.linspace(bid_lb, bid_up,
