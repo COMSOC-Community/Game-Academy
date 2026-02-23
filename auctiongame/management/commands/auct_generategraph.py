@@ -29,7 +29,8 @@ class Command(BaseCommand):
 
         # Retrieve all answers and compute initial utilities
         all_answers = Answer.objects.filter(game=game)
-        all_answers.update(utility=models.F('valuation') - models.F('bid'))  # Utility bulk update
+        for a in all_answers:
+            a.utility = a.valuation - Decimal(a.bid)
 
         global_highest_utility = None
         global_winner = []
