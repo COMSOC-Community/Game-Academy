@@ -31,12 +31,12 @@ class Command(BaseCommand):
         num_created = 0
         num_fail = 0
         with open(csv_file_path, "r", encoding="utf-8") as file:
-            reader = csv.DictReader(file, delimiter=";")
+            reader = csv.DictReader(file, delimiter=",")
             if reader:
                 for row in reader:
                     if "username" not in row:
                         raise ValueError(
-                            "The csv needs to have a column with 'username'."
+                            "The csv needs to have a column with 'username'. The delimiter should be ','."
                         )
                     player_name = row["username"].strip()
                     try:

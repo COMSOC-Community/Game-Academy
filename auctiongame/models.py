@@ -1,8 +1,63 @@
+from decimal import Decimal, InvalidOperation
+
+from django import forms
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
 from auctiongame.samplers import ALL_SAMPLERS
 from core.models import Player, Game
+
+
+class ArbitraryPrecisionDecimalFormField(forms.Field):
+    widget = forms.TextInput
+
+    def __init__(self, *, min_value=None, **kwargs):
+        self.min_value = Decimal(str(min_value)) if min_value is not None else None
+
+        # Remove max_length
+        kwargs.pop("max_length", None)
+
+        super().__init__(**kwargs)
+
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        try:
+            return Decimal(value)
+        except (InvalidOperation, ValueError):
+            raise forms.ValidationError("Enter a valid decimal number.")
+
+    def validate(self, value):
+        super().validate(value)
+        if value is not None and self.min_value is not None:
+            if value < self.min_value:
+                raise forms.ValidationError(
+                    f"Ensure this value is greater than or equal to {self.min_value}."
+                )
+
+
+class ArbitraryPrecisionDecimalField(models.TextField):
+    description = "Arbitrary precision decimal stored as text"
+
+    def to_python(self, value):
+        if value is None or isinstance(value, Decimal):
+            return value
+        try:
+            print(value, Decimal(value))
+            return Decimal(value)
+        except (InvalidOperation, TypeError):
+            raise ValidationError("Invalid decimal value.")
+
+    def get_prep_value(self, value):
+        return value
+
+    def formfield(self, **kwargs):
+        defaults = {
+            "form_class": ArbitraryPrecisionDecimalFormField
+        }
+        defaults.update(kwargs)
+        return super().formfield(**defaults)
 
 
 class Setting(models.Model):
@@ -34,8 +89,8 @@ class Answer(models.Model):
     )
     auction_id = models.IntegerField()
     valuation = models.IntegerField()
-    bid = models.FloatField(null=True)
-    utility = models.FloatField(null=True)
+    bid = ArbitraryPrecisionDecimalField(null=True)
+    utility = ArbitraryPrecisionDecimalField(null=True)
     winning_auction = models.BooleanField(default=False)
     winning_global = models.BooleanField(default=False)
     motivation = models.TextField()

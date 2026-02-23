@@ -1,6 +1,8 @@
+from decimal import Decimal, InvalidOperation
+
 from django import forms
 
-from auctiongame.models import Answer, Setting
+from auctiongame.models import Answer, Setting, ArbitraryPrecisionDecimalFormField
 
 
 class SettingForm(forms.ModelForm):
@@ -10,8 +12,8 @@ class SettingForm(forms.ModelForm):
 
 
 class SubmitAnswerForm(forms.Form):
-    bid = forms.FloatField(
-        min_value=0.0,
+    bid = ArbitraryPrecisionDecimalFormField(
+        min_value=0,
         label_suffix="",
     )
     motivation = forms.CharField(label_suffix="", widget=forms.Textarea())
@@ -34,4 +36,5 @@ class SubmitAnswerForm(forms.Form):
             raise forms.ValidationError(
                 "Your answer object is not initialised, that is weird..."
             )
+        print(cleaned_data)
         return cleaned_data

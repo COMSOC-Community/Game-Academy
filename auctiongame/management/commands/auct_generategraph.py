@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import numpy as np
 from django.db import models, transaction
 from django.core.management.base import BaseCommand
@@ -47,7 +49,8 @@ class Command(BaseCommand):
                 continue
 
             # Process histogram data for bids
-            bids = np.array(answers.filter(auction_id=auction_id).values_list("bid", flat=True))
+            bids_values = [Decimal(a) for a in answers.filter(auction_id=auction_id).values_list("bid", flat=True)]
+            bids = np.array(bids_values)
             bid_lb, bid_up = int(bids.min()), int(bids.max()) + 1
             bid_bins, bid_counts = np.histogram(bids, bins=np.linspace(bid_lb, bid_up,
                                                                        (bid_up - bid_lb) * 4 + 1))
@@ -68,11 +71,13 @@ class Command(BaseCommand):
                 results_to_update.append(result)
 
             # Determine auction winners
-            highest_bid = bids.max()
-            local_winners = [a for a in answers if a.bid == highest_bid]
+            bids_decimal = [Decimal(b) for b in bids_values]
+            highest_bid = max(bids_decimal)
+            local_winners = [a for a in answers if Decimal(a.bid) == highest_bid]
             for answer in answers:
                 answer.winning_auction = answer in local_winners
-                answer.utility = answer.utility if answer in local_winners else 0
+                answer.utility = answer.valuation - Decimal(answer.bid) if answer in local_winners else 0
+                answer.winning_global = False
                 answers_to_update.append(answer)
 
             # Global winner selection
@@ -83,7 +88,7 @@ class Command(BaseCommand):
             elif winning_utility == global_highest_utility:
                 global_winner.extend(local_winners)
 
-            # Update all global winner flags and save updates in bulk
+        # Update all global winner flags and save updates in bulk
         for answer in global_winner:
             answer.winning_global = True
             answers_to_update.append(answer)

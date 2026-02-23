@@ -67,25 +67,27 @@
                                 <th>Justification</th>
                             </tr>
                             {% for answer in auction_answers %}
-                                <tr>
-                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ auction_id|add:"10" }}</td>
-                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid|float_formatter:20 }}</td>
-                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility|float_formatter:4 }}</td>
-                                    <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
-                                </tr>
+                                {% if answer.bid %}
+                                    <tr>
+                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.valuation }}</td>
+                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.bid }}</td>
+                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.utility }}</td>
+                                        <td {% if answer.winning_auction %}class="winning"{% endif %}>{{ answer.motivation }}</td>
+                                    </tr>
+                                {% endif %}
                             {% endfor %}
                         </table>
 
                         {% if user_is_session_admin %}
                             <p class="center-align" style="margin-top: 20px;">
-                                {% if formatted_winners|get_key_dict:auction_id %}
-                                    <a class="next-collapsible">Display the name{{ winning_answers|pluralize }} of the winner{{ winning_answers|pluralize }}:</a>
-                                    {% with formatted_winners|get_key_dict:auction_id as winners %}
-                                        <span class="collapsed-content hidden"> {{ winners }}</span>
-                                    {% endwith %}
-                                {% else %}
-                                    There are no winners for this auction.
-                                {% endif %}
+                                {% with winners=formatted_winners|get_key_dict_default:auction_id %}
+                                    {% if winners %}
+                                        <a class="next-collapsible">Display the name{{ winners.0|pluralize }} of the winner{{ winners.0|pluralize }}:</a>
+                                        <span class="collapsed-content hidden"><br> {{ winners.1 }}</span>
+                                    {% else %}
+                                        There are no winners for this auction.
+                                    {% endif %}
+                                {% endwith %}
                             </p>
                         {% endif %}
                     {% else %}

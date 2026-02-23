@@ -8,6 +8,9 @@ register = template.Library()
 def get_key_dict(d, key):
     return d[key]
 
+@register.filter
+def get_key_dict_default(d, key):
+    return d.get(key, None)
 
 @register.filter
 def get_attr(obj, attr):
