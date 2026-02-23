@@ -4,6 +4,7 @@ from copy import deepcopy
 from io import TextIOWrapper
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.safestring import mark_safe
@@ -19,6 +20,15 @@ from core.constants import (
     FORBIDDEN_USERNAMES,
 )
 
+class DebugSafeReCaptchaField(ReCaptchaField):
+    """
+    If debug, always accept the captcha.
+    """
+
+    def validate(self, value):
+        if settings.DEBUG:
+            return
+        super().validate(value)
 
 class SessionFinderForm(forms.Form):
     """Form used on the main page to search a session by name."""
@@ -93,7 +103,7 @@ class UserRegistrationForm(forms.Form):
         label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
-    captcha = ReCaptchaField(
+    captcha = DebugSafeReCaptchaField(
         widget=ReCaptchaV3(
             action='UserSignUp'
         )
@@ -310,7 +320,7 @@ class CreateSessionForm(forms.Form):
         help_text="If unselected, the result navigation buttons at the bottom of a game page content "
                   "will not be displayed."
     )
-    captcha = ReCaptchaField(
+    captcha = DebugSafeReCaptchaField(
         widget=ReCaptchaV3(
             action='CreateSession'
         )
@@ -507,7 +517,7 @@ class PlayerRegistrationForm(forms.Form):
         label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
-    captcha = ReCaptchaField(
+    captcha = DebugSafeReCaptchaField(
         widget=ReCaptchaV3(
             action='PlayerSignUp'
         )
@@ -578,7 +588,7 @@ class SessionGuestRegistration(forms.Form):
         label=mark_safe("I accept the <a href='/termsconditions/' target='_blank'>Terms and Conditions</a>"),
         required=True
     )
-    captcha = ReCaptchaField(
+    captcha = DebugSafeReCaptchaField(
         widget=ReCaptchaV3(
             action='GuestSignUp'
         )

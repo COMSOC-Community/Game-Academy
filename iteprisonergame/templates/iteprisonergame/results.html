@@ -23,6 +23,7 @@
                             {% endif %}
                             <th>Strategy</th>
                             <th>Average Score</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -30,11 +31,12 @@
                             <tr>
                                 {% if user_is_session_admin %}
                                     <td {% if answer.winner %}class="winning"{% endif %}>
-                                        <a href="#{{ answer.player.display_name }}">{{ answer.player.display_name }}</a>
+                                        <a class="next-collapsible">Display name</a><span class="collapsed-content hidden">{{ answer.player.display_name }}</span>
                                     </td>
                                 {% endif %}
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
+                                <td><a class="button navigation-button" href="#{{ answer.player.display_name }}">To strategy</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>

@@ -86,12 +86,19 @@ class Results(GameResultsView):
             if auction_answers:
                 winning_answers = auction_answers.filter(winning_auction=True)
                 if winning_answers:
-                    winners_formatted = sorted(
-                        list(answer.player.name for answer in winning_answers)
-                    )
-                    if len(winners_formatted) > 1:
-                        winners_formatted[-1] = "and " + winners_formatted[-1]
-                    formatted_winners[auction_id] = ", ".join(winners_formatted)
+                    winners_formatted = ""
+                    sorted_winners = sorted(list(answer.player.name for answer in winning_answers))
+                    if len(sorted_winners) == 1:
+                        winners_formatted = sorted_winners[0]
+                    else:
+                        for i, w in enumerate(sorted_winners):
+                            if i == len(sorted_winners) - 2:
+                                winners_formatted += f"{w} "
+                            elif i == len(sorted_winners) - 1:
+                                winners_formatted += f"and {w}"
+                            else:
+                                winners_formatted += f"{w}, "
+                    formatted_winners[auction_id] = winners_formatted
         all_results = Result.objects.filter(game=self.game)
         context["result_per_auction"] = {
             auction_id: all_results.filter(auction_id=auction_id).first() for auction_id in unique_auction_ids
