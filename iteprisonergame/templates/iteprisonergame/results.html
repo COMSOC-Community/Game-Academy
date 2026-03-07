@@ -36,7 +36,7 @@
                                 {% endif %}
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.name }}</td>
                                 <td {% if answer.winner %}class="winning"{% endif %}>{{ answer.avg_score|float_formatter:4 }}</td>
-                                <td><a class="button navigation-button" href="#{{ answer.player.display_name }}">To strategy</a></td>
+                                <td><a class="button navigation-button" href="#s{{ answer.pk }}">To strategy</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -47,7 +47,7 @@
         {% for answer in answers %}
             <section>
 
-                <h2 {% if user_is_session_admin %}id="{{ answer.player.display_name }}"{% endif %}>{% if user_is_session_admin %}{{ answer.player.display_name }}: {% endif %}{{ answer.name }}</h2>
+                <h2 id="s{{ answer.pk }}">{{ answer.name }}</h2>
 
                 {% if user_is_session_admin %}
                     {% if answer.player.is_team_player %}
@@ -92,6 +92,15 @@
                         Average score of the strategy: <em>{{ answer.formatted_avg_score|float_formatter:4 }}</em>
                     {% endif %}
                 </p>
+
+                {% if user_is_session_admin %}
+                    <p class="center-align">
+                        <a class="next-collapsible">Display name:</a>
+                        <span class="collapsed-content hidden">
+                            {{ answer.player.display_name }}
+                        </span>
+                    </p>
+                {% endif %}
 
                 <p>{{ answer.motivation }}</p>
 

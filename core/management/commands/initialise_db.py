@@ -17,3 +17,5 @@ class Command(BaseCommand):
             )
             team_user.is_active = False
             team_user.save()
+
+        self.stdout.write(self.style.SUCCESS(f'Database successfully initialised.'))

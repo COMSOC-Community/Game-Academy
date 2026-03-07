@@ -84,8 +84,8 @@ pip install -r requirements.txt
 
   # Silence should be deactivated in production.
   SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
-  RECAPTCHA_PUBLIC_KEY = 'your_public_key'
-  RECAPTCHA_PRIVATE_KEY = 'your_private_key'
+  # RECAPTCHA_PUBLIC_KEY = 'your_public_key'  # Set up when in development
+  # RECAPTCHA_PRIVATE_KEY = 'your_private_key'  # Set up when in development
   RECAPTCHA_REQUIRED_SCORE = 0.85
 
   MAX_NUM_SESSION_PER_USER = 10
