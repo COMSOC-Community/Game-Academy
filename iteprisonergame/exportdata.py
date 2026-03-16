@@ -1,7 +1,6 @@
 import csv
 
-from goodbadgame.models import Answer
-from iteprisonergame.models import Setting
+from iteprisonergame.models import Setting, Answer
 
 
 def answers_to_csv(writer, game):
