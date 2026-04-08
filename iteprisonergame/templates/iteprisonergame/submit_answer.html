@@ -42,11 +42,6 @@
                     Please also write one or two sentences to explain the reasoning you have used to come up with your strategy.
                 </p>
 
-                <p>
-                    Please note that <em>you will submit the answer for the entire team {{ team.name }}</em> and that after submission, no
-                    player from the team will be able to submit anymore.
-                </p>
-
                 {% if submit_answer_form %}
                     <form action="{% url 'itepris_game:submit_answer' session.url_tag game.url_tag %}" method="post">
                         {% include "include/form_table_template.html" with form=submit_answer_form form_type='submit_answer_form' submit_button_label='Submit your Answer' %}
