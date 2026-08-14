@@ -90,8 +90,17 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
         ):
             accessed_session_url_tag = split_path[SESSION_URL_TAG_POSITION]
             session = get_object_or_404(Session, url_tag=accessed_session_url_tag)
+            # Cache the resolved session and the user's admin status on the request so that
+            # downstream code (e.g., GameView.setup, session_context_initialiser) does not
+            # have to look them up again.
+            request.resolved_session = session
+            user_is_admin, user_is_super_admin = core.authorisations.get_session_admin_status(
+                session, request.user
+            )
+            request.resolved_session_is_admin = user_is_admin
+            request.resolved_session_is_super_admin = user_is_super_admin
             # If session admin, all is good, return
-            if core.authorisations.is_session_admin(session, request.user):
+            if user_is_admin:
                 return
             # If session is visible, we only let it go through if we have a player for the
             # corresponding session
@@ -125,6 +134,7 @@ class EnforceLoginScopeMiddleware(AuthenticationMiddleware):
                 # game_type = split_path[GAME_TYPE_URL_TAG_POSITION]
                 game_url_tag = split_path[GAME_URL_TAG_POSITION]
                 game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+                request.resolved_game = game
                 if not game.visible:
                     raise Http404(
                         "Middleware block: this game is not visible and the user "

@@ -38,8 +38,18 @@ class GameView(View):
             raise ValueError(
                 "The game view did not receive a game_url_tag parameter, that is weird..."
             )
-        session = get_object_or_404(Session, url_tag=session_url_tag)
-        game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
+
+        # The EnforceLoginScopeMiddleware has already resolved the session and game for this
+        # exact URL while enforcing access scope, so we reuse them here instead of querying
+        # again. We still fall back to a fresh lookup if, for whatever reason, they are not
+        # available (e.g., middleware bypassed in tests) or do not match the requested URL.
+        session = getattr(request, "resolved_session", None)
+        if session is None or session.url_tag != session_url_tag:
+            session = get_object_or_404(Session, url_tag=session_url_tag)
+
+        game = getattr(request, "resolved_game", None)
+        if game is None or game.url_tag != game_url_tag or game.session_id != session.id:
+            game = get_object_or_404(Game, session=session, url_tag=game_url_tag)
 
         # Initialise the context
         context = base_context_initialiser(request)

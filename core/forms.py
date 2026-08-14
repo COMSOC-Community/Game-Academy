@@ -923,7 +923,7 @@ class MakeAdminForm(forms.Form):
                 cleaned_data["user"] = player.user
             except Player.DoesNotExist:
                 self.add_error(
-                    "player_name",
+                    "playername",
                     forms.ValidationError(
                         "No player with this name is registered for this session."
                     ),

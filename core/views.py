@@ -201,10 +201,19 @@ def session_context_initialiser(request, session, context=None):
         context = {}
     context["session"] = session
     if request.user.is_authenticated:
-        context["user_is_session_admin"] = is_session_admin(session, request.user)
-        context["user_is_session_super_admin"] = is_session_super_admin(
-            session, request.user
-        )
+        # The EnforceLoginScopeMiddleware already computed the admin status of this user for
+        # this exact session while enforcing access scope, so we reuse it instead of
+        # re-querying. Fall back to a fresh computation if it is not available or was computed
+        # for a different session (defensive, should not normally happen).
+        cached_session = getattr(request, "resolved_session", None)
+        if cached_session == session and hasattr(request, "resolved_session_is_admin"):
+            context["user_is_session_admin"] = request.resolved_session_is_admin
+            context["user_is_session_super_admin"] = request.resolved_session_is_super_admin
+        else:
+            context["user_is_session_admin"] = is_session_admin(session, request.user)
+            context["user_is_session_super_admin"] = is_session_super_admin(
+                session, request.user
+            )
     if not session.show_side_panel and not context.get("user_is_session_admin", False):
         context["show_side_panel"] = False
         context["session_portal_url"] = reverse("core:session_portal",

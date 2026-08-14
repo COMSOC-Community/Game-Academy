@@ -164,7 +164,7 @@ class GameConfig(AppConfig):
             all_commands = {c[0] for c in get_commands().items() if c[1] == self.name}
             for commands in [self.management_commands, self.update_management_commands]:
                 if commands is not None:
-                    for c in self.management_commands:
+                    for c in commands:
                         if c not in all_commands:
                             raise ValueError(
                                 f"For the app {self.name}, the management command "
