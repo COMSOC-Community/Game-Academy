@@ -6,7 +6,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from core.models import Session
-from core.tests.helpers import make_session, make_user, make_player
+from core.tests.helpers import make_session, make_user, make_player, make_game
 
 
 def valid_create_session_data(**overrides):
@@ -79,6 +79,14 @@ class CreateSessionViewTests(TestCase):
         self.assertTrue(response.context["max_num_session_reached"])
         self.assertNotIn("create_session_form", response.context)
 
+    def test_post_without_known_marker_is_404(self):
+        make_user("creator4")
+        self.client.login(username="creator4", password="pw")
+        response = self.client.post(
+            reverse("core:create_session"), {"unknown_marker": "1"}
+        )
+        self.assertEqual(response.status_code, 404)
+
 
 class SessionAdminSettingsViewTests(TestCase):
     def setUp(self):
@@ -125,6 +133,26 @@ class SessionAdminSettingsViewTests(TestCase):
         self.session.refresh_from_db()
         self.assertEqual(self.session.name, "Renamed Session")
         self.assertEqual(self.session.long_name, "The Renamed Session")
+
+    def test_modify_sets_game_after_logging(self):
+        game = make_game(self.session, url_tag="numb")
+        self.client.login(username="sessionadmin", password="pw")
+        response = self.client.post(
+            reverse("core:session_admin", args=(self.session.url_tag,)),
+            {
+                "modify_session_form": "1",
+                "name": self.session.name,
+                "long_name": "The Renamed Session",
+                "show_side_panel": "on",
+                "show_game_nav_home": "on",
+                "show_game_nav_result": "on",
+                "game_after_logging": str(game.pk),
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["session_modified"])
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.game_after_logging, game)
 
     def test_modify_duplicate_name_shows_error_and_does_not_rename(self):
         make_session("othernamedsession", name="Taken Name")
@@ -209,3 +237,20 @@ class SessionExportViewTests(TestCase):
         self.assertTrue(any("parameters" in n for n in names))
         self.assertTrue(any("players" in n for n in names))
         self.assertTrue(any("games" in n for n in names))
+
+    def test_full_zip_export_includes_per_game_settings_answers_and_teams(self):
+        from numbersgame.models import Setting
+
+        game = make_game(self.session, url_tag="numb", needs_teams=True)
+        Setting.objects.create(game=game, lower_bound=0, upper_bound=100)
+        self.client.login(username="exportadmin", password="pw")
+        response = self.client.get(
+            reverse("core:session_admin_export_full", args=(self.session.url_tag,))
+        )
+        self.assertEqual(response.status_code, 200)
+        zf = zipfile.ZipFile(io.BytesIO(response.content))
+        self.assertIsNone(zf.testzip())
+        names = zf.namelist()
+        self.assertTrue(any("settings" in n for n in names))
+        self.assertTrue(any("answers" in n for n in names))
+        self.assertTrue(any("teams" in n for n in names))

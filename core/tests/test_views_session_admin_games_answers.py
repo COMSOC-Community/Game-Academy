@@ -1,7 +1,10 @@
+from unittest import mock
+
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 
+from core.game_config import INSTALLED_GAMES
 from core.random import create_random_players
 from core.tests.helpers import make_session, make_user, make_game, make_player
 from numbersgame.models import Answer, Setting
@@ -125,4 +128,37 @@ class SessionAdminGamesAnswersViewTests(TestCase):
                 args=(self.session.url_tag, self.game.url_tag),
             )
         )
+        self.assertEqual(response.status_code, 404)
+
+    def test_no_answer_model_configured_shows_placeholder(self):
+        config = next(c for c in INSTALLED_GAMES if c.name == "numbersgame")
+        self.client.login(username="ganswersadmin", password="pw")
+        with mock.patch.object(config, "answer_model", None):
+            response = self.client.get(self.url())
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["no_answer_model"])
+        self.assertNotIn("answers", response.context)
+
+    def test_answer_model_fields_are_auto_derived_when_not_configured(self):
+        config = next(c for c in INSTALLED_GAMES if c.name == "numbersgame")
+        self.client.login(username="ganswersadmin", password="pw")
+        with mock.patch.object(config, "answer_model_fields", None):
+            response = self.client.get(self.url())
+        self.assertEqual(response.status_code, 200)
+        fields = response.context["answer_model_fields"]
+        self.assertNotIn("id", fields)
+        self.assertNotIn("game", fields)
+        self.assertNotIn("player", fields)
+        self.assertIn("answer", fields)
+
+    def test_answers_export_404s_when_no_export_function_configured(self):
+        config = next(c for c in INSTALLED_GAMES if c.name == "numbersgame")
+        self.client.login(username="ganswersadmin", password="pw")
+        with mock.patch.object(config, "answer_to_csv_func", None):
+            response = self.client.get(
+                reverse(
+                    "core:session_admin_games_answers_export",
+                    args=(self.session.url_tag, self.game.url_tag),
+                )
+            )
         self.assertEqual(response.status_code, 404)

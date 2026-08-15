@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
@@ -60,6 +62,32 @@ class SessionAdminGamesViewTests(TestCase):
         self.assertTrue(game.illustration_path)
         # A Setting instance should have been bootstrapped for the game.
         self.assertIsNotNone(game.numbers_setting)
+
+    def test_create_game_uses_configured_home_view_when_set(self):
+        from core.game_config import INSTALLED_GAMES
+
+        config = next(c for c in INSTALLED_GAMES if c.name == "numbersgame")
+        self.client.login(username="gamesadmin", password="pw")
+        with mock.patch.object(config, "home_view", "submit_answer"):
+            self.client.post(
+                reverse("core:session_admin_games", args=(self.session.url_tag,)),
+                valid_create_game_data(),
+            )
+        game = Game.objects.get(session=self.session, url_tag="numb")
+        self.assertEqual(game.initial_view, "submit_answer")
+        self.assertEqual(game.view_after_submit, "submit_answer")
+
+    def test_create_game_falls_back_to_first_available_view_when_no_index(self):
+        self.client.login(username="gamesadmin", password="pw")
+        with mock.patch.object(
+            Game, "all_url_names", return_value=("submit_answer", "global_results")
+        ):
+            self.client.post(
+                reverse("core:session_admin_games", args=(self.session.url_tag,)),
+                valid_create_game_data(),
+            )
+        game = Game.objects.get(session=self.session, url_tag="numb")
+        self.assertEqual(game.initial_view, "submit_answer")
 
     def test_create_game_duplicate_name_shows_error(self):
         make_game(self.session, url_tag="othr", name="My Numbers Game")

@@ -187,6 +187,41 @@ class UserProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(CustomUser.objects.filter(pk=user.id).exists())
 
+    def test_password_update_for_player_redirects_to_session_home(self):
+        session = make_session("pwplayersession", visible=True)
+        user = make_user("Player_pwplayersession_pw", is_player=True)
+        make_player(session, user, name="pw")
+        self.client.login(username="Player_pwplayersession_pw", password="pw")
+        response = self.client.post(
+            reverse("core:user_profile", args=(user.id,)),
+            {
+                "update_password_form": "1",
+                "old_password": "pw",
+                "new_password1": "NewStrongPass1",
+                "new_password2": "NewStrongPass1",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            self.client.session["_message_view_next_url"],
+            reverse("core:session_home", args=(session.url_tag,)),
+        )
+
+    def test_delete_account_for_player_redirects_to_session_portal(self):
+        session = make_session("delplayersession", visible=True)
+        user = make_user("Player_delplayersession_del", is_player=True)
+        make_player(session, user, name="del")
+        self.client.login(username="Player_delplayersession_del", password="pw")
+        response = self.client.post(
+            reverse("core:user_profile", args=(user.id,)),
+            {"delete_account_form": "1", "delete": "on", "password": "pw"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            self.client.session["_message_view_next_url"],
+            reverse("core:session_portal", args=(session.url_tag,)),
+        )
+
 
 class SessionPortalViewTests(TestCase):
     def setUp(self):
@@ -200,6 +235,15 @@ class SessionPortalViewTests(TestCase):
         self.assertIn("registration_form", response.context)
         self.assertIn("guest_form", response.context)
         self.assertIn("login_form", response.context)
+
+    def test_authenticated_player_with_profile_sees_it_in_context(self):
+        user = make_user("Player_portalsession_gail", is_player=True)
+        player = make_player(self.session, user, name="gail")
+        self.client.login(username="Player_portalsession_gail", password="pw")
+        response = self.client.get(
+            reverse("core:session_portal", args=(self.session.url_tag,))
+        )
+        self.assertEqual(response.context["player_profile"], player)
 
     def test_admin_visiting_portal_gets_session_admin_context(self):
         admin = make_user("portaladmin")
@@ -290,6 +334,26 @@ class SessionPortalViewTests(TestCase):
         )
         self.assertRedirects(
             response, reverse("core:session_home", args=(self.session.url_tag,))
+        )
+
+    def test_player_login_with_game_after_logging_redirects_to_that_game(self):
+        from core.tests.helpers import make_game
+
+        game = make_game(self.session, url_tag="numb", visible=True, playable=True)
+        self.session.game_after_logging = game
+        self.session.save()
+        user = make_user("Player_portalsession_dana")
+        make_player(self.session, user, name="dana")
+        response = self.client.post(
+            reverse("core:session_portal", args=(self.session.url_tag,)),
+            {"login_form": "1", "login-player_name": "dana", "login-password": "pw"},
+        )
+        self.assertRedirects(
+            response,
+            reverse(
+                "numbers_game:index",
+                args=(self.session.url_tag, game.url_tag),
+            ),
         )
 
     def test_player_login_wrong_password_rerenders_with_error(self):

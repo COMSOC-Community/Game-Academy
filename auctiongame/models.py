@@ -48,6 +48,9 @@ class ArbitraryPrecisionDecimalField(models.TextField):
         except (InvalidOperation, TypeError):
             raise ValidationError("Invalid decimal value.")
 
+    def from_db_value(self, value, expression, connection):
+        return self.to_python(value)
+
     def formfield(self, **kwargs):
         defaults = {
             "form_class": ArbitraryPrecisionDecimalFormField

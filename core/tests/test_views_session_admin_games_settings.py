@@ -1,6 +1,9 @@
+from unittest import mock
+
 from django.test import TestCase
 from django.urls import reverse
 
+from core.game_config import INSTALLED_GAMES
 from core.models import Game
 from core.tests.helpers import make_session, make_user, make_game, make_player
 from numbersgame.models import Setting, Answer
@@ -150,4 +153,17 @@ class SessionAdminGamesSettingsViewTests(TestCase):
                 args=(self.session.url_tag, self.game.url_tag),
             )
         )
+        self.assertEqual(response.status_code, 404)
+
+    def test_settings_export_404s_when_no_export_function_configured(self):
+        config = next(c for c in INSTALLED_GAMES if c.name == "numbersgame")
+        Setting.objects.create(game=self.game)
+        self.client.login(username="gsettingsadmin", password="pw")
+        with mock.patch.object(config, "settings_to_csv_func", None):
+            response = self.client.get(
+                reverse(
+                    "core:session_admin_games_settings_export",
+                    args=(self.session.url_tag, self.game.url_tag),
+                )
+            )
         self.assertEqual(response.status_code, 404)

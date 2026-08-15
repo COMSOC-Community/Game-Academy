@@ -36,5 +36,4 @@ class SubmitAnswerForm(forms.Form):
             raise forms.ValidationError(
                 "Your answer object is not initialised, that is weird..."
             )
-        print(cleaned_data)
         return cleaned_data

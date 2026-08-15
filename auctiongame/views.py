@@ -14,9 +14,6 @@ class Index(GameIndexView):
     def get(self, request, session_url_tag, game_url_tag):
         if self.context["answer"] and not self.context["answer"].bid:
             self.context["game_nav_display_answer"] = True
-        answer = self.context["answer"]
-        if answer:
-            print(answer.bid, type(answer.bid))
         return render(request, os.path.join("auctiongame", "index.html"), self.context)
 
 

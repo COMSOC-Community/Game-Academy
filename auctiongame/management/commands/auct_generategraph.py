@@ -34,7 +34,6 @@ class Command(BaseCommand):
         global_winner = []
 
         results_to_update = []
-        results_to_create = []
         answers_to_update = []
 
         unique_auction_ids = all_answers.values_list("auction_id", flat=True).distinct()
@@ -64,10 +63,9 @@ class Command(BaseCommand):
             result.histo_val_js_data = "\n".join(
                 [f"['{count}', {bin}]," for bin, count in zip(val_bins, val_counts)])
 
-            if created:
-                results_to_create.append(result)
-            else:
-                results_to_update.append(result)
+            # get_or_create() has already inserted the row (whether or not it pre-existed), so
+            # the histogram fields we just set on it must go through an update, not a create.
+            results_to_update.append(result)
 
             # Determine auction winners
             bids_decimal = [Decimal(b) for b in bids_values]
@@ -95,8 +93,9 @@ class Command(BaseCommand):
 
         # Save all results in a single transaction
         with transaction.atomic():
-            Result.objects.bulk_create(results_to_create, ignore_conflicts=True)
-            Result.objects.bulk_update(results_to_update,
-                                       ["histo_bids_js_data", "histo_val_js_data"])
-            Answer.objects.bulk_update(answers_to_update,
-                                       ["utility", "winning_auction", "winning_global"])
+            if results_to_update:
+                Result.objects.bulk_update(results_to_update,
+                                           ["histo_bids_js_data", "histo_val_js_data"])
+            if answers_to_update:
+                Answer.objects.bulk_update(answers_to_update,
+                                           ["utility", "winning_auction", "winning_global"])

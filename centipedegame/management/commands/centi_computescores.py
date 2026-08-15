@@ -15,7 +15,7 @@ def payoffs(game, player1, player2):
     elif player1.strategy_as_p1.endswith("Down"):
         return game.centi_setting.payoff_rrd_p1, game.centi_setting.payoff_rrd_p2
     elif player2.strategy_as_p2.endswith("Down"):
-        return game.centi_setting.payoff_rrd_p1, game.centi_setting.payoff_rrrd_p2
+        return game.centi_setting.payoff_rrrd_p1, game.centi_setting.payoff_rrrd_p2
     elif player2.strategy_as_p2.endswith("Right"):
         return game.centi_setting.payoff_rrrr_p1, game.centi_setting.payoff_rrrr_p2
 
@@ -82,7 +82,11 @@ class Command(BaseCommand):
                 total_score_as_p2 = 0
                 for opponent in answers:
                     if answer != opponent:
-                        score_as_p1, score_as_p2 = payoffs(game, answer, opponent)
+                        # answer's own payoff as p1 comes from the match where answer plays p1
+                        # against opponent as p2; answer's own payoff as p2 comes from the
+                        # reverse match, where opponent plays p1 against answer as p2.
+                        score_as_p1, _ = payoffs(game, answer, opponent)
+                        _, score_as_p2 = payoffs(game, opponent, answer)
                         total_score_as_p1 += score_as_p1
                         total_score_as_p2 += score_as_p2
                 answer.avg_score_as_p1 = total_score_as_p1 / max(len(answers) - 1, 1)

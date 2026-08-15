@@ -44,11 +44,19 @@ class GameAdminToggleViewsTests(TestCase):
         self.game.refresh_from_db()
         self.assertTrue(self.game.playable)
 
+        self.client.get(self.toggle_url("numbers_play_toggle"))
+        self.game.refresh_from_db()
+        self.assertFalse(self.game.playable)
+
     def test_result_toggle_flips_results_visible(self):
         self.client.login(username="toggleadmin", password="pw")
         self.client.get(self.toggle_url("numbers_result_toggle"))
         self.game.refresh_from_db()
         self.assertTrue(self.game.results_visible)
+
+        self.client.get(self.toggle_url("numbers_result_toggle"))
+        self.game.refresh_from_db()
+        self.assertFalse(self.game.results_visible)
 
     def test_toggle_redirects_to_game_index_by_default(self):
         self.client.login(username="toggleadmin", password="pw")

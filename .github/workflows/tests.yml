@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install system dependencies (for mysqlclient)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-libmysqlclient-dev build-essential pkg-config
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create local settings for CI (SQLite, no secrets)
+        run: |
+          cat > gameserver/local_settings.py <<'EOF'
+          import os
+          from pathlib import Path
+
+          BASE_DIR = Path(__file__).resolve().parent.parent
+
+          SECRET_KEY = "ci-only-not-a-real-secret"
+          DEBUG = True
+          ALLOWED_HOSTS = []
+
+          DATABASES = {
+              "default": {
+                  "ENGINE": "django.db.backends.sqlite3",
+                  "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+              }
+          }
+
+          SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+          RECAPTCHA_REQUIRED_SCORE = 0.85
+
+          MAX_NUM_SESSION_PER_USER = 10
+          MAX_NUM_GAMES_PER_SESSION = 20
+          MAX_NUM_RANDOM_PER_SESSION = 1000
+          EOF
+
+      # Migration files are not tracked in this repository's git history (see .gitignore),
+      # so they are generated fresh here rather than checked out.
+      - name: Generate migrations
+        run: python manage.py makemigrations
+
+      - name: Run tests
+        run: python manage.py test
