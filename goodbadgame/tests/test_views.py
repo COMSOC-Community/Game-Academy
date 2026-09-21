@@ -121,6 +121,17 @@ class SubmitAnswerViewPostTests(GoodBadGameViewTestsBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(QuestionAnswer.objects.filter(answer=answer).count(), 1)
 
+    def test_duplicate_submission_does_not_create_duplicate_question_answers(self):
+        answer = Answer.objects.create(game=self.game, player=self.player)
+        answer.questions.add(*self.questions)
+        self.client.login(username="gdbdviewplayer", password="pw")
+        post_data = {
+            f"{q.slug}_selector": str(q.correct_alt.pk) for q in self.questions
+        }
+        self.client.post(self.submit_url(), post_data)
+        self.client.post(self.submit_url(), post_data)
+        self.assertEqual(QuestionAnswer.objects.filter(answer=answer).count(), 3)
+
     def test_management_command_runs_when_flag_enabled(self):
         self.game.run_management_after_submit = True
         self.game.save()

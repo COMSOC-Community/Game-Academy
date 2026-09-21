@@ -49,19 +49,21 @@ class SubmitAnswer(GameSubmitAnswerView):
         return True, None
 
     def post_code_if_form_valid(self, request, form_object):
-        for question in self.context["answer"].questions.all():
-            if question.slug + "_selector" in request.POST:
-                QuestionAnswer.objects.create(
-                    answer=self.context["answer"],
-                    question=question,
-                    selected_alt=question.alternatives.get(
-                        id=request.POST.get(question.slug + "_selector")
-                    ),
-                    is_correct=Alternative.objects.get(
-                        id=request.POST.get(question.slug + "_selector")
+        answer = self.context["answer"]
+        if not answer.question_answers.exists():
+            for question in answer.questions.all():
+                if question.slug + "_selector" in request.POST:
+                    QuestionAnswer.objects.create(
+                        answer=answer,
+                        question=question,
+                        selected_alt=question.alternatives.get(
+                            id=request.POST.get(question.slug + "_selector")
+                        ),
+                        is_correct=Alternative.objects.get(
+                            id=request.POST.get(question.slug + "_selector")
+                        )
+                        == question.correct_alt,
                     )
-                    == question.correct_alt,
-                )
         self.context["submitted_answer"] = True
 
     def post_code_render(self, request):
